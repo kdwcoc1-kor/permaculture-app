@@ -1,6 +1,6 @@
 {
-  "name": "텃밭 친구 | 퍼머컬처ON",
-  "short_name": "텃밭친구",
+  "name": "퍼머컬처ON - 텃밭 친구",
+  "short_name": "퍼머컬처ON",
   "description": "동반식물 조합찾기 - 함께 심으면 좋은 작물을 찾아보세요",
   "start_url": "/",
   "display": "standalone",
