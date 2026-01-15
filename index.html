@@ -1,0 +1,2199 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#004B3D">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="텃밭친구">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- 앱 아이콘 -->
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512x512.png">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-192x192.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="icons/icon-192x192.png">
+    
+    <title>🌱 텃밭 친구 | 퍼머컬처ON</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --forest-green: #004B3D;
+            --leaf-green: #2E7D32;
+            --sage-green: #5D8A66;
+            --cream: #F7F5E4;
+            --warm-white: #FFFEF9;
+            --earth-brown: #8B6914;
+            --sunset-orange: #E07B39;
+            --berry-red: #C75146;
+            --sky-blue: #4A90A4;
+            --gradient-forest: linear-gradient(135deg, #004B3D 0%, #2E7D32 100%);
+            --gradient-earth: linear-gradient(135deg, #F7F5E4 0%, #E8E4D0 100%);
+        }
+
+        body {
+            font-family: 'Noto Sans KR', 'Manrope', sans-serif;
+            background: var(--cream);
+            min-height: 100vh;
+            padding-bottom: 80px;
+            color: var(--forest-green);
+        }
+
+        /* 헤더 */
+        .app-header {
+            background: var(--gradient-forest);
+            color: white;
+            padding: 16px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0, 75, 61, 0.3);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 12px;
+            display: none;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover { background: rgba(255,255,255,0.25); }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-logo {
+            width: 36px;
+            height: 36px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .brand-logo img {
+            width: 24px;
+            height: 24px;
+        }
+
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-name {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-tagline {
+            font-size: 10px;
+            opacity: 0.8;
+            font-weight: 500;
+        }
+
+        .header-btn {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            color: white;
+            padding: 8px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .header-btn:hover { background: rgba(255,255,255,0.25); }
+
+        /* 페이지 */
+        .page {
+            display: none;
+            padding: 20px;
+            max-width: 520px;
+            margin: 0 auto;
+            animation: pageIn 0.4s ease-out;
+        }
+
+        .page.active { display: block; }
+
+        @keyframes pageIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 일러스트 이미지 스타일 */
+        .plant-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .plant-img-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 홈 히어로 */
+        .hero-section {
+            background: var(--gradient-forest);
+            margin: -20px -20px 24px -20px;
+            padding: 30px 24px;
+            border-radius: 0 0 30px 30px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -30%;
+            width: 200px;
+            height: 200px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+        }
+
+        .hero-greeting {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 6px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-subtitle {
+            font-size: 15px;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+            line-height: 1.5;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.2);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-top: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-badge img {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* 추천 카드 */
+        .rec-card {
+            background: var(--warm-white);
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(0, 75, 61, 0.08);
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .rec-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0, 75, 61, 0.15);
+            border-color: var(--sage-green);
+        }
+
+        .rec-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-forest);
+        }
+
+        .rec-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--gradient-forest);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .rec-emoji {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .rec-emoji .plant-icon-lg {
+            width: 56px;
+            height: 56px;
+            background: var(--cream);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .rec-emoji .plant-icon-lg img {
+            width: 40px;
+            height: 40px;
+        }
+
+        .rec-plus {
+            font-size: 24px;
+            color: var(--sage-green);
+            font-weight: bold;
+        }
+
+        .rec-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--forest-green);
+            text-align: center;
+            margin-bottom: 6px;
+        }
+
+        .rec-plants {
+            font-size: 14px;
+            color: var(--sage-green);
+            text-align: center;
+            margin-bottom: 14px;
+        }
+
+        .rec-effect {
+            background: var(--cream);
+            padding: 10px 18px;
+            border-radius: 20px;
+            font-size: 13px;
+            color: var(--forest-green);
+            text-align: center;
+            width: fit-content;
+            margin: 0 auto;
+            font-weight: 600;
+        }
+
+        .rec-diff {
+            text-align: center;
+            margin-top: 14px;
+            font-size: 12px;
+            color: var(--sage-green);
+        }
+
+        .diff-dots { color: var(--forest-green); font-weight: bold; }
+
+        /* 섹션 */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--forest-green);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* 퀵 메뉴 */
+        .quick-menu {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .menu-btn {
+            background: var(--warm-white);
+            border: 2px solid transparent;
+            border-radius: 20px;
+            padding: 20px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 12px rgba(0, 75, 61, 0.06);
+        }
+
+        .menu-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 75, 61, 0.12);
+            border-color: var(--sage-green);
+        }
+
+        .menu-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .menu-icon img {
+            width: 32px;
+            height: 32px;
+        }
+
+        .menu-btn.s1 .menu-icon { background: linear-gradient(135deg, #E8F5E9, #C8E6C9); }
+        .menu-btn.s2 .menu-icon { background: linear-gradient(135deg, #FFF3E0, #FFE0B2); }
+        .menu-btn.s3 .menu-icon { background: linear-gradient(135deg, #FFEBEE, #FFCDD2); }
+        .menu-btn.s4 .menu-icon { background: linear-gradient(135deg, #E3F2FD, #BBDEFB); }
+
+        .menu-btn span:last-child {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--forest-green);
+        }
+
+        /* 할일 박스 */
+        .tasks-box {
+            background: var(--warm-white);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 2px 12px rgba(0, 75, 61, 0.06);
+            border-left: 4px solid var(--sunset-orange);
+        }
+
+        .tasks-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .tasks-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tasks-icon img {
+            width: 22px;
+            height: 22px;
+        }
+
+        .tasks-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--forest-green);
+        }
+
+        .task-list {
+            list-style: none;
+            margin-bottom: 14px;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            font-size: 14px;
+            color: var(--forest-green);
+            border-bottom: 1px solid rgba(0, 75, 61, 0.06);
+        }
+
+        .task-item:last-child { border-bottom: none; }
+
+        .task-check {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--sage-green);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: var(--sage-green);
+        }
+
+        .tip-box {
+            background: var(--cream);
+            border-radius: 12px;
+            padding: 14px;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .tip-icon img {
+            width: 20px;
+            height: 20px;
+        }
+
+        .tip-text {
+            font-size: 13px;
+            color: var(--forest-green);
+            line-height: 1.5;
+        }
+
+        /* 퍼머컬처 원칙 배너 */
+        .principles-banner {
+            background: var(--gradient-earth);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(0, 75, 61, 0.1);
+        }
+
+        .principles-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--forest-green);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .principles-title img {
+            width: 20px;
+            height: 20px;
+        }
+
+        .principles-list {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .principle-tag {
+            background: var(--warm-white);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--forest-green);
+            font-weight: 600;
+            border: 1px solid rgba(0, 75, 61, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .principle-tag img {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* 검색 페이지 */
+        .search-box {
+            background: var(--warm-white);
+            border-radius: 16px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 12px rgba(0, 75, 61, 0.06);
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .search-box:focus-within { border-color: var(--sage-green); }
+
+        .search-box .material-icons { color: var(--sage-green); }
+
+        .search-box input {
+            flex: 1;
+            border: none;
+            font-size: 15px;
+            font-family: inherit;
+            outline: none;
+            background: transparent;
+            color: var(--forest-green);
+        }
+
+        .search-box input::placeholder { color: var(--sage-green); }
+
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .filter-tab {
+            background: var(--warm-white);
+            border: 2px solid rgba(0, 75, 61, 0.1);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            color: var(--forest-green);
+            transition: all 0.3s;
+        }
+
+        .filter-tab:hover { border-color: var(--sage-green); }
+
+        .filter-tab.active {
+            background: var(--forest-green);
+            color: white;
+            border-color: var(--forest-green);
+        }
+
+        /* 조합 리스트 */
+        .combo-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .combo-item {
+            background: var(--warm-white);
+            border-radius: 20px;
+            padding: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 12px rgba(0, 75, 61, 0.06);
+            border: 2px solid transparent;
+        }
+
+        .combo-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 75, 61, 0.12);
+            border-color: var(--sage-green);
+        }
+
+        .combo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .combo-icons {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .combo-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--cream);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px;
+        }
+
+        .combo-icon img {
+            width: 24px;
+            height: 24px;
+        }
+
+        .combo-badge {
+            background: var(--cream);
+            color: var(--forest-green);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .combo-badge.easy { background: #E8F5E9; color: #2E7D32; }
+        .combo-badge.medium { background: #FFF3E0; color: #E07B39; }
+        .combo-badge.hard { background: #FFEBEE; color: #C75146; }
+
+        .combo-title {
+            font-size: 17px;
+            font-weight: 800;
+            color: var(--forest-green);
+            margin-bottom: 4px;
+        }
+
+        .combo-plants {
+            font-size: 13px;
+            color: var(--sage-green);
+            margin-bottom: 8px;
+        }
+
+        .combo-effect {
+            font-size: 12px;
+            color: var(--forest-green);
+            font-weight: 600;
+        }
+
+        /* 상세 페이지 */
+        .detail-hero {
+            background: var(--gradient-forest);
+            margin: -20px -20px 20px -20px;
+            padding: 30px 24px;
+            border-radius: 0 0 30px 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .detail-icons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .detail-icon {
+            width: 64px;
+            height: 64px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        .detail-icon img {
+            width: 44px;
+            height: 44px;
+        }
+
+        .detail-plus {
+            font-size: 24px;
+            opacity: 0.7;
+        }
+
+        .detail-title {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .detail-sub {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .detail-section {
+            background: var(--warm-white);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 14px;
+            box-shadow: 0 2px 12px rgba(0, 75, 61, 0.06);
+        }
+
+        .detail-section-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--forest-green);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .detail-section-title .material-icons {
+            font-size: 20px;
+            color: var(--sage-green);
+        }
+
+        .plant-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(0, 75, 61, 0.06);
+        }
+
+        .plant-row:last-child { border-bottom: none; }
+
+        .plant-icon-md {
+            width: 52px;
+            height: 52px;
+            background: var(--cream);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+        }
+
+        .plant-icon-md img {
+            width: 36px;
+            height: 36px;
+        }
+
+        .plant-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--forest-green);
+        }
+
+        .plant-name-en {
+            font-size: 12px;
+            color: var(--sage-green);
+        }
+
+        .effect-tag {
+            display: inline-block;
+            background: var(--cream);
+            color: var(--forest-green);
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin: 4px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(0, 75, 61, 0.06);
+            font-size: 14px;
+        }
+
+        .info-row:last-child { border-bottom: none; }
+        .info-label { color: var(--sage-green); }
+        .info-value { font-weight: 700; color: var(--forest-green); }
+
+        /* 상극 체크 */
+        .check-box {
+            background: var(--warm-white);
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0, 75, 61, 0.06);
+        }
+
+        .check-title {
+            text-align: center;
+            font-size: 15px;
+            color: var(--forest-green);
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .select-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .select-box {
+            flex: 1;
+            max-width: 130px;
+        }
+
+        .select-box label {
+            display: block;
+            font-size: 12px;
+            color: var(--sage-green);
+            margin-bottom: 8px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .select-box select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid rgba(0, 75, 61, 0.15);
+            border-radius: 14px;
+            font-size: 14px;
+            font-family: inherit;
+            text-align: center;
+            background: var(--cream);
+            color: var(--forest-green);
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .select-box select:focus {
+            border-color: var(--forest-green);
+            outline: none;
+        }
+
+        .vs-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .vs-icon img {
+            width: 32px;
+            height: 32px;
+        }
+
+        .check-result {
+            text-align: center;
+            padding: 24px;
+            border-radius: 20px;
+            margin-top: 20px;
+        }
+
+        .check-result.good { background: linear-gradient(135deg, #E8F5E9, #C8E6C9); }
+        .check-result.bad { background: linear-gradient(135deg, #FFEBEE, #FFCDD2); }
+
+        .result-icon {
+            width: 56px;
+            height: 56px;
+            margin: 0 auto 12px;
+        }
+
+        .result-icon img {
+            width: 56px;
+            height: 56px;
+        }
+
+        .result-title { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+        .check-result.good .result-title { color: var(--forest-green); }
+        .check-result.bad .result-title { color: var(--berry-red); }
+        .result-desc { font-size: 13px; color: var(--forest-green); line-height: 1.6; }
+
+        .bad-list-title {
+            font-size: 17px;
+            font-weight: 800;
+            margin-bottom: 14px;
+            color: var(--forest-green);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .bad-list-title img {
+            width: 24px;
+            height: 24px;
+        }
+
+        .bad-item {
+            background: linear-gradient(135deg, #FFEBEE, #FFCDD2);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .bad-icon {
+            width: 44px;
+            height: 44px;
+            background: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+        }
+
+        .bad-icon img {
+            width: 28px;
+            height: 28px;
+        }
+
+        .bad-info h4 {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--berry-red);
+            margin-bottom: 4px;
+        }
+
+        .bad-info p {
+            font-size: 12px;
+            color: var(--forest-green);
+        }
+
+        /* 캘린더 */
+        .month-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--warm-white);
+            border-radius: 20px;
+            padding: 14px 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 12px rgba(0, 75, 61, 0.06);
+        }
+
+        .month-nav button {
+            background: var(--cream);
+            border: none;
+            border-radius: 12px;
+            width: 44px;
+            height: 44px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .month-nav button:hover {
+            background: var(--forest-green);
+        }
+
+        .month-nav button .material-icons { color: var(--forest-green); }
+        .month-nav button:hover .material-icons { color: white; }
+        .month-nav h3 { font-size: 20px; font-weight: 800; color: var(--forest-green); }
+
+        .cal-section {
+            background: var(--warm-white);
+            border-radius: 20px;
+            padding: 18px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 12px rgba(0, 75, 61, 0.06);
+        }
+
+        .cal-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            font-weight: 700;
+            color: var(--forest-green);
+        }
+
+        .cal-header-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+        }
+
+        .cal-header-icon img {
+            width: 22px;
+            height: 22px;
+        }
+
+        .cal-header-icon.sow { background: linear-gradient(135deg, #E8F5E9, #C8E6C9); }
+        .cal-header-icon.herb { background: linear-gradient(135deg, #E8F5E9, #A5D6A7); }
+        .cal-header-icon.harvest { background: linear-gradient(135deg, #FFF3E0, #FFE0B2); }
+        .cal-header-icon.tasks { background: linear-gradient(135deg, #FFF8E1, #FFECB3); }
+
+        .cal-item {
+            padding: 8px 0;
+            font-size: 14px;
+            color: var(--forest-green);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cal-item::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: var(--sage-green);
+            border-radius: 50%;
+        }
+
+        .cal-empty {
+            font-size: 13px;
+            color: var(--sage-green);
+            font-style: italic;
+            padding: 8px 0;
+        }
+
+        /* 도감 */
+        .guide-tabs {
+            display: flex;
+            background: var(--warm-white);
+            border-radius: 16px;
+            padding: 4px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 12px rgba(0, 75, 61, 0.06);
+        }
+
+        .guide-tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            border: none;
+            background: none;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--sage-green);
+            cursor: pointer;
+            border-radius: 12px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .guide-tab img {
+            width: 18px;
+            height: 18px;
+        }
+
+        .guide-tab.active {
+            background: var(--forest-green);
+            color: white;
+        }
+
+        .guide-list {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .guide-item {
+            background: var(--warm-white);
+            border-radius: 18px;
+            padding: 16px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(0, 75, 61, 0.04);
+            border: 2px solid transparent;
+        }
+
+        .guide-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0, 75, 61, 0.1);
+            border-color: var(--sage-green);
+        }
+
+        .guide-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 8px;
+            background: var(--cream);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px;
+        }
+
+        .guide-icon img {
+            width: 36px;
+            height: 36px;
+        }
+
+        .guide-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--forest-green);
+        }
+
+        .guide-name-en {
+            font-size: 10px;
+            color: var(--sage-green);
+            margin-top: 2px;
+        }
+
+        /* 모달 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 75, 61, 0.6);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        .modal {
+            background: var(--warm-white);
+            border-radius: 24px;
+            padding: 24px;
+            max-width: 360px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 75, 61, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .modal-icon {
+            width: 56px;
+            height: 56px;
+            background: var(--cream);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+        }
+
+        .modal-icon img {
+            width: 40px;
+            height: 40px;
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--forest-green);
+        }
+
+        .modal-close {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            background: var(--gradient-forest);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 18px;
+            transition: all 0.3s;
+        }
+
+        .modal-close:hover { transform: scale(1.02); }
+
+        /* 하단 네비게이션 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: var(--warm-white);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0 20px 0;
+            border-top: 1px solid rgba(0, 75, 61, 0.08);
+            box-shadow: 0 -4px 20px rgba(0, 75, 61, 0.08);
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 14px;
+            background: none;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .nav-item:hover { background: var(--cream); }
+
+        .nav-item .material-icons { font-size: 26px; color: var(--sage-green); }
+        .nav-item span:last-child { font-size: 11px; font-weight: 600; color: var(--sage-green); }
+        .nav-item.active { background: var(--cream); }
+        .nav-item.active .material-icons,
+        .nav-item.active span:last-child { color: var(--forest-green); }
+
+        /* 푸터 배너 */
+        .footer-banner {
+            background: var(--gradient-forest);
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 24px;
+            color: white;
+            text-align: center;
+        }
+
+        .footer-banner-logo {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 8px;
+        }
+
+        .footer-banner-logo img {
+            width: 40px;
+            height: 40px;
+        }
+
+        .footer-banner-text {
+            font-size: 12px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+
+        .footer-banner-brand {
+            font-size: 16px;
+            font-weight: 800;
+            margin-top: 10px;
+        }
+
+        /* 유틸리티 */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--sage-green);
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--cream);
+            border-top-color: var(--forest-green);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 헤더 -->
+<header class="app-header">
+    <div class="header-top">
+        <div class="header-left">
+            <button class="back-btn" id="backBtn">
+                <span class="material-icons">arrow_back</span>
+            </button>
+            <div class="brand">
+                <div class="brand-logo">
+                    <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f331.svg" alt="seedling">
+                </div>
+                <div class="brand-text">
+                    <span class="brand-name" id="appTitleText">퍼머컬처ON</span>
+                    <span class="brand-tagline">텃밭 친구 | Companion Planting</span>
+                </div>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="header-btn">
+                <span class="material-icons">share</span>
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- 홈 페이지 -->
+<main class="page active" id="homePage">
+    <div class="hero-section">
+        <div class="hero-greeting">안녕하세요! 👋</div>
+        <div class="hero-subtitle">자연과 함께하는 텃밭 가꾸기,<br>동반작물로 더 건강하게!</div>
+        <div class="hero-badge">
+            <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f33f.svg" alt="herb">
+            <span>Earth Care · People Care · Fair Share</span>
+        </div>
+    </div>
+
+    <div class="rec-card" id="recCard">
+        <span class="rec-label">🌟 오늘의 추천 조합</span>
+        <div class="rec-emoji" id="recEmoji">
+            <div class="plant-icon-lg"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f345.svg" alt="tomato"></div>
+            <span class="rec-plus">+</span>
+            <div class="plant-icon-lg"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f33f.svg" alt="herb"></div>
+            <span class="rec-plus">+</span>
+            <div class="plant-icon-lg"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f33c.svg" alt="flower"></div>
+        </div>
+        <div class="rec-title" id="recTitle">토마토 완벽 길드</div>
+        <div class="rec-plants" id="recPlants">토마토 + 바질 + 메리골드</div>
+        <div class="rec-effect" id="recEffect">✨ 해충 퇴치, 풍미 향상</div>
+        <div class="rec-diff">난이도: <strong id="recDiff">쉬움</strong> <span class="diff-dots" id="recDots">●○○</span></div>
+    </div>
+
+    <div class="section-header">
+        <h3 class="section-title">🧭 빠른 메뉴</h3>
+    </div>
+    <div class="quick-menu">
+        <button class="menu-btn s1" id="btnSearch">
+            <div class="menu-icon">
+                <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50d.svg" alt="search">
+            </div>
+            <span>조합 찾기</span>
+        </button>
+        <button class="menu-btn s2" id="btnCalendar">
+            <div class="menu-icon">
+                <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4c5.svg" alt="calendar">
+            </div>
+            <span>파종 캘린더</span>
+        </button>
+        <button class="menu-btn s3" id="btnBadcombo">
+            <div class="menu-icon">
+                <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/26a0.svg" alt="warning">
+            </div>
+            <span>상극 체크</span>
+        </button>
+        <button class="menu-btn s4" id="btnGuide">
+            <div class="menu-icon">
+                <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4d6.svg" alt="book">
+            </div>
+            <span>작물 도감</span>
+        </button>
+    </div>
+
+    <div class="principles-banner">
+        <div class="principles-title">
+            <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f30d.svg" alt="earth">
+            퍼머컬처 윤리
+        </div>
+        <div class="principles-list">
+            <span class="principle-tag">
+                <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f331.svg" alt="seedling">
+                지구 돌봄
+            </span>
+            <span class="principle-tag">
+                <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f465.svg" alt="people">
+                사람 돌봄
+            </span>
+            <span class="principle-tag">
+                <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/267b.svg" alt="recycle">
+                공정한 분배
+            </span>
+        </div>
+    </div>
+
+    <div class="tasks-box">
+        <div class="tasks-header">
+            <div class="tasks-icon">
+                <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4cb.svg" alt="clipboard">
+            </div>
+            <span class="tasks-title" id="monthTitle">1월 할 일</span>
+        </div>
+        <ul class="task-list" id="taskList"></ul>
+        <div class="tip-box">
+            <div class="tip-icon">
+                <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4a1.svg" alt="bulb">
+            </div>
+            <p class="tip-text" id="tipText">팁이 여기에 표시됩니다.</p>
+        </div>
+    </div>
+
+    <div class="footer-banner">
+        <div class="footer-banner-logo">
+            <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f331.svg" alt="seedling">
+        </div>
+        <div class="footer-banner-text">자연의 원리를 따르는<br>지속가능한 텃밭 가꾸기</div>
+        <div class="footer-banner-brand">퍼머컬처ON</div>
+    </div>
+</main>
+
+<!-- 조합 찾기 페이지 -->
+<main class="page" id="searchPage">
+    <div class="search-box">
+        <span class="material-icons">search</span>
+        <input type="text" placeholder="작물 이름으로 검색..." id="searchInput">
+    </div>
+
+    <div class="filter-tabs" id="filterTabs">
+        <button class="filter-tab active" data-filter="all">전체</button>
+        <button class="filter-tab" data-filter="쉬움">쉬움</button>
+        <button class="filter-tab" data-filter="베란다">베란다</button>
+        <button class="filter-tab" data-filter="봄">봄</button>
+        <button class="filter-tab" data-filter="여름">여름</button>
+    </div>
+
+    <div class="combo-list" id="comboList">
+        <div class="loading">
+            <div class="loading-spinner"></div>
+            데이터 로딩 중...
+        </div>
+    </div>
+</main>
+
+<!-- 조합 상세 페이지 -->
+<main class="page" id="detailPage">
+    <div class="detail-hero">
+        <div class="detail-icons" id="detailIcons">
+            <div class="detail-icon"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f345.svg" alt=""></div>
+            <span class="detail-plus">+</span>
+            <div class="detail-icon"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f33f.svg" alt=""></div>
+            <span class="detail-plus">+</span>
+            <div class="detail-icon"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f33c.svg" alt=""></div>
+        </div>
+        <div class="detail-title" id="detailTitle">토마토 완벽 길드</div>
+        <div class="detail-sub" id="detailSub">Tomato Perfect Guild</div>
+    </div>
+
+    <div class="detail-section">
+        <div class="detail-section-title">
+            <span class="material-icons">eco</span>
+            구성 작물
+        </div>
+        <div id="detailPlants"></div>
+    </div>
+
+    <div class="detail-section">
+        <div class="detail-section-title">
+            <span class="material-icons">auto_awesome</span>
+            동반 효과
+        </div>
+        <div id="detailEffects"></div>
+    </div>
+
+    <div class="detail-section">
+        <div class="detail-section-title">
+            <span class="material-icons">info</span>
+            재배 정보
+        </div>
+        <div id="detailInfo"></div>
+    </div>
+
+    <div class="detail-section">
+        <div class="detail-section-title">
+            <span class="material-icons">grid_view</span>
+            배치 방법
+        </div>
+        <p id="detailLayout" style="font-size:14px;color:var(--forest-green);line-height:1.6;"></p>
+    </div>
+</main>
+
+<!-- 상극 체크 페이지 -->
+<main class="page" id="badcomboPage">
+    <div class="check-box">
+        <p class="check-title">🤔 두 작물이 함께 심어도 될까요?</p>
+        <div class="select-row">
+            <div class="select-box">
+                <label>작물 A</label>
+                <select id="plantA"><option value="">선택...</option></select>
+            </div>
+            <div class="vs-icon">
+                <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2694.svg" alt="swords">
+            </div>
+            <div class="select-box">
+                <label>작물 B</label>
+                <select id="plantB"><option value="">선택...</option></select>
+            </div>
+        </div>
+        <div id="checkResult"></div>
+    </div>
+
+    <h3 class="bad-list-title">
+        <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/26a0.svg" alt="warning">
+        피해야 할 상극 조합
+    </h3>
+    <div id="badList"></div>
+</main>
+
+<!-- 캘린더 페이지 -->
+<main class="page" id="calendarPage">
+    <div class="month-nav">
+        <button id="prevMonth"><span class="material-icons">chevron_left</span></button>
+        <h3 id="calMonth">1월</h3>
+        <button id="nextMonth"><span class="material-icons">chevron_right</span></button>
+    </div>
+    <div id="calContent"></div>
+</main>
+
+<!-- 작물 도감 페이지 -->
+<main class="page" id="guidePage">
+    <div class="guide-tabs" id="guideTabs">
+        <button class="guide-tab active" data-type="veg">
+            <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f96c.svg" alt="veg">
+            채소
+        </button>
+        <button class="guide-tab" data-type="herb">
+            <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f33f.svg" alt="herb">
+            허브
+        </button>
+        <button class="guide-tab" data-type="flower">
+            <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f33c.svg" alt="flower">
+            꽃
+        </button>
+    </div>
+    <div class="guide-list" id="guideList"></div>
+</main>
+
+<!-- 모달 -->
+<div class="modal-overlay" id="modal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-icon" id="modalIcon">
+                <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f345.svg" alt="">
+            </div>
+            <div class="modal-title" id="modalTitle">토마토</div>
+        </div>
+        <div id="modalContent"></div>
+        <button class="modal-close" id="modalClose">닫기</button>
+    </div>
+</div>
+
+<!-- 하단 네비게이션 -->
+<nav class="bottom-nav">
+    <button class="nav-item active" data-page="home">
+        <span class="material-icons">home</span>
+        <span>홈</span>
+    </button>
+    <button class="nav-item" data-page="search">
+        <span class="material-icons">search</span>
+        <span>찾기</span>
+    </button>
+    <button class="nav-item" data-page="calendar">
+        <span class="material-icons">calendar_today</span>
+        <span>캘린더</span>
+    </button>
+    <button class="nav-item" data-page="guide">
+        <span class="material-icons">menu_book</span>
+        <span>도감</span>
+    </button>
+</nav>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+<script>
+// ===== 전역 변수 =====
+var currentPage = 'home';
+var prevPage = 'home';
+var currentMonth = new Date().getMonth();
+var currentFilter = 'all';
+var allCombos = [];
+var allBadCombos = [];
+var allVegetables = [];
+var allHerbs = [];
+var allFlowers = [];
+var calendarData = [];
+var db = null;
+
+// ===== 수채화 스타일 SVG 아이콘 =====
+var watercolorSVGs = {
+    // 채소
+    '토마토': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="tomato_g1" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#ff6b6b"/><stop offset="50%" stop-color="#e63946"/><stop offset="100%" stop-color="#c1121f"/></radialGradient></defs><ellipse cx="32" cy="36" rx="22" ry="20" fill="url(#tomato_g1)" opacity="0.95"/><ellipse cx="28" cy="30" rx="6" ry="4" fill="#ff8a8a" opacity="0.5"/><path d="M32 16 Q28 20 26 18 Q24 14 28 12 Q32 10 36 12 Q40 14 38 18 Q36 20 32 16" fill="#588157" opacity="0.9"/><path d="M32 12 L32 8" stroke="#6a994e" stroke-width="2" stroke-linecap="round"/></svg>',
+    '방울토마토': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="cherry_g1" cx="35%" cy="35%" r="55%"><stop offset="0%" stop-color="#ff6b6b"/><stop offset="60%" stop-color="#e63946"/><stop offset="100%" stop-color="#c1121f"/></radialGradient></defs><circle cx="24" cy="38" r="12" fill="url(#cherry_g1)" opacity="0.95"/><circle cx="40" cy="34" r="10" fill="url(#cherry_g1)" opacity="0.9"/><circle cx="22" cy="34" r="3" fill="#ff8a8a" opacity="0.4"/><path d="M24 26 Q20 24 22 20 M40 24 Q44 22 42 18" stroke="#588157" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M30 18 L36 14" stroke="#6a994e" stroke-width="2" stroke-linecap="round"/></svg>',
+    '고추': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="pepper_g1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ff595e"/><stop offset="50%" stop-color="#e63946"/><stop offset="100%" stop-color="#9d0208"/></linearGradient></defs><path d="M20 20 Q22 16 26 18 L28 20 Q40 28 46 44 Q48 52 44 54 Q40 56 36 52 Q24 40 20 28 Q18 24 20 20" fill="url(#pepper_g1)" opacity="0.95"/><path d="M24 22 Q28 26 26 30" stroke="#ff8a8a" stroke-width="2" fill="none" opacity="0.4" stroke-linecap="round"/><path d="M22 18 Q20 14 22 12 Q26 10 28 14 L26 18" fill="#588157"/><path d="M24 12 L22 6" stroke="#6a994e" stroke-width="2" stroke-linecap="round"/></svg>',
+    '청양고추': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="cheong_g1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#95d5b2"/><stop offset="50%" stop-color="#52b788"/><stop offset="100%" stop-color="#2d6a4f"/></linearGradient></defs><path d="M22 18 Q24 14 28 16 L30 18 Q42 26 48 42 Q50 50 46 52 Q42 54 38 50 Q26 38 22 26 Q20 22 22 18" fill="url(#cheong_g1)" opacity="0.95"/><path d="M26 20 Q30 24 28 28" stroke="#b7e4c7" stroke-width="2" fill="none" opacity="0.5" stroke-linecap="round"/><path d="M24 16 Q22 12 24 10 Q28 8 30 12 L28 16" fill="#588157"/><path d="M26 10 L24 4" stroke="#6a994e" stroke-width="2" stroke-linecap="round"/></svg>',
+    '오이': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="cuc_g1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#40916c"/><stop offset="50%" stop-color="#52b788"/><stop offset="100%" stop-color="#40916c"/></linearGradient></defs><path d="M12 32 Q12 24 20 22 L44 22 Q54 24 54 32 Q54 40 44 42 L20 42 Q12 40 12 32" fill="url(#cuc_g1)" opacity="0.95"/><ellipse cx="18" cy="32" rx="4" ry="8" fill="#74c69d" opacity="0.3"/><circle cx="24" cy="28" r="1.5" fill="#2d6a4f" opacity="0.4"/><circle cx="32" cy="30" r="1.5" fill="#2d6a4f" opacity="0.4"/><circle cx="40" cy="28" r="1.5" fill="#2d6a4f" opacity="0.4"/><circle cx="28" cy="36" r="1.5" fill="#2d6a4f" opacity="0.4"/><circle cx="36" cy="34" r="1.5" fill="#2d6a4f" opacity="0.4"/></svg>',
+    '호박': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="pumpkin_g1" cx="50%" cy="40%" r="50%"><stop offset="0%" stop-color="#f9c74f"/><stop offset="60%" stop-color="#f8961e"/><stop offset="100%" stop-color="#e85d04"/></radialGradient></defs><ellipse cx="22" cy="38" rx="12" ry="16" fill="url(#pumpkin_g1)" opacity="0.9"/><ellipse cx="32" cy="36" rx="10" ry="18" fill="url(#pumpkin_g1)" opacity="0.95"/><ellipse cx="42" cy="38" rx="12" ry="16" fill="url(#pumpkin_g1)" opacity="0.9"/><path d="M26 22 Q24 18 26 14 Q30 12 34 14 Q36 16 34 20" fill="#588157"/><path d="M30 14 C28 8 36 6 34 12" stroke="#6a994e" stroke-width="3" fill="none" stroke-linecap="round"/></svg>',
+    '가지': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="egg_g1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#7b2cbf"/><stop offset="50%" stop-color="#5a189a"/><stop offset="100%" stop-color="#3c096c"/></linearGradient></defs><path d="M28 18 Q20 24 18 36 Q16 48 24 54 Q32 58 40 52 Q48 44 46 32 Q44 22 36 18 Q32 16 28 18" fill="url(#egg_g1)" opacity="0.95"/><path d="M30 22 Q26 28 28 36" stroke="#9d4edd" stroke-width="3" fill="none" opacity="0.4" stroke-linecap="round"/><path d="M28 18 Q26 14 28 12 L36 12 Q40 14 38 18" fill="#588157"/><path d="M32 12 L32 6" stroke="#6a994e" stroke-width="2" stroke-linecap="round"/></svg>',
+    '감자': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="potato_g1" cx="40%" cy="40%" r="60%"><stop offset="0%" stop-color="#ddb892"/><stop offset="50%" stop-color="#b08968"/><stop offset="100%" stop-color="#7f5539"/></radialGradient></defs><ellipse cx="32" cy="34" rx="20" ry="16" fill="url(#potato_g1)" opacity="0.95" transform="rotate(-15 32 34)"/><circle cx="26" cy="30" r="2" fill="#7f5539" opacity="0.5"/><circle cx="36" cy="28" r="1.5" fill="#7f5539" opacity="0.5"/><circle cx="40" cy="36" r="2" fill="#7f5539" opacity="0.5"/><circle cx="28" cy="40" r="1.5" fill="#7f5539" opacity="0.5"/><ellipse cx="28" cy="28" rx="5" ry="3" fill="#e6ccb2" opacity="0.3"/></svg>',
+    '고구마': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="sweet_g1" cx="40%" cy="40%" r="60%"><stop offset="0%" stop-color="#d4a373"/><stop offset="50%" stop-color="#bc6c25"/><stop offset="100%" stop-color="#774936"/></radialGradient><radialGradient id="sweet_g2" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#f4a261"/><stop offset="100%" stop-color="#e76f51"/></radialGradient></defs><path d="M14 32 Q12 24 18 20 Q28 16 44 20 Q52 24 52 34 Q52 44 44 48 Q28 52 18 46 Q12 42 14 32" fill="url(#sweet_g1)" opacity="0.95"/><ellipse cx="28" cy="30" rx="8" ry="4" fill="url(#sweet_g2)" opacity="0.3"/><path d="M20 28 Q18 32 20 36" stroke="#e9c46a" stroke-width="1" opacity="0.4" fill="none"/><path d="M40 26 Q38 32 40 38" stroke="#e9c46a" stroke-width="1" opacity="0.4" fill="none"/></svg>',
+    '상추': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="lettuce_g1" cx="50%" cy="60%" r="50%"><stop offset="0%" stop-color="#b7e4c7"/><stop offset="100%" stop-color="#52b788"/></radialGradient></defs><path d="M32 52 Q20 48 16 40 Q12 32 18 26 Q24 20 32 22 Q40 20 46 26 Q52 32 48 40 Q44 48 32 52" fill="url(#lettuce_g1)" opacity="0.85"/><path d="M32 48 Q24 44 22 36 Q20 28 26 24" stroke="#74c69d" stroke-width="2" fill="none" opacity="0.6"/><path d="M32 48 Q40 44 42 36 Q44 28 38 24" stroke="#74c69d" stroke-width="2" fill="none" opacity="0.6"/><path d="M28 42 Q26 36 30 32" stroke="#95d5b2" stroke-width="1.5" fill="none" opacity="0.5"/><path d="M36 42 Q38 36 34 32" stroke="#95d5b2" stroke-width="1.5" fill="none" opacity="0.5"/></svg>',
+    '배추': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="napa_g1" cx="50%" cy="60%" r="50%"><stop offset="0%" stop-color="#f8f9fa"/><stop offset="100%" stop-color="#b7e4c7"/></radialGradient></defs><path d="M32 56 Q18 52 14 40 Q10 28 18 20 Q26 14 32 16 Q38 14 46 20 Q54 28 50 40 Q46 52 32 56" fill="url(#napa_g1)" opacity="0.9"/><path d="M32 52 Q22 46 20 36 Q18 26 26 20" stroke="#74c69d" stroke-width="2" fill="none" opacity="0.5"/><path d="M32 52 Q42 46 44 36 Q46 26 38 20" stroke="#74c69d" stroke-width="2" fill="none" opacity="0.5"/></svg>',
+    '양배추': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="cab_g1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#b7e4c7"/><stop offset="100%" stop-color="#52b788"/></radialGradient></defs><circle cx="32" cy="32" r="20" fill="url(#cab_g1)" opacity="0.9"/><circle cx="32" cy="32" r="14" fill="#95d5b2" opacity="0.7"/><circle cx="32" cy="32" r="8" fill="#b7e4c7" opacity="0.8"/><path d="M26 38 Q32 28 38 38" stroke="#74c69d" stroke-width="1" fill="none" opacity="0.5"/></svg>',
+    '시금치': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="spin_g1" x1="50%" y1="100%" x2="50%" y2="0%"><stop offset="0%" stop-color="#2d6a4f"/><stop offset="100%" stop-color="#40916c"/></linearGradient></defs><path d="M32 54 L28 32 Q26 24 32 18 Q38 24 36 32 L32 54" fill="url(#spin_g1)" opacity="0.9"/><path d="M32 50 L22 36 Q16 30 20 22" fill="url(#spin_g1)" opacity="0.85"/><path d="M32 50 L42 36 Q48 30 44 22" fill="url(#spin_g1)" opacity="0.85"/><path d="M32 46 L18 40 Q10 36 14 28" fill="url(#spin_g1)" opacity="0.8"/><path d="M32 46 L46 40 Q54 36 50 28" fill="url(#spin_g1)" opacity="0.8"/></svg>',
+    '당근': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="carrot_g1" x1="50%" y1="0%" x2="50%" y2="100%"><stop offset="0%" stop-color="#f9844a"/><stop offset="50%" stop-color="#f3722c"/><stop offset="100%" stop-color="#e85d04"/></linearGradient></defs><path d="M26 22 Q24 36 28 48 Q30 56 32 58 Q34 56 36 48 Q40 36 38 22 Q34 18 32 18 Q30 18 26 22" fill="url(#carrot_g1)" opacity="0.95"/><path d="M30 26 Q28 34 30 44" stroke="#f9c74f" stroke-width="1" opacity="0.4" fill="none"/><path d="M34 28 Q36 36 34 46" stroke="#f9c74f" stroke-width="1" opacity="0.4" fill="none"/><path d="M26 20 Q22 14 24 10 Q28 8 30 12" fill="#588157"/><path d="M32 18 Q32 12 36 8" stroke="#6a994e" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M38 20 Q42 14 40 10 Q36 8 34 12" fill="#588157"/></svg>',
+    '무': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="radish_g1" x1="50%" y1="0%" x2="50%" y2="100%"><stop offset="0%" stop-color="#f8f9fa"/><stop offset="70%" stop-color="#e9ecef"/><stop offset="100%" stop-color="#dee2e6"/></linearGradient></defs><path d="M24 20 Q22 32 24 44 Q28 56 32 58 Q36 56 40 44 Q42 32 40 20 Q36 16 32 16 Q28 16 24 20" fill="url(#radish_g1)" opacity="0.95"/><path d="M28 24 Q26 34 28 46" stroke="#adb5bd" stroke-width="1" opacity="0.3" fill="none"/><path d="M36 24 Q38 34 36 46" stroke="#adb5bd" stroke-width="1" opacity="0.3" fill="none"/><path d="M24 18 Q20 12 24 8" stroke="#588157" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M32 16 Q32 10 36 6" stroke="#6a994e" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M40 18 Q44 12 40 8" stroke="#588157" stroke-width="3" fill="none" stroke-linecap="round"/></svg>',
+    '열무': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="yeol_g1" x1="50%" y1="100%" x2="50%" y2="0%"><stop offset="0%" stop-color="#f8f9fa"/><stop offset="40%" stop-color="#95d5b2"/><stop offset="100%" stop-color="#52b788"/></linearGradient></defs><path d="M28 56 Q24 44 28 32 Q30 24 32 20 Q34 24 36 32 Q40 44 36 56" fill="url(#yeol_g1)" opacity="0.9"/><path d="M24 52 Q18 40 22 28 Q26 18 28 12" fill="#52b788" opacity="0.8"/><path d="M40 52 Q46 40 42 28 Q38 18 36 12" fill="#52b788" opacity="0.8"/></svg>',
+    '파': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="scal_g1" x1="50%" y1="0%" x2="50%" y2="100%"><stop offset="0%" stop-color="#40916c"/><stop offset="60%" stop-color="#74c69d"/><stop offset="100%" stop-color="#f8f9fa"/></linearGradient></defs><path d="M28 8 Q26 24 28 44 Q30 56 32 58 Q34 56 36 44 Q38 24 36 8" fill="url(#scal_g1)" opacity="0.9"/><path d="M24 10 Q22 28 26 46" fill="url(#scal_g1)" opacity="0.85"/><path d="M40 10 Q42 28 38 46" fill="url(#scal_g1)" opacity="0.85"/><ellipse cx="32" cy="54" rx="6" ry="4" fill="#f8f9fa" opacity="0.8"/></svg>',
+    '양파': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="onion_g1" cx="50%" cy="40%" r="50%"><stop offset="0%" stop-color="#ffd166"/><stop offset="60%" stop-color="#d4a373"/><stop offset="100%" stop-color="#bc6c25"/></radialGradient></defs><ellipse cx="32" cy="38" rx="18" ry="20" fill="url(#onion_g1)" opacity="0.95"/><path d="M24 30 Q22 38 26 48" stroke="#e9c46a" stroke-width="1" opacity="0.4" fill="none"/><path d="M32 28 Q32 38 32 50" stroke="#e9c46a" stroke-width="1" opacity="0.4" fill="none"/><path d="M40 30 Q42 38 38 48" stroke="#e9c46a" stroke-width="1" opacity="0.4" fill="none"/><path d="M32 18 Q28 14 30 10 Q32 8 34 10 Q36 14 32 18" fill="#74c69d"/><path d="M32 10 L32 4" stroke="#588157" stroke-width="2" stroke-linecap="round"/></svg>',
+    '마늘': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="garlic_g1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#fefae0"/><stop offset="70%" stop-color="#e9ecef"/><stop offset="100%" stop-color="#dda15e"/></radialGradient></defs><ellipse cx="24" cy="38" rx="8" ry="14" fill="url(#garlic_g1)" opacity="0.9" transform="rotate(-15 24 38)"/><ellipse cx="32" cy="36" rx="8" ry="16" fill="url(#garlic_g1)" opacity="0.95"/><ellipse cx="40" cy="38" rx="8" ry="14" fill="url(#garlic_g1)" opacity="0.9" transform="rotate(15 40 38)"/><path d="M28 22 Q26 18 28 14 L32 12 L36 14 Q38 18 36 22" fill="#bc6c25" opacity="0.8"/><path d="M32 12 L32 6" stroke="#774936" stroke-width="2" stroke-linecap="round"/></svg>',
+    '브로콜리': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="broc_g1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#52b788"/><stop offset="100%" stop-color="#2d6a4f"/></radialGradient></defs><circle cx="32" cy="26" r="10" fill="url(#broc_g1)" opacity="0.95"/><circle cx="22" cy="30" r="8" fill="url(#broc_g1)" opacity="0.9"/><circle cx="42" cy="30" r="8" fill="url(#broc_g1)" opacity="0.9"/><circle cx="26" cy="36" r="7" fill="url(#broc_g1)" opacity="0.85"/><circle cx="38" cy="36" r="7" fill="url(#broc_g1)" opacity="0.85"/><path d="M32 40 L32 56" stroke="#588157" stroke-width="8" stroke-linecap="round"/><path d="M32 40 L28 48" stroke="#6a994e" stroke-width="3" stroke-linecap="round"/><path d="M32 40 L36 48" stroke="#6a994e" stroke-width="3" stroke-linecap="round"/></svg>',
+    '옥수수': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="corn_g1" x1="50%" y1="0%" x2="50%" y2="100%"><stop offset="0%" stop-color="#ffd166"/><stop offset="100%" stop-color="#f9c74f"/></linearGradient></defs><path d="M24 16 Q22 32 24 50 Q28 56 32 56 Q36 56 40 50 Q42 32 40 16 Q36 12 32 12 Q28 12 24 16" fill="url(#corn_g1)" opacity="0.95"/><circle cx="28" cy="22" r="2.5" fill="#e9c46a"/><circle cx="36" cy="22" r="2.5" fill="#e9c46a"/><circle cx="26" cy="30" r="2.5" fill="#e9c46a"/><circle cx="32" cy="28" r="2.5" fill="#e9c46a"/><circle cx="38" cy="30" r="2.5" fill="#e9c46a"/><circle cx="28" cy="38" r="2.5" fill="#e9c46a"/><circle cx="36" cy="36" r="2.5" fill="#e9c46a"/><circle cx="30" cy="46" r="2.5" fill="#e9c46a"/><circle cx="34" cy="44" r="2.5" fill="#e9c46a"/><path d="M22 14 Q16 10 18 4" stroke="#588157" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M42 14 Q48 10 46 4" stroke="#588157" stroke-width="2" fill="none" stroke-linecap="round"/></svg>',
+    '콩': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="bean_g1" cx="40%" cy="40%" r="60%"><stop offset="0%" stop-color="#a7c957"/><stop offset="100%" stop-color="#6a994e"/></radialGradient></defs><path d="M16 28 Q14 22 18 18 Q28 14 42 18 Q50 22 50 30 Q50 38 42 42 Q28 46 18 42 Q14 38 16 28" fill="url(#bean_g1)" opacity="0.95"/><ellipse cx="24" cy="30" rx="5" ry="6" fill="#386641" opacity="0.3"/><ellipse cx="36" cy="30" rx="5" ry="6" fill="#386641" opacity="0.3"/><path d="M18 30 Q32 24 48 30" stroke="#386641" stroke-width="1.5" fill="none" opacity="0.5"/></svg>',
+    '강낭콩': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="kidney_g1" cx="40%" cy="40%" r="60%"><stop offset="0%" stop-color="#c1121f"/><stop offset="100%" stop-color="#780000"/></radialGradient></defs><path d="M18 28 Q16 22 20 18 Q30 14 42 20 Q50 26 48 34 Q46 42 38 44 Q26 46 20 40 Q16 36 18 28" fill="url(#kidney_g1)" opacity="0.95"/><path d="M24 30 Q32 26 40 32" stroke="#a4161a" stroke-width="1.5" fill="none" opacity="0.4"/></svg>',
+    '완두콩': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="pea_g1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#40916c"/><stop offset="50%" stop-color="#52b788"/><stop offset="100%" stop-color="#40916c"/></linearGradient></defs><path d="M10 32 Q10 26 16 24 L48 24 Q56 26 56 32 Q56 38 48 40 L16 40 Q10 38 10 32" fill="url(#pea_g1)" opacity="0.9"/><circle cx="20" cy="32" r="5" fill="#95d5b2" opacity="0.8"/><circle cx="32" cy="32" r="5" fill="#95d5b2" opacity="0.8"/><circle cx="44" cy="32" r="5" fill="#95d5b2" opacity="0.8"/></svg>',
+    '딸기': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="straw_g1" cx="50%" cy="30%" r="60%"><stop offset="0%" stop-color="#ff6b6b"/><stop offset="60%" stop-color="#e63946"/><stop offset="100%" stop-color="#c1121f"/></radialGradient></defs><path d="M32 18 Q20 24 18 38 Q20 52 32 56 Q44 52 46 38 Q44 24 32 18" fill="url(#straw_g1)" opacity="0.95"/><circle cx="26" cy="32" r="1.5" fill="#ffd166" opacity="0.8"/><circle cx="38" cy="32" r="1.5" fill="#ffd166" opacity="0.8"/><circle cx="32" cy="28" r="1.5" fill="#ffd166" opacity="0.8"/><circle cx="28" cy="42" r="1.5" fill="#ffd166" opacity="0.8"/><circle cx="36" cy="40" r="1.5" fill="#ffd166" opacity="0.8"/><circle cx="32" cy="48" r="1.5" fill="#ffd166" opacity="0.8"/><path d="M24 18 Q22 14 26 12 L32 10 L38 12 Q42 14 40 18" fill="#588157"/><circle cx="32" cy="14" r="2" fill="#6a994e"/></svg>',
+    '참외': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="melon_g1" cx="40%" cy="40%" r="60%"><stop offset="0%" stop-color="#ffd166"/><stop offset="60%" stop-color="#f9c74f"/><stop offset="100%" stop-color="#e9c46a"/></radialGradient></defs><ellipse cx="32" cy="34" rx="20" ry="16" fill="url(#melon_g1)" opacity="0.95"/><path d="M14 34 Q24 28 32 34 Q40 40 50 34" stroke="#e9c46a" stroke-width="2" fill="none" opacity="0.5"/><path d="M16 38 Q26 32 32 38 Q38 44 48 38" stroke="#e9c46a" stroke-width="1.5" fill="none" opacity="0.4"/><ellipse cx="26" cy="30" rx="6" ry="3" fill="#fff3b0" opacity="0.4"/><path d="M32 18 Q30 14 32 12 Q34 14 32 18" fill="#588157"/><path d="M32 12 L32 8" stroke="#6a994e" stroke-width="2" stroke-linecap="round"/></svg>',
+    '수박': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="wmelon_g1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#40916c"/><stop offset="100%" stop-color="#1b4332"/></radialGradient></defs><ellipse cx="32" cy="34" rx="24" ry="20" fill="url(#wmelon_g1)" opacity="0.95"/><path d="M10 34 Q20 28 32 34 Q44 40 54 34" stroke="#2d6a4f" stroke-width="3" fill="none" opacity="0.5"/><path d="M12 28 Q22 22 32 28 Q42 34 52 28" stroke="#2d6a4f" stroke-width="2" fill="none" opacity="0.4"/><path d="M12 40 Q22 34 32 40 Q42 46 52 40" stroke="#2d6a4f" stroke-width="2" fill="none" opacity="0.4"/><ellipse cx="24" cy="30" rx="5" ry="3" fill="#52b788" opacity="0.3"/></svg>',
+    '쑥갓': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="ssuk_g1" x1="50%" y1="100%" x2="50%" y2="0%"><stop offset="0%" stop-color="#2d6a4f"/><stop offset="100%" stop-color="#52b788"/></linearGradient></defs><path d="M32 56 L32 28" stroke="#6a994e" stroke-width="2"/><path d="M32 32 L24 22 Q20 16 24 12" fill="url(#ssuk_g1)" opacity="0.9"/><path d="M32 32 L40 22 Q44 16 40 12" fill="url(#ssuk_g1)" opacity="0.9"/><path d="M32 40 L20 32 Q14 28 18 22" fill="url(#ssuk_g1)" opacity="0.85"/><path d="M32 40 L44 32 Q50 28 46 22" fill="url(#ssuk_g1)" opacity="0.85"/></svg>',
+    
+    // 허브
+    '바질': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="basil_g1" x1="50%" y1="100%" x2="50%" y2="0%"><stop offset="0%" stop-color="#2d6a4f"/><stop offset="100%" stop-color="#40916c"/></linearGradient></defs><ellipse cx="32" cy="24" rx="12" ry="8" fill="url(#basil_g1)" opacity="0.9"/><ellipse cx="22" cy="32" rx="10" ry="7" fill="url(#basil_g1)" opacity="0.85" transform="rotate(-20 22 32)"/><ellipse cx="42" cy="32" rx="10" ry="7" fill="url(#basil_g1)" opacity="0.85" transform="rotate(20 42 32)"/><ellipse cx="26" cy="42" rx="9" ry="6" fill="url(#basil_g1)" opacity="0.8" transform="rotate(-10 26 42)"/><ellipse cx="38" cy="42" rx="9" ry="6" fill="url(#basil_g1)" opacity="0.8" transform="rotate(10 38 42)"/><path d="M32 48 L32 58" stroke="#6a994e" stroke-width="3" stroke-linecap="round"/></svg>',
+    '로즈마리': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M32 56 L32 20" stroke="#6a994e" stroke-width="2"/><path d="M32 24 L22 18 M32 24 L42 18" stroke="#588157" stroke-width="4" stroke-linecap="round"/><path d="M32 32 L20 26 M32 32 L44 26" stroke="#588157" stroke-width="4" stroke-linecap="round"/><path d="M32 40 L18 34 M32 40 L46 34" stroke="#588157" stroke-width="4" stroke-linecap="round"/><path d="M32 48 L16 42 M32 48 L48 42" stroke="#588157" stroke-width="4" stroke-linecap="round"/><circle cx="32" cy="14" r="4" fill="#a7c4f5" opacity="0.8"/></svg>',
+    '라벤더': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="lav_g1" x1="50%" y1="100%" x2="50%" y2="0%"><stop offset="0%" stop-color="#7b2cbf"/><stop offset="100%" stop-color="#9d4edd"/></linearGradient></defs><path d="M32 58 L32 30" stroke="#6a994e" stroke-width="2"/><ellipse cx="32" cy="26" rx="4" ry="3" fill="url(#lav_g1)" opacity="0.9"/><ellipse cx="32" cy="20" rx="3.5" ry="2.5" fill="url(#lav_g1)" opacity="0.85"/><ellipse cx="32" cy="14" rx="3" ry="2" fill="url(#lav_g1)" opacity="0.8"/><ellipse cx="32" cy="10" rx="2" ry="1.5" fill="url(#lav_g1)" opacity="0.75"/><ellipse cx="28" cy="24" rx="3" ry="2" fill="url(#lav_g1)" opacity="0.7"/><ellipse cx="36" cy="24" rx="3" ry="2" fill="url(#lav_g1)" opacity="0.7"/><ellipse cx="29" cy="18" rx="2.5" ry="1.5" fill="url(#lav_g1)" opacity="0.65"/><ellipse cx="35" cy="18" rx="2.5" ry="1.5" fill="url(#lav_g1)" opacity="0.65"/></svg>',
+    '세이지': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="sage_g1" x1="50%" y1="100%" x2="50%" y2="0%"><stop offset="0%" stop-color="#588157"/><stop offset="100%" stop-color="#a7c957"/></linearGradient></defs><ellipse cx="32" cy="22" rx="10" ry="6" fill="url(#sage_g1)" opacity="0.9"/><ellipse cx="24" cy="32" rx="9" ry="5" fill="url(#sage_g1)" opacity="0.85" transform="rotate(-15 24 32)"/><ellipse cx="40" cy="32" rx="9" ry="5" fill="url(#sage_g1)" opacity="0.85" transform="rotate(15 40 32)"/><ellipse cx="22" cy="44" rx="8" ry="4" fill="url(#sage_g1)" opacity="0.8" transform="rotate(-10 22 44)"/><ellipse cx="42" cy="44" rx="8" ry="4" fill="url(#sage_g1)" opacity="0.8" transform="rotate(10 42 44)"/><path d="M32 48 L32 58" stroke="#6a994e" stroke-width="3"/></svg>',
+    '타임': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M32 58 L32 24" stroke="#6a994e" stroke-width="2"/><ellipse cx="30" cy="22" rx="3" ry="2" fill="#588157" opacity="0.9"/><ellipse cx="34" cy="22" rx="3" ry="2" fill="#588157" opacity="0.9"/><ellipse cx="28" cy="28" rx="3" ry="2" fill="#588157" opacity="0.85"/><ellipse cx="36" cy="28" rx="3" ry="2" fill="#588157" opacity="0.85"/><ellipse cx="26" cy="34" rx="3" ry="2" fill="#588157" opacity="0.8"/><ellipse cx="38" cy="34" rx="3" ry="2" fill="#588157" opacity="0.8"/><ellipse cx="24" cy="40" rx="3" ry="2" fill="#588157" opacity="0.75"/><ellipse cx="40" cy="40" rx="3" ry="2" fill="#588157" opacity="0.75"/><circle cx="30" cy="18" r="2" fill="#d8b4fe" opacity="0.8"/><circle cx="34" cy="16" r="2" fill="#d8b4fe" opacity="0.8"/></svg>',
+    '오레가노': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="oreg_g1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#6a994e"/><stop offset="100%" stop-color="#386641"/></radialGradient></defs><ellipse cx="32" cy="22" rx="8" ry="5" fill="url(#oreg_g1)" opacity="0.9"/><ellipse cx="24" cy="30" rx="7" ry="4" fill="url(#oreg_g1)" opacity="0.85"/><ellipse cx="40" cy="30" rx="7" ry="4" fill="url(#oreg_g1)" opacity="0.85"/><ellipse cx="20" cy="40" rx="6" ry="4" fill="url(#oreg_g1)" opacity="0.8"/><ellipse cx="44" cy="40" rx="6" ry="4" fill="url(#oreg_g1)" opacity="0.8"/><ellipse cx="28" cy="46" rx="5" ry="3" fill="url(#oreg_g1)" opacity="0.75"/><ellipse cx="36" cy="46" rx="5" ry="3" fill="url(#oreg_g1)" opacity="0.75"/><path d="M32 50 L32 58" stroke="#588157" stroke-width="3"/></svg>',
+    '민트': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="mint_g1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#95d5b2"/><stop offset="100%" stop-color="#52b788"/></radialGradient></defs><ellipse cx="32" cy="20" rx="10" ry="7" fill="url(#mint_g1)" opacity="0.9"/><ellipse cx="22" cy="30" rx="9" ry="6" fill="url(#mint_g1)" opacity="0.85" transform="rotate(-25 22 30)"/><ellipse cx="42" cy="30" rx="9" ry="6" fill="url(#mint_g1)" opacity="0.85" transform="rotate(25 42 30)"/><ellipse cx="18" cy="42" rx="8" ry="5" fill="url(#mint_g1)" opacity="0.8" transform="rotate(-20 18 42)"/><ellipse cx="46" cy="42" rx="8" ry="5" fill="url(#mint_g1)" opacity="0.8" transform="rotate(20 46 42)"/><path d="M32 24 L32 56" stroke="#40916c" stroke-width="2"/></svg>',
+    '딜': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="dill_g1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#b7e4c7"/><stop offset="100%" stop-color="#74c69d"/></radialGradient></defs><path d="M32 58 L32 24" stroke="#6a994e" stroke-width="2"/><circle cx="32" cy="16" r="8" fill="url(#dill_g1)" opacity="0.3"/><circle cx="28" cy="14" r="1.5" fill="#ffd166"/><circle cx="32" cy="12" r="1.5" fill="#ffd166"/><circle cx="36" cy="14" r="1.5" fill="#ffd166"/><circle cx="30" cy="18" r="1.5" fill="#ffd166"/><circle cx="34" cy="18" r="1.5" fill="#ffd166"/><circle cx="32" cy="22" r="1.5" fill="#ffd166"/><path d="M32 30 L24 22 M32 30 L40 22" stroke="#74c69d" stroke-width="1.5" stroke-linecap="round"/><path d="M32 40 L22 32 M32 40 L42 32" stroke="#74c69d" stroke-width="1.5" stroke-linecap="round"/></svg>',
+    '차이브': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="chive_g1" x1="50%" y1="100%" x2="50%" y2="0%"><stop offset="0%" stop-color="#f8f9fa"/><stop offset="30%" stop-color="#52b788"/><stop offset="100%" stop-color="#40916c"/></linearGradient></defs><path d="M24 58 Q22 40 26 20 Q28 10 30 6" stroke="url(#chive_g1)" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M32 58 Q32 40 32 20 Q32 10 32 6" stroke="url(#chive_g1)" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M40 58 Q42 40 38 20 Q36 10 34 6" stroke="url(#chive_g1)" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="28" cy="8" r="4" fill="#d8b4fe" opacity="0.9"/><circle cx="34" cy="6" r="3" fill="#d8b4fe" opacity="0.8"/></svg>',
+    '파슬리': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="pars_g1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#74c69d"/><stop offset="100%" stop-color="#40916c"/></radialGradient></defs><circle cx="32" cy="18" r="6" fill="url(#pars_g1)" opacity="0.9"/><circle cx="24" cy="24" r="5" fill="url(#pars_g1)" opacity="0.85"/><circle cx="40" cy="24" r="5" fill="url(#pars_g1)" opacity="0.85"/><circle cx="20" cy="32" r="5" fill="url(#pars_g1)" opacity="0.8"/><circle cx="44" cy="32" r="5" fill="url(#pars_g1)" opacity="0.8"/><circle cx="26" cy="38" r="4" fill="url(#pars_g1)" opacity="0.75"/><circle cx="38" cy="38" r="4" fill="url(#pars_g1)" opacity="0.75"/><path d="M32 42 L32 58" stroke="#588157" stroke-width="3"/></svg>',
+    '고수': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="cori_g1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#95d5b2"/><stop offset="100%" stop-color="#52b788"/></radialGradient></defs><path d="M32 58 L32 32" stroke="#6a994e" stroke-width="2"/><path d="M32 32 L26 24 Q22 18 26 14" fill="url(#cori_g1)" opacity="0.9"/><path d="M32 32 L38 24 Q42 18 38 14" fill="url(#cori_g1)" opacity="0.9"/><path d="M32 32 L22 28 Q16 24 20 18" fill="url(#cori_g1)" opacity="0.85"/><path d="M32 32 L42 28 Q48 24 44 18" fill="url(#cori_g1)" opacity="0.85"/><circle cx="32" cy="14" r="3" fill="#f8f9fa" opacity="0.7"/></svg>',
+    '카모마일': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M32 58 L32 36" stroke="#6a994e" stroke-width="2"/><ellipse cx="32" cy="16" rx="3" ry="6" fill="#f8f9fa" opacity="0.95"/><ellipse cx="42" cy="22" rx="3" ry="6" fill="#f8f9fa" opacity="0.9" transform="rotate(50 42 22)"/><ellipse cx="44" cy="32" rx="3" ry="6" fill="#f8f9fa" opacity="0.9" transform="rotate(90 44 32)"/><ellipse cx="40" cy="40" rx="3" ry="6" fill="#f8f9fa" opacity="0.9" transform="rotate(130 40 40)"/><ellipse cx="24" cy="40" rx="3" ry="6" fill="#f8f9fa" opacity="0.9" transform="rotate(-130 24 40)"/><ellipse cx="20" cy="32" rx="3" ry="6" fill="#f8f9fa" opacity="0.9" transform="rotate(-90 20 32)"/><ellipse cx="22" cy="22" rx="3" ry="6" fill="#f8f9fa" opacity="0.9" transform="rotate(-50 22 22)"/><circle cx="32" cy="28" r="6" fill="#ffd166"/></svg>',
+    '캐모마일': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M32 58 L32 36" stroke="#6a994e" stroke-width="2"/><ellipse cx="32" cy="16" rx="3" ry="6" fill="#f8f9fa" opacity="0.95"/><ellipse cx="42" cy="22" rx="3" ry="6" fill="#f8f9fa" opacity="0.9" transform="rotate(50 42 22)"/><ellipse cx="44" cy="32" rx="3" ry="6" fill="#f8f9fa" opacity="0.9" transform="rotate(90 44 32)"/><ellipse cx="40" cy="40" rx="3" ry="6" fill="#f8f9fa" opacity="0.9" transform="rotate(130 40 40)"/><ellipse cx="24" cy="40" rx="3" ry="6" fill="#f8f9fa" opacity="0.9" transform="rotate(-130 24 40)"/><ellipse cx="20" cy="32" rx="3" ry="6" fill="#f8f9fa" opacity="0.9" transform="rotate(-90 20 32)"/><ellipse cx="22" cy="22" rx="3" ry="6" fill="#f8f9fa" opacity="0.9" transform="rotate(-50 22 22)"/><circle cx="32" cy="28" r="6" fill="#ffd166"/></svg>',
+    '보리지': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M32 58 L32 32" stroke="#6a994e" stroke-width="2"/><path d="M32 28 L32 18 L26 10" stroke="#a7c4f5" stroke-width="3" stroke-linecap="round"/><path d="M32 28 L32 18 L38 10" stroke="#a7c4f5" stroke-width="3" stroke-linecap="round"/><path d="M32 28 L26 22 L18 20" stroke="#a7c4f5" stroke-width="3" stroke-linecap="round"/><path d="M32 28 L38 22 L46 20" stroke="#a7c4f5" stroke-width="3" stroke-linecap="round"/><path d="M32 28 L24 32 L16 36" stroke="#a7c4f5" stroke-width="3" stroke-linecap="round"/><path d="M32 28 L40 32 L48 36" stroke="#a7c4f5" stroke-width="3" stroke-linecap="round"/><circle cx="32" cy="28" r="4" fill="#1d3557"/><circle cx="32" cy="28" r="2" fill="#f8f9fa"/></svg>',
+    '컴프리': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="comf_g1" x1="50%" y1="100%" x2="50%" y2="0%"><stop offset="0%" stop-color="#2d6a4f"/><stop offset="100%" stop-color="#52b788"/></linearGradient></defs><path d="M32 58 L32 36" stroke="#588157" stroke-width="3"/><ellipse cx="32" cy="28" rx="14" ry="10" fill="url(#comf_g1)" opacity="0.9"/><ellipse cx="22" cy="36" rx="12" ry="8" fill="url(#comf_g1)" opacity="0.85" transform="rotate(-20 22 36)"/><ellipse cx="42" cy="36" rx="12" ry="8" fill="url(#comf_g1)" opacity="0.85" transform="rotate(20 42 36)"/><circle cx="28" cy="18" r="3" fill="#d8b4fe" opacity="0.8"/><circle cx="36" cy="20" r="2.5" fill="#d8b4fe" opacity="0.7"/></svg>',
+    '루꼴라': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="ruc_g1" x1="50%" y1="100%" x2="50%" y2="0%"><stop offset="0%" stop-color="#386641"/><stop offset="100%" stop-color="#6a994e"/></linearGradient></defs><path d="M32 56 L32 32" stroke="#588157" stroke-width="2"/><path d="M32 32 Q24 26 22 18 Q24 12 32 16 Q40 12 42 18 Q40 26 32 32" fill="url(#ruc_g1)" opacity="0.9"/><path d="M32 40 Q22 34 18 24 Q22 16 32 22" fill="url(#ruc_g1)" opacity="0.85"/><path d="M32 40 Q42 34 46 24 Q42 16 32 22" fill="url(#ruc_g1)" opacity="0.85"/></svg>',
+    '레몬밤': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="lemon_g1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#b7e4c7"/><stop offset="100%" stop-color="#74c69d"/></radialGradient></defs><ellipse cx="32" cy="22" rx="10" ry="7" fill="url(#lemon_g1)" opacity="0.9"/><ellipse cx="22" cy="30" rx="9" ry="6" fill="url(#lemon_g1)" opacity="0.85" transform="rotate(-20 22 30)"/><ellipse cx="42" cy="30" rx="9" ry="6" fill="url(#lemon_g1)" opacity="0.85" transform="rotate(20 42 30)"/><ellipse cx="18" cy="40" rx="8" ry="5" fill="url(#lemon_g1)" opacity="0.8"/><ellipse cx="46" cy="40" rx="8" ry="5" fill="url(#lemon_g1)" opacity="0.8"/><path d="M32 46 L32 58" stroke="#52b788" stroke-width="3"/></svg>',
+    '야로우': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M32 58 L32 28" stroke="#6a994e" stroke-width="2"/><circle cx="28" cy="18" r="3" fill="#f8f9fa" opacity="0.9"/><circle cx="36" cy="18" r="3" fill="#f8f9fa" opacity="0.9"/><circle cx="24" cy="24" r="3" fill="#f8f9fa" opacity="0.85"/><circle cx="40" cy="24" r="3" fill="#f8f9fa" opacity="0.85"/><circle cx="32" cy="14" r="3" fill="#f8f9fa" opacity="0.95"/><circle cx="20" cy="20" r="2.5" fill="#f8f9fa" opacity="0.8"/><circle cx="44" cy="20" r="2.5" fill="#f8f9fa" opacity="0.8"/><circle cx="32" cy="22" r="3" fill="#f8f9fa" opacity="0.9"/><path d="M32 32 L24 28 M32 32 L40 28" stroke="#74c69d" stroke-width="1.5"/></svg>',
+    '세이보리': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M32 58 L32 20" stroke="#6a994e" stroke-width="2"/><ellipse cx="28" cy="18" rx="4" ry="2.5" fill="#588157" opacity="0.9" transform="rotate(-30 28 18)"/><ellipse cx="36" cy="18" rx="4" ry="2.5" fill="#588157" opacity="0.9" transform="rotate(30 36 18)"/><ellipse cx="26" cy="26" rx="4" ry="2.5" fill="#588157" opacity="0.85" transform="rotate(-30 26 26)"/><ellipse cx="38" cy="26" rx="4" ry="2.5" fill="#588157" opacity="0.85" transform="rotate(30 38 26)"/><ellipse cx="24" cy="34" rx="4" ry="2.5" fill="#588157" opacity="0.8" transform="rotate(-30 24 34)"/><ellipse cx="40" cy="34" rx="4" ry="2.5" fill="#588157" opacity="0.8" transform="rotate(30 40 34)"/><ellipse cx="22" cy="42" rx="4" ry="2.5" fill="#588157" opacity="0.75" transform="rotate(-30 22 42)"/><ellipse cx="42" cy="42" rx="4" ry="2.5" fill="#588157" opacity="0.75" transform="rotate(30 42 42)"/></svg>',
+    
+    // 꽃
+    '메리골드': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="mari_g1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#f9c74f"/><stop offset="100%" stop-color="#f8961e"/></radialGradient></defs><path d="M32 58 L32 38" stroke="#6a994e" stroke-width="3"/><ellipse cx="32" cy="18" rx="4" ry="8" fill="url(#mari_g1)" opacity="0.95"/><ellipse cx="42" cy="24" rx="4" ry="8" fill="url(#mari_g1)" opacity="0.9" transform="rotate(55 42 24)"/><ellipse cx="44" cy="34" rx="4" ry="8" fill="url(#mari_g1)" opacity="0.9" transform="rotate(90 44 34)"/><ellipse cx="38" cy="42" rx="4" ry="8" fill="url(#mari_g1)" opacity="0.9" transform="rotate(125 38 42)"/><ellipse cx="26" cy="42" rx="4" ry="8" fill="url(#mari_g1)" opacity="0.9" transform="rotate(-125 26 42)"/><ellipse cx="20" cy="34" rx="4" ry="8" fill="url(#mari_g1)" opacity="0.9" transform="rotate(-90 20 34)"/><ellipse cx="22" cy="24" rx="4" ry="8" fill="url(#mari_g1)" opacity="0.9" transform="rotate(-55 22 24)"/><circle cx="32" cy="30" r="6" fill="#e85d04"/></svg>',
+    '나스터튬': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="nast_g1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ff6b6b"/><stop offset="100%" stop-color="#f8961e"/></radialGradient></defs><path d="M32 58 L32 40" stroke="#6a994e" stroke-width="2"/><circle cx="32" cy="28" r="14" fill="url(#nast_g1)" opacity="0.9"/><ellipse cx="32" cy="20" rx="6" ry="10" fill="url(#nast_g1)" opacity="0.95"/><ellipse cx="24" cy="32" rx="6" ry="10" fill="url(#nast_g1)" opacity="0.9" transform="rotate(-60 24 32)"/><ellipse cx="40" cy="32" rx="6" ry="10" fill="url(#nast_g1)" opacity="0.9" transform="rotate(60 40 32)"/><circle cx="32" cy="28" r="4" fill="#ffd166"/><ellipse cx="20" cy="50" rx="10" ry="8" fill="#52b788" opacity="0.8"/><ellipse cx="44" cy="48" rx="8" ry="6" fill="#52b788" opacity="0.75"/></svg>',
+    '한련화': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="nast2_g1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ff6b6b"/><stop offset="100%" stop-color="#f8961e"/></radialGradient></defs><path d="M32 58 L32 40" stroke="#6a994e" stroke-width="2"/><circle cx="32" cy="28" r="14" fill="url(#nast2_g1)" opacity="0.9"/><ellipse cx="32" cy="20" rx="6" ry="10" fill="url(#nast2_g1)" opacity="0.95"/><ellipse cx="24" cy="32" rx="6" ry="10" fill="url(#nast2_g1)" opacity="0.9" transform="rotate(-60 24 32)"/><ellipse cx="40" cy="32" rx="6" ry="10" fill="url(#nast2_g1)" opacity="0.9" transform="rotate(60 40 32)"/><circle cx="32" cy="28" r="4" fill="#ffd166"/></svg>',
+    '해바라기': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="sun_g1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffd166"/><stop offset="100%" stop-color="#f9c74f"/></radialGradient></defs><path d="M32 58 L32 40" stroke="#6a994e" stroke-width="4"/><ellipse cx="32" cy="14" rx="4" ry="10" fill="url(#sun_g1)"/><ellipse cx="44" cy="20" rx="4" ry="10" fill="url(#sun_g1)" transform="rotate(50 44 20)"/><ellipse cx="48" cy="32" rx="4" ry="10" fill="url(#sun_g1)" transform="rotate(90 48 32)"/><ellipse cx="44" cy="44" rx="4" ry="10" fill="url(#sun_g1)" transform="rotate(130 44 44)"/><ellipse cx="32" cy="50" rx="4" ry="10" fill="url(#sun_g1)" transform="rotate(180 32 50)"/><ellipse cx="20" cy="44" rx="4" ry="10" fill="url(#sun_g1)" transform="rotate(-130 20 44)"/><ellipse cx="16" cy="32" rx="4" ry="10" fill="url(#sun_g1)" transform="rotate(-90 16 32)"/><ellipse cx="20" cy="20" rx="4" ry="10" fill="url(#sun_g1)" transform="rotate(-50 20 20)"/><circle cx="32" cy="32" r="10" fill="#774936"/><circle cx="30" cy="30" r="1.5" fill="#5c4033"/><circle cx="34" cy="30" r="1.5" fill="#5c4033"/><circle cx="32" cy="34" r="1.5" fill="#5c4033"/></svg>',
+    '코스모스': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="cos_g1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffc8dd"/><stop offset="100%" stop-color="#ffafcc"/></radialGradient></defs><path d="M32 58 L32 38" stroke="#6a994e" stroke-width="2"/><ellipse cx="32" cy="16" rx="3" ry="10" fill="url(#cos_g1)" opacity="0.95"/><ellipse cx="42" cy="22" rx="3" ry="10" fill="url(#cos_g1)" opacity="0.9" transform="rotate(45 42 22)"/><ellipse cx="46" cy="32" rx="3" ry="10" fill="url(#cos_g1)" opacity="0.9" transform="rotate(90 46 32)"/><ellipse cx="42" cy="42" rx="3" ry="10" fill="url(#cos_g1)" opacity="0.9" transform="rotate(135 42 42)"/><ellipse cx="32" cy="48" rx="3" ry="10" fill="url(#cos_g1)" opacity="0.9" transform="rotate(180 32 48)"/><ellipse cx="22" cy="42" rx="3" ry="10" fill="url(#cos_g1)" opacity="0.9" transform="rotate(-135 22 42)"/><ellipse cx="18" cy="32" rx="3" ry="10" fill="url(#cos_g1)" opacity="0.9" transform="rotate(-90 18 32)"/><ellipse cx="22" cy="22" rx="3" ry="10" fill="url(#cos_g1)" opacity="0.9" transform="rotate(-45 22 22)"/><circle cx="32" cy="32" r="5" fill="#ffd166"/></svg>',
+    '백일홍': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="zin_g1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ff6b6b"/><stop offset="100%" stop-color="#e63946"/></radialGradient></defs><path d="M32 58 L32 40" stroke="#6a994e" stroke-width="3"/><ellipse cx="32" cy="18" rx="4" ry="9" fill="url(#zin_g1)" opacity="0.95"/><ellipse cx="42" cy="24" rx="4" ry="9" fill="url(#zin_g1)" opacity="0.9" transform="rotate(50 42 24)"/><ellipse cx="44" cy="34" rx="4" ry="9" fill="url(#zin_g1)" opacity="0.9" transform="rotate(90 44 34)"/><ellipse cx="40" cy="42" rx="4" ry="9" fill="url(#zin_g1)" opacity="0.9" transform="rotate(130 40 42)"/><ellipse cx="24" cy="42" rx="4" ry="9" fill="url(#zin_g1)" opacity="0.9" transform="rotate(-130 24 42)"/><ellipse cx="20" cy="34" rx="4" ry="9" fill="url(#zin_g1)" opacity="0.9" transform="rotate(-90 20 34)"/><ellipse cx="22" cy="24" rx="4" ry="9" fill="url(#zin_g1)" opacity="0.9" transform="rotate(-50 22 24)"/><circle cx="32" cy="30" r="7" fill="#ffd166"/></svg>',
+    '캘린듈라': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="cal_g1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#f9c74f"/><stop offset="100%" stop-color="#f8961e"/></radialGradient></defs><path d="M32 58 L32 38" stroke="#6a994e" stroke-width="3"/><ellipse cx="32" cy="16" rx="3" ry="9" fill="url(#cal_g1)" opacity="0.95"/><ellipse cx="42" cy="22" rx="3" ry="9" fill="url(#cal_g1)" opacity="0.9" transform="rotate(50 42 22)"/><ellipse cx="44" cy="32" rx="3" ry="9" fill="url(#cal_g1)" opacity="0.9" transform="rotate(90 44 32)"/><ellipse cx="40" cy="40" rx="3" ry="9" fill="url(#cal_g1)" opacity="0.9" transform="rotate(130 40 40)"/><ellipse cx="24" cy="40" rx="3" ry="9" fill="url(#cal_g1)" opacity="0.9" transform="rotate(-130 24 40)"/><ellipse cx="20" cy="32" rx="3" ry="9" fill="url(#cal_g1)" opacity="0.9" transform="rotate(-90 20 32)"/><ellipse cx="22" cy="22" rx="3" ry="9" fill="url(#cal_g1)" opacity="0.9" transform="rotate(-50 22 22)"/><circle cx="32" cy="28" r="5" fill="#e85d04"/></svg>',
+    '금잔화': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="gold_g1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#f9c74f"/><stop offset="100%" stop-color="#f8961e"/></radialGradient></defs><path d="M32 58 L32 38" stroke="#6a994e" stroke-width="3"/><ellipse cx="32" cy="16" rx="3" ry="9" fill="url(#gold_g1)" opacity="0.95"/><ellipse cx="42" cy="22" rx="3" ry="9" fill="url(#gold_g1)" opacity="0.9" transform="rotate(50 42 22)"/><ellipse cx="44" cy="32" rx="3" ry="9" fill="url(#gold_g1)" opacity="0.9" transform="rotate(90 44 32)"/><ellipse cx="40" cy="40" rx="3" ry="9" fill="url(#gold_g1)" opacity="0.9" transform="rotate(130 40 40)"/><ellipse cx="24" cy="40" rx="3" ry="9" fill="url(#gold_g1)" opacity="0.9" transform="rotate(-130 24 40)"/><ellipse cx="20" cy="32" rx="3" ry="9" fill="url(#gold_g1)" opacity="0.9" transform="rotate(-90 20 32)"/><ellipse cx="22" cy="22" rx="3" ry="9" fill="url(#gold_g1)" opacity="0.9" transform="rotate(-50 22 22)"/><circle cx="32" cy="28" r="5" fill="#e85d04"/></svg>',
+    '알리섬': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M32 58 L32 40" stroke="#6a994e" stroke-width="2"/><circle cx="26" cy="28" r="4" fill="#f8f9fa" opacity="0.95"/><circle cx="38" cy="28" r="4" fill="#f8f9fa" opacity="0.95"/><circle cx="32" cy="22" r="4" fill="#f8f9fa" opacity="0.9"/><circle cx="22" cy="34" r="3.5" fill="#f8f9fa" opacity="0.9"/><circle cx="42" cy="34" r="3.5" fill="#f8f9fa" opacity="0.9"/><circle cx="28" cy="36" r="3" fill="#f8f9fa" opacity="0.85"/><circle cx="36" cy="36" r="3" fill="#f8f9fa" opacity="0.85"/><circle cx="32" cy="30" r="3" fill="#f8f9fa" opacity="0.9"/><ellipse cx="24" cy="46" rx="8" ry="5" fill="#74c69d" opacity="0.7"/><ellipse cx="40" cy="44" rx="6" ry="4" fill="#74c69d" opacity="0.65"/></svg>',
+    '페튜니아': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="pet_g1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#9d4edd"/><stop offset="100%" stop-color="#7b2cbf"/></radialGradient></defs><path d="M32 58 L32 42" stroke="#6a994e" stroke-width="2"/><circle cx="32" cy="28" r="16" fill="url(#pet_g1)" opacity="0.9"/><ellipse cx="32" cy="18" rx="8" ry="12" fill="url(#pet_g1)" opacity="0.95"/><ellipse cx="22" cy="32" rx="8" ry="12" fill="url(#pet_g1)" opacity="0.9" transform="rotate(-70 22 32)"/><ellipse cx="42" cy="32" rx="8" ry="12" fill="url(#pet_g1)" opacity="0.9" transform="rotate(70 42 32)"/><circle cx="32" cy="28" r="4" fill="#ffd166"/><ellipse cx="32" cy="28" rx="2" ry="1" fill="#f8f9fa" opacity="0.6"/></svg>',
+    '에키네시아': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="ech_g1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffc8dd"/><stop offset="100%" stop-color="#e63946"/></radialGradient></defs><path d="M32 58 L32 40" stroke="#6a994e" stroke-width="3"/><ellipse cx="32" cy="18" rx="3" ry="10" fill="url(#ech_g1)" opacity="0.9" transform="rotate(-10 32 18)"/><ellipse cx="42" cy="24" rx="3" ry="10" fill="url(#ech_g1)" opacity="0.85" transform="rotate(40 42 24)"/><ellipse cx="44" cy="36" rx="3" ry="10" fill="url(#ech_g1)" opacity="0.85" transform="rotate(80 44 36)"/><ellipse cx="22" cy="24" rx="3" ry="10" fill="url(#ech_g1)" opacity="0.85" transform="rotate(-40 22 24)"/><ellipse cx="20" cy="36" rx="3" ry="10" fill="url(#ech_g1)" opacity="0.85" transform="rotate(-80 20 36)"/><ellipse cx="32" cy="30" rx="8" ry="10" fill="#bc6c25"/></svg>',
+    '수레국화': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="corn_f1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#4a90a4"/><stop offset="100%" stop-color="#1d3557"/></radialGradient></defs><path d="M32 58 L32 38" stroke="#6a994e" stroke-width="2"/><path d="M32 18 L32 10 L28 6" stroke="url(#corn_f1)" stroke-width="3" stroke-linecap="round"/><path d="M32 18 L32 10 L36 6" stroke="url(#corn_f1)" stroke-width="3" stroke-linecap="round"/><path d="M32 22 L40 16 L46 12" stroke="url(#corn_f1)" stroke-width="3" stroke-linecap="round"/><path d="M32 22 L24 16 L18 12" stroke="url(#corn_f1)" stroke-width="3" stroke-linecap="round"/><path d="M32 28 L44 24 L52 22" stroke="url(#corn_f1)" stroke-width="3" stroke-linecap="round"/><path d="M32 28 L20 24 L12 22" stroke="url(#corn_f1)" stroke-width="3" stroke-linecap="round"/><path d="M32 34 L42 34 L50 36" stroke="url(#corn_f1)" stroke-width="3" stroke-linecap="round"/><path d="M32 34 L22 34 L14 36" stroke="url(#corn_f1)" stroke-width="3" stroke-linecap="round"/><circle cx="32" cy="26" r="5" fill="#7b2cbf"/></svg>',
+    '팬지': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="pan_g1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#7b2cbf"/><stop offset="100%" stop-color="#5a189a"/></radialGradient><radialGradient id="pan_g2" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffd166"/><stop offset="100%" stop-color="#f9c74f"/></radialGradient></defs><path d="M32 58 L32 42" stroke="#6a994e" stroke-width="2"/><ellipse cx="26" cy="20" rx="10" ry="8" fill="url(#pan_g1)" opacity="0.95"/><ellipse cx="38" cy="20" rx="10" ry="8" fill="url(#pan_g1)" opacity="0.95"/><ellipse cx="24" cy="32" rx="10" ry="8" fill="url(#pan_g2)" opacity="0.9" transform="rotate(-20 24 32)"/><ellipse cx="40" cy="32" rx="10" ry="8" fill="url(#pan_g2)" opacity="0.9" transform="rotate(20 40 32)"/><ellipse cx="32" cy="38" rx="8" ry="6" fill="url(#pan_g2)" opacity="0.95"/><circle cx="32" cy="26" r="4" fill="#1d3557"/></svg>'
+};
+
+// 기본 SVG 아이콘
+var defaultSVGs = {
+    'vegetable': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="def_veg" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#95d5b2"/><stop offset="100%" stop-color="#52b788"/></radialGradient></defs><circle cx="32" cy="36" r="18" fill="url(#def_veg)" opacity="0.9"/><path d="M32 18 Q28 14 30 10 Q32 8 34 10 Q36 14 32 18" fill="#588157"/><path d="M32 10 L32 6" stroke="#6a994e" stroke-width="2" stroke-linecap="round"/></svg>',
+    'herb': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="def_herb" x1="50%" y1="100%" x2="50%" y2="0%"><stop offset="0%" stop-color="#2d6a4f"/><stop offset="100%" stop-color="#52b788"/></linearGradient></defs><ellipse cx="32" cy="24" rx="10" ry="7" fill="url(#def_herb)" opacity="0.9"/><ellipse cx="24" cy="32" rx="8" ry="6" fill="url(#def_herb)" opacity="0.85"/><ellipse cx="40" cy="32" rx="8" ry="6" fill="url(#def_herb)" opacity="0.85"/><ellipse cx="28" cy="42" rx="7" ry="5" fill="url(#def_herb)" opacity="0.8"/><ellipse cx="36" cy="42" rx="7" ry="5" fill="url(#def_herb)" opacity="0.8"/><path d="M32 46 L32 58" stroke="#588157" stroke-width="3"/></svg>',
+    'flower': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="def_flower" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffc8dd"/><stop offset="100%" stop-color="#ffafcc"/></radialGradient></defs><path d="M32 58 L32 38" stroke="#6a994e" stroke-width="3"/><ellipse cx="32" cy="18" rx="4" ry="10" fill="url(#def_flower)" opacity="0.95"/><ellipse cx="42" cy="26" rx="4" ry="10" fill="url(#def_flower)" opacity="0.9" transform="rotate(60 42 26)"/><ellipse cx="38" cy="38" rx="4" ry="10" fill="url(#def_flower)" opacity="0.9" transform="rotate(120 38 38)"/><ellipse cx="26" cy="38" rx="4" ry="10" fill="url(#def_flower)" opacity="0.9" transform="rotate(-120 26 38)"/><ellipse cx="22" cy="26" rx="4" ry="10" fill="url(#def_flower)" opacity="0.9" transform="rotate(-60 22 26)"/><circle cx="32" cy="28" r="6" fill="#ffd166"/></svg>',
+    'default': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="def_seed" x1="50%" y1="100%" x2="50%" y2="0%"><stop offset="0%" stop-color="#588157"/><stop offset="100%" stop-color="#a7c957"/></linearGradient></defs><ellipse cx="32" cy="40" rx="8" ry="12" fill="url(#def_seed)" opacity="0.9"/><path d="M32 28 L32 20 Q28 14 32 10 Q36 14 32 20" fill="#74c69d" opacity="0.8"/><path d="M32 28 L26 22 Q22 18 26 14" fill="#74c69d" opacity="0.7"/><path d="M32 28 L38 22 Q42 18 38 14" fill="#74c69d" opacity="0.7"/></svg>'
+};
+
+function getPlantImageUrl(name, type) {
+    var svg = watercolorSVGs[name];
+    if (!svg && type) {
+        svg = defaultSVGs[type] || defaultSVGs['default'];
+    }
+    if (!svg) {
+        // 이름에서 키워드 찾기
+        for (var key in watercolorSVGs) {
+            if (name && name.indexOf(key) !== -1) {
+                svg = watercolorSVGs[key];
+                break;
+            }
+        }
+    }
+    if (!svg) {
+        svg = defaultSVGs['default'];
+    }
+    // SVG를 Data URI로 변환
+    return 'data:image/svg+xml,' + encodeURIComponent(svg);
+}
+
+// ===== 월별 할일 데이터 =====
+var monthTasks = [
+    { tasks: ['씨앗 주문하기', '텃밭 계획 세우기', '퇴비 준비'], tip: '카탈로그를 보며 올해 심을 작물을 정해보세요!' },
+    { tasks: ['육묘 시작 (토마토, 고추)', '퇴비 뒤집기'], tip: '따뜻한 곳에서 육묘를 시작하세요!' },
+    { tasks: ['밭 만들기', '감자 심기', '상추 파종'], tip: '서리가 끝나면 본격적으로 시작!' },
+    { tasks: ['본격 파종', '멀칭하기', '봄배추 정식'], tip: '바질, 딜 등 허브도 파종하세요!' },
+    { tasks: ['토마토/고추 정식', '지주 세우기'], tip: '서리 후 정식 시작!' },
+    { tasks: ['해충 관리', '곁순 제거', '마늘 수확'], tip: '장마 전 마늘 수확!' },
+    { tasks: ['물주기', '병해충 방제', '여름 수확'], tip: '아침저녁으로 물주기!' },
+    { tasks: ['김장배추 파종', '가을무 파종'], tip: '8월 중순이 배추 적기!' },
+    { tasks: ['김장 준비', '딸기 정식'], tip: '가을 상추도 지금 심어요!' },
+    { tasks: ['마늘/양파 정식', '배추/무 수확'], tip: '서리 전 수확 마무리!' },
+    { tasks: ['김장하기', '밭 정리', '퇴비 넣기'], tip: '빈 밭에 퇴비를 넣어두세요!' },
+    { tasks: ['밭 정리', '다음해 계획 세우기'], tip: '내년 텃밭을 미리 계획하세요!' }
+];
+
+// ===== Firebase 초기화 =====
+function initFirebase() {
+    try {
+        var firebaseConfig = {
+            apiKey: "AIzaSyCOXi8-WnJFH2fjmCdvK4ALsuurU-ieCgc",
+            authDomain: "companion-planting-b12b4.firebaseapp.com",
+            projectId: "companion-planting-b12b4",
+            storageBucket: "companion-planting-b12b4.firebasestorage.app",
+            messagingSenderId: "30722207428",
+            appId: "1:30722207428:web:2a77486a3f6ee8fd1ca391"
+        };
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.firestore();
+        console.log('✅ Firebase 초기화 성공!');
+        return true;
+    } catch (e) {
+        console.error('❌ Firebase 초기화 실패:', e);
+        return false;
+    }
+}
+
+// ===== 네비게이션 =====
+function goTo(page, data) {
+    var pages = document.querySelectorAll('.page');
+    for (var i = 0; i < pages.length; i++) {
+        pages[i].classList.remove('active');
+    }
+    document.getElementById(page + 'Page').classList.add('active');
+    
+    var navItems = document.querySelectorAll('.nav-item');
+    for (var i = 0; i < navItems.length; i++) {
+        navItems[i].classList.remove('active');
+    }
+    var navItem = document.querySelector('.nav-item[data-page="' + page + '"]');
+    if (navItem) navItem.classList.add('active');
+
+    var backBtn = document.getElementById('backBtn');
+    var titleText = document.getElementById('appTitleText');
+
+    if (page === 'home') {
+        backBtn.style.display = 'none';
+        titleText.textContent = '퍼머컬처ON';
+    } else if (page === 'detail') {
+        backBtn.style.display = 'flex';
+        titleText.textContent = '조합 상세';
+        prevPage = currentPage;
+        if (data) showDetail(data);
+    } else {
+        backBtn.style.display = 'none';
+        var titles = { 'search': '조합 찾기', 'badcombo': '상극 체크', 'calendar': '파종 캘린더', 'guide': '작물 도감' };
+        titleText.textContent = titles[page] || '퍼머컬처ON';
+    }
+
+    currentPage = page;
+    window.scrollTo(0, 0);
+}
+
+// ===== 홈 페이지 =====
+function updateHome() {
+    var m = new Date().getMonth();
+    document.getElementById('monthTitle').textContent = (m + 1) + '월 할 일';
+    
+    var data = monthTasks[m];
+    var html = '';
+    for (var i = 0; i < data.tasks.length; i++) {
+        html += '<li class="task-item"><div class="task-check">✓</div><span>' + data.tasks[i] + '</span></li>';
+    }
+    document.getElementById('taskList').innerHTML = html;
+    document.getElementById('tipText').textContent = data.tip;
+}
+
+// ===== 추천 조합 로드 =====
+function loadRecommended() {
+    if (!db) return;
+    
+    db.collection('companion_combos')
+        .where('difficulty', '==', '쉬움')
+        .limit(10)
+        .get()
+        .then(function(snap) {
+            if (!snap.empty) {
+                var combos = [];
+                snap.forEach(function(doc) { combos.push(doc.data()); });
+                var combo = combos[Math.floor(Math.random() * combos.length)];
+                
+                // 추천 카드 이미지 업데이트
+                document.getElementById('recEmoji').innerHTML = 
+                    '<div class="plant-icon-lg"><img src="' + getPlantImageUrl(combo.vegetable, 'vegetable') + '" alt=""></div>' +
+                    '<span class="rec-plus">+</span>' +
+                    '<div class="plant-icon-lg"><img src="' + getPlantImageUrl(combo.herb, 'herb') + '" alt=""></div>' +
+                    '<span class="rec-plus">+</span>' +
+                    '<div class="plant-icon-lg"><img src="' + getPlantImageUrl(combo.flower, 'flower') + '" alt=""></div>';
+                
+                document.getElementById('recTitle').textContent = combo.name;
+                document.getElementById('recPlants').textContent = combo.vegetable + ' + ' + combo.herb + ' + ' + combo.flower;
+                document.getElementById('recEffect').textContent = '✨ ' + combo.main_effect;
+                document.getElementById('recDiff').textContent = combo.difficulty;
+                
+                var dots = combo.difficulty === '쉬움' ? '●○○' : combo.difficulty === '보통' ? '●●○' : '●●●';
+                document.getElementById('recDots').textContent = dots;
+                
+                document.getElementById('recCard').onclick = function() { goTo('detail', combo); };
+            }
+        })
+        .catch(function(e) { console.log('추천 로드 실패:', e); });
+}
+
+// ===== 조합 찾기 =====
+function loadCombos() {
+    if (!db) return;
+    
+    db.collection('companion_combos').get()
+        .then(function(snap) {
+            allCombos = [];
+            snap.forEach(function(doc) {
+                var data = doc.data();
+                data.id = doc.id;
+                allCombos.push(data);
+            });
+            renderCombos(allCombos);
+        })
+        .catch(function(e) {
+            console.log('조합 로드 실패:', e);
+            document.getElementById('comboList').innerHTML = '<div class="loading">데이터를 불러올 수 없습니다.</div>';
+        });
+}
+
+function renderCombos(combos) {
+    var list = document.getElementById('comboList');
+    
+    if (combos.length === 0) {
+        list.innerHTML = '<div class="loading">검색 결과가 없습니다.</div>';
+        return;
+    }
+
+    var html = '';
+    for (var i = 0; i < combos.length; i++) {
+        var c = combos[i];
+        var badgeClass = c.difficulty === '쉬움' ? 'easy' : c.difficulty === '보통' ? 'medium' : 'hard';
+        html += '<div class="combo-item" data-index="' + i + '">' +
+            '<div class="combo-header">' +
+                '<div class="combo-icons">' +
+                    '<div class="combo-icon"><img src="' + getPlantImageUrl(c.vegetable, 'vegetable') + '" alt=""></div>' +
+                    '<div class="combo-icon"><img src="' + getPlantImageUrl(c.herb, 'herb') + '" alt=""></div>' +
+                    '<div class="combo-icon"><img src="' + getPlantImageUrl(c.flower, 'flower') + '" alt=""></div>' +
+                '</div>' +
+                '<span class="combo-badge ' + badgeClass + '">' + (c.difficulty || '보통') + '</span>' +
+            '</div>' +
+            '<div class="combo-title">' + c.name + '</div>' +
+            '<div class="combo-plants">' + c.vegetable + ' + ' + c.herb + ' + ' + c.flower + '</div>' +
+            '<div class="combo-effect">✨ ' + c.main_effect + '</div>' +
+        '</div>';
+    }
+    list.innerHTML = html;
+    
+    var items = list.querySelectorAll('.combo-item');
+    for (var i = 0; i < items.length; i++) {
+        items[i].addEventListener('click', function() {
+            var index = parseInt(this.getAttribute('data-index'));
+            goTo('detail', combos[index]);
+        });
+    }
+}
+
+function filterCombos() {
+    var search = document.getElementById('searchInput').value.toLowerCase();
+    
+    var filtered = allCombos.filter(function(c) {
+        var matchSearch = !search || 
+            c.name.toLowerCase().indexOf(search) !== -1 ||
+            c.vegetable.toLowerCase().indexOf(search) !== -1 ||
+            c.herb.toLowerCase().indexOf(search) !== -1 ||
+            c.flower.toLowerCase().indexOf(search) !== -1;
+        
+        var matchFilter = currentFilter === 'all' ||
+            c.difficulty === currentFilter ||
+            (c.space_type && c.space_type.indexOf(currentFilter) !== -1) ||
+            (c.season && c.season.indexOf(currentFilter) !== -1);
+        
+        return matchSearch && matchFilter;
+    });
+    
+    renderCombos(filtered);
+}
+
+// ===== 상세 페이지 =====
+function showDetail(combo) {
+    // 상세 히어로 이미지
+    document.getElementById('detailIcons').innerHTML = 
+        '<div class="detail-icon"><img src="' + getPlantImageUrl(combo.vegetable, 'vegetable') + '" alt=""></div>' +
+        '<span class="detail-plus">+</span>' +
+        '<div class="detail-icon"><img src="' + getPlantImageUrl(combo.herb, 'herb') + '" alt=""></div>' +
+        '<span class="detail-plus">+</span>' +
+        '<div class="detail-icon"><img src="' + getPlantImageUrl(combo.flower, 'flower') + '" alt=""></div>';
+    
+    document.getElementById('detailTitle').textContent = combo.name;
+    document.getElementById('detailSub').textContent = combo.name_en || '';
+
+    document.getElementById('detailPlants').innerHTML = 
+        '<div class="plant-row"><div class="plant-icon-md"><img src="' + getPlantImageUrl(combo.vegetable, 'vegetable') + '" alt=""></div><div><div class="plant-name">' + combo.vegetable + '</div><div class="plant-name-en">' + (combo.vegetable_en || '채소') + '</div></div></div>' +
+        '<div class="plant-row"><div class="plant-icon-md"><img src="' + getPlantImageUrl(combo.herb, 'herb') + '" alt=""></div><div><div class="plant-name">' + combo.herb + '</div><div class="plant-name-en">' + (combo.herb_en || '허브') + '</div></div></div>' +
+        '<div class="plant-row"><div class="plant-icon-md"><img src="' + getPlantImageUrl(combo.flower, 'flower') + '" alt=""></div><div><div class="plant-name">' + combo.flower + '</div><div class="plant-name-en">' + (combo.flower_en || '꽃') + '</div></div></div>';
+
+    var effects = combo.effects || [combo.main_effect];
+    var effectsHtml = '';
+    for (var i = 0; i < effects.length; i++) {
+        effectsHtml += '<span class="effect-tag">' + effects[i] + '</span>';
+    }
+    document.getElementById('detailEffects').innerHTML = effectsHtml;
+
+    document.getElementById('detailInfo').innerHTML = 
+        '<div class="info-row"><span class="info-label">심는 시기</span><span class="info-value">' + (combo.planting_time || '-') + '</span></div>' +
+        '<div class="info-row"><span class="info-label">수확 시기</span><span class="info-value">' + (combo.harvest_time || '-') + '</span></div>' +
+        '<div class="info-row"><span class="info-label">난이도</span><span class="info-value">' + (combo.difficulty || '보통') + '</span></div>' +
+        '<div class="info-row"><span class="info-label">재배 공간</span><span class="info-value">' + ((combo.space_type || []).join(', ') || '-') + '</span></div>';
+
+    document.getElementById('detailLayout').textContent = combo.layout || '자유롭게 배치하세요.';
+}
+
+// ===== 상극 체크 =====
+function loadBadCombos() {
+    if (!db) return;
+    
+    Promise.all([
+        db.collection('bad_combinations').get(),
+        db.collection('vegetables').get()
+    ]).then(function(results) {
+        allBadCombos = [];
+        results[0].forEach(function(doc) { allBadCombos.push(doc.data()); });
+        
+        var vegs = [];
+        results[1].forEach(function(doc) { vegs.push(doc.data()); });
+
+        var options = '<option value="">선택...</option>';
+        for (var i = 0; i < vegs.length; i++) {
+            options += '<option value="' + vegs[i].name + '">' + vegs[i].name + '</option>';
+        }
+        document.getElementById('plantA').innerHTML = options;
+        document.getElementById('plantB').innerHTML = options;
+
+        var html = '';
+        for (var i = 0; i < allBadCombos.length; i++) {
+            var b = allBadCombos[i];
+            html += '<div class="bad-item">' +
+                '<div class="bad-icon"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/274c.svg" alt="x"></div>' +
+                '<div class="bad-info"><h4>' + b.plant_a + ' ✕ ' + b.plant_b + '</h4><p>' + b.reason + '</p></div>' +
+            '</div>';
+        }
+        document.getElementById('badList').innerHTML = html;
+    }).catch(function(e) { console.log('상극 로드 실패:', e); });
+}
+
+function checkCompat() {
+    var a = document.getElementById('plantA').value;
+    var b = document.getElementById('plantB').value;
+    var result = document.getElementById('checkResult');
+
+    if (!a || !b) { result.innerHTML = ''; return; }
+    if (a === b) {
+        result.innerHTML = '<div class="check-result" style="background:var(--cream);"><div class="result-icon"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f914.svg" alt=""></div><div class="result-title" style="color:var(--sage-green);">같은 작물이에요</div></div>';
+        return;
+    }
+
+    var bad = null;
+    for (var i = 0; i < allBadCombos.length; i++) {
+        var c = allBadCombos[i];
+        if ((c.plant_a.indexOf(a) !== -1 && c.plant_b.indexOf(b) !== -1) ||
+            (c.plant_a.indexOf(b) !== -1 && c.plant_b.indexOf(a) !== -1)) {
+            bad = c; break;
+        }
+    }
+
+    if (bad) {
+        result.innerHTML = '<div class="check-result bad"><div class="result-icon"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/274c.svg" alt=""></div><div class="result-title">상극이에요!</div><div class="result-desc"><strong>이유:</strong> ' + bad.reason + '<br><strong>영향:</strong> ' + bad.effect + '</div></div>';
+    } else {
+        result.innerHTML = '<div class="check-result good"><div class="result-icon"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2705.svg" alt=""></div><div class="result-title">함께 심어도 좋아요!</div><div class="result-desc">' + a + '와(과) ' + b + '는 서로 문제없이 잘 자라요.</div></div>';
+    }
+}
+
+// ===== 캘린더 =====
+function loadCalendar() {
+    if (!db) return;
+    
+    db.collection('monthly_calendar').orderBy('month').get()
+        .then(function(snap) {
+            calendarData = [];
+            snap.forEach(function(doc) { calendarData.push(doc.data()); });
+            updateCalendar();
+        })
+        .catch(function(e) { console.log('캘린더 로드 실패:', e); updateCalendar(); });
+}
+
+function changeMonth(delta) {
+    currentMonth = (currentMonth + delta + 12) % 12;
+    updateCalendar();
+}
+
+function updateCalendar() {
+    document.getElementById('calMonth').textContent = (currentMonth + 1) + '월';
+    
+    var data = null;
+    for (var i = 0; i < calendarData.length; i++) {
+        if (parseInt(calendarData[i].month) === currentMonth + 1) { data = calendarData[i]; break; }
+    }
+    var tasks = monthTasks[currentMonth];
+    
+    function renderList(items, emptyMsg) {
+        if (!items || items === '-') return '<p class="cal-empty">' + emptyMsg + '</p>';
+        var arr = items.split(',');
+        var html = '';
+        for (var i = 0; i < arr.length; i++) { html += '<div class="cal-item">' + arr[i].trim() + '</div>'; }
+        return html;
+    }
+
+    document.getElementById('calContent').innerHTML = 
+        '<div class="cal-section"><div class="cal-header"><div class="cal-header-icon sow"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f331.svg" alt=""></div>파종 가능</div>' + renderList(data ? data.sow_vegetables : null, '이번 달은 파종할 채소가 없어요') + '</div>' +
+        '<div class="cal-section"><div class="cal-header"><div class="cal-header-icon herb"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f33f.svg" alt=""></div>허브 파종</div>' + renderList(data ? data.sow_herbs : null, '이번 달은 파종할 허브가 없어요') + '</div>' +
+        '<div class="cal-section"><div class="cal-header"><div class="cal-header-icon harvest"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f96c.svg" alt=""></div>수확 가능</div>' + renderList(data ? data.harvest : null, '이번 달은 수확할 작물이 없어요') + '</div>' +
+        '<div class="cal-section" style="background:var(--cream);"><div class="cal-header"><div class="cal-header-icon tasks"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4cb.svg" alt=""></div>이달의 할 일</div><p style="font-size:14px;color:var(--forest-green);line-height:1.6;">' + (data ? data.tasks : tasks.tasks.join(', ')) + '</p></div>';
+}
+
+// ===== 도감 =====
+function loadGuide() {
+    if (!db) return;
+    
+    Promise.all([
+        db.collection('vegetables').get(),
+        db.collection('herbs').get(),
+        db.collection('flowers').get()
+    ]).then(function(results) {
+        allVegetables = []; results[0].forEach(function(doc) { allVegetables.push(doc.data()); });
+        allHerbs = []; results[1].forEach(function(doc) { allHerbs.push(doc.data()); });
+        allFlowers = []; results[2].forEach(function(doc) { allFlowers.push(doc.data()); });
+        renderGuide('veg');
+    }).catch(function(e) { console.log('도감 로드 실패:', e); });
+}
+
+function renderGuide(type) {
+    var data = type === 'veg' ? allVegetables : type === 'herb' ? allHerbs : allFlowers;
+    var plantType = type === 'veg' ? 'vegetable' : type === 'herb' ? 'herb' : 'flower';
+    
+    var html = '';
+    for (var i = 0; i < data.length; i++) {
+        var item = data[i];
+        html += '<div class="guide-item" data-index="' + i + '" data-type="' + type + '">' +
+            '<div class="guide-icon"><img src="' + getPlantImageUrl(item.name, plantType) + '" alt=""></div>' +
+            '<div class="guide-name">' + item.name + '</div>' +
+            '<div class="guide-name-en">' + (item.name_en || '') + '</div>' +
+        '</div>';
+    }
+    document.getElementById('guideList').innerHTML = html;
+    
+    var items = document.querySelectorAll('.guide-item');
+    for (var i = 0; i < items.length; i++) {
+        items[i].addEventListener('click', function() {
+            var index = parseInt(this.getAttribute('data-index'));
+            var t = this.getAttribute('data-type');
+            var arr = t === 'veg' ? allVegetables : t === 'herb' ? allHerbs : allFlowers;
+            var pt = t === 'veg' ? 'vegetable' : t === 'herb' ? 'herb' : 'flower';
+            showModal(arr[index], pt);
+        });
+    }
+}
+
+function showModal(item, plantType) {
+    document.getElementById('modalIcon').innerHTML = '<img src="' + getPlantImageUrl(item.name, plantType) + '" alt="">';
+    document.getElementById('modalTitle').textContent = item.name;
+    
+    var content = '';
+    if (item.sowing_mid) {
+        content = '<div class="info-row"><span class="info-label">파종(중부)</span><span class="info-value">' + item.sowing_mid + '</span></div>' +
+            '<div class="info-row"><span class="info-label">파종(남부)</span><span class="info-value">' + (item.sowing_south || '-') + '</span></div>' +
+            '<div class="info-row"><span class="info-label">정식</span><span class="info-value">' + (item.transplant || '-') + '</span></div>' +
+            '<div class="info-row"><span class="info-label">수확</span><span class="info-value">' + item.harvest + '</span></div>' +
+            '<div class="info-row"><span class="info-label">적정온도</span><span class="info-value">' + item.temp_optimal + '°C</span></div>' +
+            '<div class="info-row"><span class="info-label">난이도</span><span class="info-value">' + item.difficulty + '</span></div>' +
+            '<div style="margin-top:16px;padding:14px;background:var(--cream);border-radius:12px;"><strong>💡 팁:</strong> ' + item.notes + '</div>';
+    } else {
+        content = '<div class="info-row"><span class="info-label">파종</span><span class="info-value">' + item.sowing + '</span></div>' +
+            '<div class="info-row"><span class="info-label">정식</span><span class="info-value">' + (item.transplant || '-') + '</span></div>' +
+            '<div class="info-row"><span class="info-label">수확/개화</span><span class="info-value">' + (item.harvest || item.bloom) + '</span></div>' +
+            '<div class="info-row"><span class="info-label">적정온도</span><span class="info-value">' + item.temp_optimal + '°C</span></div>' +
+            (item.companion_effect ? '<div class="info-row"><span class="info-label">동반효과</span><span class="info-value">' + item.companion_effect + '</span></div>' : '') +
+            (item.notes ? '<div style="margin-top:16px;padding:14px;background:var(--cream);border-radius:12px;"><strong>💡 팁:</strong> ' + item.notes + '</div>' : '');
+    }
+    
+    document.getElementById('modalContent').innerHTML = content;
+    document.getElementById('modal').classList.add('active');
+}
+
+function closeModal() {
+    document.getElementById('modal').classList.remove('active');
+}
+
+// ===== 이벤트 리스너 =====
+function setupEventListeners() {
+    document.getElementById('backBtn').addEventListener('click', function() { goTo(prevPage || 'search'); });
+    
+    document.getElementById('btnSearch').addEventListener('click', function() { goTo('search'); });
+    document.getElementById('btnCalendar').addEventListener('click', function() { goTo('calendar'); });
+    document.getElementById('btnBadcombo').addEventListener('click', function() { goTo('badcombo'); });
+    document.getElementById('btnGuide').addEventListener('click', function() { goTo('guide'); });
+    
+    var navItems = document.querySelectorAll('.nav-item');
+    for (var i = 0; i < navItems.length; i++) {
+        navItems[i].addEventListener('click', function() { goTo(this.getAttribute('data-page')); });
+    }
+    
+    document.getElementById('searchInput').addEventListener('input', filterCombos);
+    
+    var filterTabs = document.querySelectorAll('.filter-tab');
+    for (var i = 0; i < filterTabs.length; i++) {
+        filterTabs[i].addEventListener('click', function() {
+            for (var j = 0; j < filterTabs.length; j++) { filterTabs[j].classList.remove('active'); }
+            this.classList.add('active');
+            currentFilter = this.getAttribute('data-filter');
+            filterCombos();
+        });
+    }
+    
+    document.getElementById('plantA').addEventListener('change', checkCompat);
+    document.getElementById('plantB').addEventListener('change', checkCompat);
+    
+    document.getElementById('prevMonth').addEventListener('click', function() { changeMonth(-1); });
+    document.getElementById('nextMonth').addEventListener('click', function() { changeMonth(1); });
+    
+    var guideTabs = document.querySelectorAll('.guide-tab');
+    for (var i = 0; i < guideTabs.length; i++) {
+        guideTabs[i].addEventListener('click', function() {
+            for (var j = 0; j < guideTabs.length; j++) { guideTabs[j].classList.remove('active'); }
+            this.classList.add('active');
+            renderGuide(this.getAttribute('data-type'));
+        });
+    }
+    
+    document.getElementById('modalClose').addEventListener('click', closeModal);
+    document.getElementById('modal').addEventListener('click', function(e) { if (e.target.id === 'modal') closeModal(); });
+}
+
+// ===== 앱 초기화 =====
+function initApp() {
+    console.log('🌱 퍼머컬처ON 앱 시작...');
+    updateHome();
+    
+    if (typeof firebase !== 'undefined') {
+        if (initFirebase()) {
+            loadRecommended();
+            loadCombos();
+            loadBadCombos();
+            loadCalendar();
+            loadGuide();
+        }
+    } else {
+        console.error('Firebase SDK 로드 실패');
+    }
+    
+    setupEventListeners();
+    console.log('✅ 앱 초기화 완료!');
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    initApp();
+}
+</script>
+
+</body>
+</html>
