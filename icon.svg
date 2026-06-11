@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<defs>
+  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#3A6B4A"/>
+    <stop offset="0.62" stop-color="#2F5D3F"/>
+    <stop offset="1" stop-color="#26492F"/>
+  </linearGradient>
+  <linearGradient id="leafL" x1="0" y1="1" x2="1" y2="0">
+    <stop offset="0" stop-color="#5B9A68"/><stop offset="1" stop-color="#8FC487"/>
+  </linearGradient>
+  <linearGradient id="leafR" x1="1" y1="1" x2="0" y2="0">
+    <stop offset="0" stop-color="#74B077"/><stop offset="1" stop-color="#A9D69C"/>
+  </linearGradient>
+</defs>
+<rect width="512" height="512" rx="116" fill="url(#sky)"/>
+<!-- 떠오르는 해 -->
+<circle cx="394" cy="118" r="46" fill="#E5A33C" opacity="0.9"/>
+<circle cx="394" cy="118" r="64" fill="#E5A33C" opacity="0.18"/>
+<!-- 뒷 언덕 -->
+<path d="M0 360 Q 130 300 260 348 T 512 330 L 512 512 L 0 512 Z" fill="#22422B"/>
+<!-- 앞 흙 언덕 -->
+<path d="M0 408 Q 150 368 300 402 T 512 392 L 512 512 L 0 512 Z" fill="#6B4E37"/>
+<!-- 이랑 씨앗 점 -->
+<g fill="#E5A33C">
+  <ellipse cx="110" cy="448" rx="13" ry="9"/>
+  <ellipse cx="186" cy="460" rx="13" ry="9"/>
+  <ellipse cx="262" cy="452" rx="13" ry="9"/>
+  <ellipse cx="338" cy="462" rx="13" ry="9"/>
+  <ellipse cx="414" cy="450" rx="13" ry="9"/>
+</g>
+<!-- 줄기: 살짝 휜 손그림 곡선 -->
+<path d="M256 412 C 252 340 260 290 254 218" fill="none" stroke="#EAF2E3" stroke-width="17" stroke-linecap="round"/>
+<!-- 왼쪽 잎 -->
+<path d="M254 300 C 190 290 150 240 146 172 C 216 178 254 232 256 296 Z" fill="url(#leafL)"/>
+<path d="M252 296 C 216 268 192 234 172 196" fill="none" stroke="#2F5D3F" stroke-width="8" stroke-linecap="round" opacity="0.5"/>
+<!-- 오른쪽 잎 -->
+<path d="M256 238 C 318 226 360 172 366 102 C 292 110 252 168 254 234 Z" fill="url(#leafR)"/>
+<path d="M258 232 C 294 200 320 162 342 122" fill="none" stroke="#2F5D3F" stroke-width="8" stroke-linecap="round" opacity="0.5"/>
+<!-- 새순 -->
+<circle cx="253" cy="214" r="12" fill="#A9D69C"/>
+</svg>
