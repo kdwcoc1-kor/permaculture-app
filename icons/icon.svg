@@ -1,112 +1,41 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <defs>
-    <!-- 배경 그라데이션 -->
-    <radialGradient id="bg" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#2E7D32"/>
-      <stop offset="100%" stop-color="#1B5E20"/>
-    </radialGradient>
-    
-    <!-- 잎 그라데이션들 -->
-    <linearGradient id="leaf1" x1="0%" y1="100%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#43A047"/>
-      <stop offset="100%" stop-color="#81C784"/>
-    </linearGradient>
-    <linearGradient id="leaf2" x1="0%" y1="100%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#2E7D32"/>
-      <stop offset="100%" stop-color="#66BB6A"/>
-    </linearGradient>
-    <linearGradient id="leaf3" x1="0%" y1="100%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#388E3C"/>
-      <stop offset="100%" stop-color="#A5D6A7"/>
-    </linearGradient>
-    
-    <!-- 흙/대지 그라데이션 -->
-    <linearGradient id="earth" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#8D6E63"/>
-      <stop offset="100%" stop-color="#5D4037"/>
-    </linearGradient>
-    
-    <!-- 태양 그라데이션 -->
-    <radialGradient id="sun" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#FFD54F"/>
-      <stop offset="100%" stop-color="#FF8F00"/>
-    </radialGradient>
-    
-    <!-- 물 그라데이션 -->
-    <linearGradient id="water" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#4FC3F7"/>
-      <stop offset="100%" stop-color="#0288D1"/>
-    </linearGradient>
-  </defs>
-  
-  <!-- 배경 원 -->
-  <circle cx="256" cy="256" r="245" fill="url(#bg)"/>
-  
-  <!-- 순환 화살표 원 (퍼머컬처 순환 상징) -->
-  <circle cx="256" cy="256" r="200" fill="none" stroke="#1B5E20" stroke-width="8" opacity="0.3"/>
-  
-  <!-- 중앙 나선형 정원 (퍼머컬처 상징) -->
-  <path d="M256 180 
-           Q300 180 320 220 
-           Q340 260 320 300 
-           Q300 340 256 340 
-           Q212 340 192 300 
-           Q172 260 192 220 
-           Q212 180 256 210
-           Q280 230 280 256
-           Q280 282 256 282
-           Q232 282 232 256
-           Q232 240 256 240" 
-        fill="none" stroke="#A5D6A7" stroke-width="12" stroke-linecap="round" opacity="0.8"/>
-  
-  <!-- 세 가지 요소: 태양(상단), 물(좌하단), 흙(우하단) - 퍼머컬처 3요소 -->
-  
-  <!-- 태양 -->
-  <circle cx="256" cy="100" r="35" fill="url(#sun)" opacity="0.95"/>
-  <g stroke="#FFD54F" stroke-width="4" stroke-linecap="round" opacity="0.8">
-    <line x1="256" y1="55" x2="256" y2="40"/>
-    <line x1="286" y1="70" x2="298" y2="58"/>
-    <line x1="301" y1="100" x2="316" y2="100"/>
-    <line x1="286" y1="130" x2="298" y2="142"/>
-    <line x1="226" y1="70" x2="214" y2="58"/>
-    <line x1="211" y1="100" x2="196" y2="100"/>
-    <line x1="226" y1="130" x2="214" y2="142"/>
-  </g>
-  
-  <!-- 물방울 (좌하단) -->
-  <path d="M120 380 Q120 340 140 320 Q160 340 160 380 Q160 410 140 420 Q120 410 120 380" fill="url(#water)" opacity="0.9"/>
-  <ellipse cx="135" cy="370" rx="8" ry="12" fill="#B3E5FC" opacity="0.5"/>
-  
-  <!-- 흙/산 (우하단) -->
-  <path d="M340 420 Q360 360 400 380 Q380 340 410 320 Q440 360 420 420 Z" fill="url(#earth)" opacity="0.9"/>
-  
-  <!-- 다양한 식물들 (동반식물 상징) -->
-  
-  <!-- 큰 잎 (좌상단) -->
-  <ellipse cx="150" cy="200" rx="35" ry="60" fill="url(#leaf1)" opacity="0.9" transform="rotate(-30 150 200)"/>
-  <path d="M150 240 Q150 200 150 160" stroke="#C8E6C9" stroke-width="2" fill="none" opacity="0.6" transform="rotate(-30 150 200)"/>
-  
-  <!-- 큰 잎 (우상단) -->
-  <ellipse cx="362" cy="200" rx="35" ry="60" fill="url(#leaf2)" opacity="0.9" transform="rotate(30 362 200)"/>
-  <path d="M362 240 Q362 200 362 160" stroke="#C8E6C9" stroke-width="2" fill="none" opacity="0.6" transform="rotate(30 362 200)"/>
-  
-  <!-- 작은 잎들 (중앙 좌우) -->
-  <ellipse cx="180" cy="300" rx="20" ry="35" fill="url(#leaf3)" opacity="0.85" transform="rotate(-15 180 300)"/>
-  <ellipse cx="332" cy="300" rx="20" ry="35" fill="url(#leaf3)" opacity="0.85" transform="rotate(15 332 300)"/>
-  
-  <!-- 꽃 (동반식물 - 메리골드 느낌) -->
-  <circle cx="200" cy="380" r="20" fill="#FF8F00" opacity="0.9"/>
-  <circle cx="200" cy="380" r="10" fill="#FFD54F"/>
-  
-  <!-- 꽃2 -->
-  <circle cx="312" cy="380" r="18" fill="#E91E63" opacity="0.85"/>
-  <circle cx="312" cy="380" r="8" fill="#F8BBD9"/>
-  
-  <!-- 중앙 새싹 (성장/희망 상징) -->
-  <path d="M256 290 L256 330" stroke="#2E7D32" stroke-width="6" stroke-linecap="round"/>
-  <ellipse cx="246" cy="280" rx="15" ry="25" fill="url(#leaf1)" opacity="0.95" transform="rotate(-20 246 280)"/>
-  <ellipse cx="266" cy="280" rx="15" ry="25" fill="url(#leaf1)" opacity="0.95" transform="rotate(20 266 280)"/>
-  
-  <!-- 하단 흙 라인 -->
-  <path d="M100 430 Q180 410 256 420 Q332 430 412 410" stroke="#5D4037" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.6"/>
+<defs>
+  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#3A6B4A"/>
+    <stop offset="0.62" stop-color="#2F5D3F"/>
+    <stop offset="1" stop-color="#26492F"/>
+  </linearGradient>
+  <linearGradient id="leafL" x1="0" y1="1" x2="1" y2="0">
+    <stop offset="0" stop-color="#5B9A68"/><stop offset="1" stop-color="#8FC487"/>
+  </linearGradient>
+  <linearGradient id="leafR" x1="1" y1="1" x2="0" y2="0">
+    <stop offset="0" stop-color="#74B077"/><stop offset="1" stop-color="#A9D69C"/>
+  </linearGradient>
+</defs>
+<rect width="512" height="512" rx="116" fill="url(#sky)"/>
+<!-- 떠오르는 해 -->
+<circle cx="394" cy="118" r="46" fill="#E5A33C" opacity="0.9"/>
+<circle cx="394" cy="118" r="64" fill="#E5A33C" opacity="0.18"/>
+<!-- 뒷 언덕 -->
+<path d="M0 360 Q 130 300 260 348 T 512 330 L 512 512 L 0 512 Z" fill="#22422B"/>
+<!-- 앞 흙 언덕 -->
+<path d="M0 408 Q 150 368 300 402 T 512 392 L 512 512 L 0 512 Z" fill="#6B4E37"/>
+<!-- 이랑 씨앗 점 -->
+<g fill="#E5A33C">
+  <ellipse cx="110" cy="448" rx="13" ry="9"/>
+  <ellipse cx="186" cy="460" rx="13" ry="9"/>
+  <ellipse cx="262" cy="452" rx="13" ry="9"/>
+  <ellipse cx="338" cy="462" rx="13" ry="9"/>
+  <ellipse cx="414" cy="450" rx="13" ry="9"/>
+</g>
+<!-- 줄기: 살짝 휜 손그림 곡선 -->
+<path d="M256 412 C 252 340 260 290 254 218" fill="none" stroke="#EAF2E3" stroke-width="17" stroke-linecap="round"/>
+<!-- 왼쪽 잎 -->
+<path d="M254 300 C 190 290 150 240 146 172 C 216 178 254 232 256 296 Z" fill="url(#leafL)"/>
+<path d="M252 296 C 216 268 192 234 172 196" fill="none" stroke="#2F5D3F" stroke-width="8" stroke-linecap="round" opacity="0.5"/>
+<!-- 오른쪽 잎 -->
+<path d="M256 238 C 318 226 360 172 366 102 C 292 110 252 168 254 234 Z" fill="url(#leafR)"/>
+<path d="M258 232 C 294 200 320 162 342 122" fill="none" stroke="#2F5D3F" stroke-width="8" stroke-linecap="round" opacity="0.5"/>
+<!-- 새순 -->
+<circle cx="253" cy="214" r="12" fill="#A9D69C"/>
 </svg>
