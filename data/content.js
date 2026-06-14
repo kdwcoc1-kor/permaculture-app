@@ -20,6 +20,14 @@ const VIDEOS = [
     type: "shorts"
   },
   {
+    videoId: "M0oP7eYfQNM",
+    title: "퍼머컬처ON 영상", // ← 실제 영상 제목으로 수정해주세요
+    desc: "",                  // ← 한 줄 설명을 넣어주세요 (비워둬도 됩니다)
+    principle: 0,              // ← 해당하는 12원리 번호 (없으면 0)
+    date: "2026-06-14",
+    type: "video"
+  },
+  {
     videoId: "g4hBvv9PTqM",
     title: "퍼머컬처ON 영상", // ← 실제 영상 제목으로 수정해주세요
     desc: "",                  // ← 한 줄 설명을 넣어주세요 (비워둬도 됩니다)
