@@ -352,7 +352,7 @@ nav.tabs{
   box-shadow:0 -5px 18px rgba(58,51,39,.22), inset 0 1px 0 rgba(255,255,255,.45);
   padding-bottom:env(safe-area-inset-bottom);
 }
-nav.tabs .inner{max-width:540px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
+nav.tabs .inner{max-width:540px;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr)}
 nav.tabs button{
   border:0;background:none;padding:11px 0 9px;cursor:pointer;position:relative;
   display:flex;flex-direction:column;align-items:center;gap:3px;
@@ -376,108 +376,294 @@ nav.tabs button.on::after{
 @keyframes seedpop{from{transform:scale(0)}to{transform:scale(1)}}
 nav.tabs button:focus-visible{outline:2px solid var(--sun);outline-offset:-2px}
 
-/* ════ 🏡 텃밭 설계 시뮬레이터 ═════════ */
-.gd-row{display:flex;gap:10px;align-items:center;margin-bottom:9px}
-.gd-row label{flex:1;font-size:.85rem;color:var(--muted);font-weight:600}
-.gd-row input{
-  width:88px;padding:10px;border:1px solid #D7D0B6;border-radius:12px;text-align:center;
-  font-family:var(--body);font-size:1rem;color:var(--bark);
-  background:linear-gradient(180deg,#FFFDF4,#F4F0DF);
-  box-shadow:inset 0 1px 3px rgba(58,51,39,.1);
-}
-button.gd-main{
-  width:100%;padding:13px;border:1px solid #234630;border-radius:13px;cursor:pointer;
-  background:linear-gradient(180deg,#3C6F4C,#2A5238);color:#FDF9EA;
-  font-family:var(--body);font-size:.92rem;font-weight:700;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.18), 0 3px 7px rgba(38,73,47,.32);
-}
-button.gd-main:active{transform:translateY(1px)}
-.gd-note{font-size:.78rem;color:var(--muted);margin-top:10px;line-height:1.5}
-.gd-note b{color:var(--soil)}
-
-/* 밭 격자 — 진짜 흙 이랑 */
-.gd-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
-.gd-head .gd-dim{font-family:var(--display);font-size:1.05rem;font-weight:700;color:var(--moss)}
-.gd-compass{font-size:.7rem;color:#7A5410;background:linear-gradient(180deg,#FBF0D8,#F6E8C8);
-  border:1px solid #EBD9AC;padding:4px 11px;border-radius:999px;font-weight:600}
-.gd-wrap{overflow:auto;border-radius:14px}
-.gd-grid{
-  display:grid;gap:3px;width:max-content;margin:0 auto;padding:8px;border-radius:14px;
-  background:url("textures/soil.png") #7A6244;background-size:130px;
-  box-shadow:inset 0 2px 8px rgba(0,0,0,.35);touch-action:pan-y;
-}
-.gd-cell{
-  width:var(--cs,40px);height:var(--cs,40px);border-radius:7px;position:relative;
-  display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;
-  font-size:calc(var(--cs,40px)*.58);
-  background:radial-gradient(circle at 32% 28%, rgba(255,255,255,.10), transparent 62%), #A08258;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.14), inset 0 -2px 4px rgba(0,0,0,.18);
-  transition:box-shadow .15s;
-}
-.gd-cell span{display:block;transition:transform .35s cubic-bezier(.34,1.4,.5,1)}
-.gd-cell b{position:absolute;bottom:1px;right:3px;font-size:.55rem;line-height:1}
-.gd-cell.good{box-shadow:inset 0 0 0 2.5px var(--leaf), inset 0 -2px 4px rgba(0,0,0,.18)}
-.gd-cell.bad{box-shadow:inset 0 0 0 2.5px var(--danger), inset 0 -2px 4px rgba(0,0,0,.18);animation:gd-warn 1.3s ease-in-out infinite}
-@keyframes gd-warn{50%{box-shadow:inset 0 0 0 4px var(--danger), inset 0 -2px 4px rgba(0,0,0,.18)}}
-.gd-cell.shade::after{
-  content:"";position:absolute;inset:0;border-radius:7px;pointer-events:none;
-  background:repeating-linear-gradient(45deg,rgba(30,40,60,.3) 0 4px,transparent 4px 8px);
-}
-.gd-legend{display:flex;flex-wrap:wrap;gap:11px;margin-top:11px;font-size:.72rem;color:var(--muted)}
-.gd-legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:4px;vertical-align:-1px}
-
-/* 점수판 */
-.gd-score{
-  text-align:center;padding:14px;border-radius:15px;margin-bottom:13px;
-  background:linear-gradient(168deg,#3B6E4E 0%, var(--moss) 55%, #224229 100%);
-  color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.14), 0 6px 16px -6px rgba(38,73,47,.45);
-}
-.gd-score .n{font-family:var(--display);font-size:2.4rem;font-weight:700;line-height:1.1}
-.gd-score .l{font-size:.75rem;color:#AECBB4;font-weight:600}
-.gd-meter{margin-bottom:11px}
-.gd-meter .t{display:flex;justify-content:space-between;font-size:.79rem;margin-bottom:4px;font-weight:600}
-.gd-meter .bar{height:9px;background:#E7E1CB;border-radius:99px;overflow:hidden;box-shadow:inset 0 1px 3px rgba(58,51,39,.16)}
-.gd-meter .fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#5B9A68,#3C6F4C);transition:width .45s ease}
-.gd-meter.honey .fill{background:linear-gradient(90deg,#EBAE45,#CE8B22)}
-.gd-meter.sky .fill{background:linear-gradient(90deg,#7BA9CE,#4E7DA5)}
-.gd-meter.plum .fill{background:linear-gradient(90deg,#A585C4,#7B5C9B)}
-.gd-alert{font-size:.8rem;padding:9px 12px;border-radius:12px;margin-top:8px;line-height:1.5}
-.gd-alert.bad{background:var(--danger-soft);color:#8A3A2C;border-left:3px solid var(--danger)}
-.gd-alert.good{background:var(--leaf-soft);color:var(--moss);border-left:3px solid var(--leaf)}
-.gd-alert.info{background:var(--sun-soft);color:#7A5410;border-left:3px solid var(--sun)}
-.gd-check{list-style:none;margin-top:2px}
-.gd-check li{font-size:.82rem;padding:5px 0;color:var(--muted)}
-.gd-check li.ok{color:var(--bark)}
-
-/* 자동 디자인 */
-.gd-tpl{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.gd-tpl-btn{
-  border:1px solid #D7D0B6;border-radius:13px;padding:12px 6px;cursor:pointer;
-  background:linear-gradient(180deg,#FFFDF4,#F2EEDC);color:var(--bark);
-  font-family:var(--body);font-size:.82rem;font-weight:700;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.9), 0 2px 4px rgba(58,51,39,.12);
-}
-.gd-tpl-btn:active{transform:translateY(1px)}
-.gd-tpl-btn .em{display:block;font-size:1.3rem;margin-bottom:2px}
-
-/* 성장 시뮬레이션 */
-.gd-time{display:flex;align-items:center;gap:10px;margin:4px 0 12px}
-.gd-time input[type=range]{flex:1;accent-color:var(--moss);height:28px}
-.gd-time .mv{font-family:var(--display);font-size:1.15rem;font-weight:700;color:var(--moss);min-width:44px;text-align:center}
-button.gd-play{
-  border:1px solid #D7D0B6;border-radius:12px;padding:9px 13px;cursor:pointer;white-space:nowrap;
-  background:linear-gradient(180deg,#FFFDF4,#F2EEDC);color:var(--moss);
-  font-family:var(--body);font-size:.8rem;font-weight:700;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.9), 0 2px 4px rgba(58,51,39,.12);
-}
-.gd-pal{padding-bottom:4px}
-.gd-pal .chip{font-size:.82rem}
-
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
   .sprout .stem{stroke-dashoffset:0}
   .sprout .lf{transform:scale(1)}
 }
+
+
+/* ===== 텃밭 디자인 탭 ===== */
+/* ============================================================
+   퍼머컬처ON — 텃밭 디자인 탭 전용 스타일 (#view-garden 스코프)
+   ============================================================ */
+#view-garden{ --gd-green:var(--moss); --gd-green2:var(--leaf); --gd-gold:var(--sun);
+  --gd-good:#3f8a52; --gd-bad:var(--danger); --gd-warn:#d9912b;
+  --gd-card:#FCFAF1; --gd-bd:#E2DCC4; }
+
+#view-garden .gd-steps{display:flex;gap:6px;margin:12px 0 18px}
+#view-garden .gd-steps .dot{flex:1;height:5px;border-radius:3px;background:#dcd3bd;transition:.3s}
+#view-garden .gd-steps .dot.on{background:var(--gd-green)}
+#view-garden .gd-steps .dot.done{background:var(--gd-green2)}
+
+#view-garden .gd-panel{display:none}
+#view-garden .gd-panel.show{display:block;animation:gd-rise .35s ease both}
+@keyframes gd-rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+#view-garden .gd-step-label{font-size:12px;font-weight:800;letter-spacing:.1em;color:var(--soil);text-transform:uppercase}
+#view-garden .gd-h2{font-family:var(--display);margin:.2em 0 .4em;font-size:1.2rem;font-weight:700;color:var(--moss)}
+#view-garden .gd-hint{font-size:.84rem;color:var(--muted);margin:0 0 14px}
+
+#view-garden .tech-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+#view-garden .tech-card{background:url("textures/paper.png") var(--gd-card);background-size:256px;
+  border:2px solid var(--gd-bd);border-radius:var(--radius);padding:14px 13px;cursor:pointer;text-align:left;
+  transition:.18s;box-shadow:inset 0 1px 0 rgba(255,255,255,.85),0 6px 16px -8px rgba(58,51,39,.22)}
+#view-garden .tech-card:hover{border-color:var(--gd-green2)}
+#view-garden .tech-card.sel{border-color:var(--gd-green);background:var(--leaf-soft)}
+#view-garden .tech-card .te{font-size:26px;line-height:1}
+#view-garden .tech-card .tt{font-weight:800;font-size:15px;margin-top:6px;color:var(--bark)}
+#view-garden .tech-card .tg{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.4}
+#view-garden .tech-card.full{grid-column:1 / -1}
+#view-garden .tech-detail{display:none;background:var(--leaf-soft);border:1px solid #cfe0cf;border-radius:var(--radius);
+  padding:14px 15px;margin-bottom:6px;animation:gd-rise .3s ease both}
+#view-garden .tech-detail.show{display:block}
+#view-garden .tech-detail .dh{font-weight:800;font-size:15px;color:var(--moss);margin-bottom:4px}
+#view-garden .tech-detail .db{font-size:13.5px;color:#3f4a40;margin-bottom:10px}
+#view-garden .tech-detail .zone{display:flex;gap:8px;font-size:12.5px;margin:5px 0;color:#465248}
+#view-garden .tech-detail .zk{font-weight:800;color:var(--soil);flex:0 0 auto}
+
+#view-garden .size-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+#view-garden .size-card{background:var(--gd-card);border:2px solid var(--gd-bd);border-radius:var(--radius);
+  padding:14px;cursor:pointer;text-align:left;transition:.18s;box-shadow:0 4px 12px -8px rgba(58,51,39,.3)}
+#view-garden .size-card:hover{border-color:var(--gd-green2)}
+#view-garden .size-card.sel{border-color:var(--gd-green);background:var(--leaf-soft)}
+#view-garden .size-card .ico{font-size:22px}
+#view-garden .size-card .ttl{font-weight:800;font-size:15px}
+#view-garden .size-card .dim{font-size:12.5px;color:var(--muted);margin-top:3px}
+#view-garden .gd-custom{display:flex;gap:8px;align-items:flex-end;background:var(--gd-card);border:2px solid var(--gd-bd);
+  border-radius:var(--radius);padding:12px 14px}
+#view-garden .gd-custom label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-weight:700}
+#view-garden .gd-custom input{width:64px;padding:7px 8px;border:1.5px solid #d8cdb3;border-radius:8px;font-size:15px;
+  text-align:center;font-weight:700;color:var(--bark);background:#fff}
+#view-garden .gd-custom .x{padding-bottom:7px;color:#9a9}
+
+#view-garden .sun-row{display:flex;gap:8px;margin:14px 0 4px;flex-wrap:wrap}
+#view-garden .sun-row .chip{border:1.5px solid #d8cdb3;background:var(--gd-card);border-radius:999px;
+  padding:7px 13px;font-size:13px;font-weight:700;cursor:pointer;transition:.15s;color:var(--muted);
+  box-shadow:none}
+#view-garden .sun-row .chip.sel{background:var(--gd-gold);border-color:var(--gd-gold);color:#3a2c12}
+
+#view-garden .mat-block{display:none;margin-top:18px}
+#view-garden .mat-block.show{display:block;animation:gd-rise .3s ease both}
+#view-garden .mat-head{font-size:15px;font-weight:800;color:var(--bark);margin-bottom:2px}
+#view-garden .mat-grid{display:flex;gap:8px;overflow-x:auto;padding:0 4px 4px;scrollbar-width:none;margin:0 -4px}
+#view-garden .mat-grid::-webkit-scrollbar{display:none}
+#view-garden .mat-card{flex:0 0 auto;width:96px;background:var(--gd-card);border:2px solid var(--gd-bd);
+  border-radius:12px;padding:11px 8px;cursor:pointer;text-align:center;transition:.15s;position:relative}
+#view-garden .mat-card:hover{border-color:var(--gd-green2)}
+#view-garden .mat-card.sel{border-color:var(--gd-green);background:var(--leaf-soft)}
+#view-garden .mat-card .me{font-size:24px;line-height:1}
+#view-garden .mat-card .mn{font-size:12px;font-weight:800;margin-top:5px}
+#view-garden .mat-card .pick{position:absolute;top:-7px;right:-4px;background:var(--gd-gold);color:#3a2c12;
+  font-size:9px;font-weight:800;padding:2px 6px;border-radius:7px;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+#view-garden .mat-detail{display:none;background:#faf6ea;border:1.5px solid var(--gd-bd);border-radius:12px;
+  padding:12px 14px;margin-top:12px}
+#view-garden .mat-detail.show{display:block}
+#view-garden .mat-detail .mt{font-weight:800;font-size:14px;margin-bottom:8px}
+#view-garden .mat-bars{display:grid;grid-template-columns:auto 1fr;gap:5px 10px;font-size:12px;align-items:center;margin-bottom:9px}
+#view-garden .mat-bars .bk{color:var(--muted);font-weight:700}
+#view-garden .mat-bars .bar{display:flex;gap:3px}
+#view-garden .mat-bars .pip{display:inline-block;width:14px;height:7px;border-radius:2px;background:#e0d8c4}
+#view-garden .mat-bars .pip.on{background:var(--gd-green)}
+#view-garden .mat-bars .pip.cost.on{background:var(--gd-gold)}
+#view-garden .mat-bars .pip.effort.on{background:#c8835a}
+#view-garden .mat-pc{font-size:12.5px;margin:3px 0;color:#465248}
+#view-garden .mat-pc .ok{color:var(--gd-good);font-weight:800}
+#view-garden .mat-pc .no{color:var(--gd-bad);font-weight:800}
+#view-garden .mat-tip{font-size:12.5px;color:#3f4a40;margin-top:8px;padding-top:8px;border-top:1px dashed #d8cdb3}
+
+#view-garden .cat-tabs{display:flex;gap:6px;overflow-x:auto;margin:0 -2px 12px;padding:0 2px 2px;scrollbar-width:none}
+#view-garden .cat-tabs::-webkit-scrollbar{display:none}
+#view-garden .cat-tab{white-space:nowrap;border:none;background:#e7decb;color:#6b6450;border-radius:999px;
+  padding:7px 14px;font-size:13px;font-weight:800;cursor:pointer}
+#view-garden .cat-tab.sel{background:var(--gd-green);color:#fff}
+#view-garden .plant-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+#view-garden .plant{position:relative;background:var(--gd-card);border:2px solid var(--gd-bd);border-radius:12px;
+  padding:12px 6px 9px;text-align:center;cursor:pointer;transition:.15s}
+#view-garden .plant:hover{border-color:var(--gd-green2)}
+#view-garden .plant.sel{border-color:var(--gd-green);background:var(--leaf-soft)}
+#view-garden .plant.rec{border-color:#cfe0cf}
+#view-garden .plant .e{font-size:26px;line-height:1}
+#view-garden .plant .n{font-size:12.5px;font-weight:700;margin-top:4px}
+#view-garden .plant.sel::after{content:"✓";position:absolute;top:5px;right:7px;color:var(--gd-green);font-weight:900;font-size:13px}
+#view-garden .plant .rectag{position:absolute;top:5px;left:6px;background:var(--gd-green);color:#fff;
+  font-size:9px;font-weight:800;padding:1px 5px;border-radius:6px}
+#view-garden .gd-basket{position:sticky;bottom:calc(80px + env(safe-area-inset-bottom));margin-top:14px;
+  background:#fffdf6ee;backdrop-filter:blur(6px);border-top:2px solid var(--gd-bd);padding:10px 2px;
+  font-size:13px;color:var(--muted)}
+#view-garden .gd-basket b{color:var(--gd-green)}
+
+#view-garden .three-wrap{margin-bottom:16px}
+#view-garden .three-stage{width:100%;height:240px;perspective:760px;
+  background:radial-gradient(ellipse at 50% 40%, #f7f1e2, #e9dec6);
+  border:2px solid var(--gd-bd);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;
+  overflow:hidden;touch-action:none;cursor:grab;box-shadow:0 6px 16px -8px rgba(58,51,39,.25)}
+#view-garden .three-stage:active{cursor:grabbing}
+#view-garden .three-scene{transform-style:preserve-3d;position:relative;width:1px;height:1px}
+#view-garden .three-cap{text-align:center;font-size:12px;color:#8a8a78;margin-top:7px}
+
+#view-garden .bed-wrap{background:var(--gd-card);border:2px solid var(--gd-bd);border-radius:var(--radius);
+  padding:14px;margin-bottom:16px;box-shadow:0 6px 16px -8px rgba(58,51,39,.22)}
+#view-garden .bed-meta{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;color:var(--muted);margin-bottom:10px}
+#view-garden .compass{font-weight:800;color:var(--soil)}
+#view-garden #gdBed{width:100%;height:auto;border-radius:10px;display:block;background:#efe6d0}
+
+#view-garden .gd-report h3{font-size:13px;font-weight:800;letter-spacing:.04em;color:var(--soil);
+  margin:18px 0 8px;text-transform:uppercase}
+#view-garden .note{display:flex;gap:9px;align-items:flex-start;background:var(--gd-card);border:1.5px solid var(--gd-bd);
+  border-left-width:5px;border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:13.5px}
+#view-garden .note.good{border-left-color:var(--gd-good)}
+#view-garden .note.bad{border-left-color:var(--gd-bad)}
+#view-garden .note.warn{border-left-color:var(--gd-warn)}
+#view-garden .note.info{border-left-color:#8a93a0}
+#view-garden .note .ic{font-size:16px;line-height:1.4}
+#view-garden .note b{font-weight:800}
+
+#view-garden .gd-bar{position:fixed;left:0;right:0;bottom:calc(72px + env(safe-area-inset-bottom));z-index:45;
+  max-width:540px;margin:0 auto;display:flex;gap:10px;padding:12px 16px;
+  background:linear-gradient(transparent, #EBE7D2 35%)}
+#view-garden .gd-btn{flex:1;border:none;border-radius:12px;padding:15px;font-size:16px;font-weight:800;
+  cursor:pointer;font-family:var(--body);transition:.15s}
+#view-garden .gd-btn.primary{background:var(--moss);color:#fff;box-shadow:0 4px 0 var(--moss-deep)}
+#view-garden .gd-btn.primary:active{transform:translateY(2px);box-shadow:0 2px 0 var(--moss-deep)}
+#view-garden .gd-btn.primary:disabled{background:#bcc4ba;box-shadow:0 4px 0 #9aa39a;cursor:not-allowed}
+#view-garden .gd-btn.ghost{flex:0 0 auto;background:transparent;color:var(--muted);border:1.5px solid #cdc3aa}
+
+#view-garden.active{padding-bottom:96px}
+
+@media (prefers-reduced-motion:reduce){
+  #view-garden .three-scene{animation:none !important}
+}
+
+/* ── v2 정밀화 ── */
+#view-garden #gdBedHost svg{width:100%;height:auto;border-radius:12px;display:block;
+  background:linear-gradient(180deg,#f2ead6,#e9dec6)}
+#view-garden .three-stage{height:260px;
+  background:linear-gradient(180deg,#f3ecd9 0%, #ece1c8 55%, #e2d4b6 100%)}
+#view-garden .bed-wrap{padding:12px}
+#view-garden .bed-meta{font-weight:700}
+
+/* ── 프리미엄 목업 UI ── */
+#view-garden .gd-mybtn{display:inline-flex;align-items:center;gap:6px;border:1.5px solid #cdc3aa;background:#FCFAF1;
+  color:#2f4030;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;margin:-4px 0 14px}
+#view-garden .gd-mybtn b{background:var(--moss);color:#fff;border-radius:999px;min-width:18px;height:18px;display:inline-flex;
+  align-items:center;justify-content:center;font-size:11px;padding:0 5px}
+#view-garden .gd-actions{display:flex;gap:8px;margin:2px 0 14px}
+#view-garden .gd-actions button{flex:1;border:1.5px solid #cdc3aa;background:#FCFAF1;color:#2f4030;border-radius:11px;
+  padding:10px 4px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;transition:.15s}
+#view-garden .gd-actions button:active{transform:translateY(1px)}
+#view-garden .gd-actions button.on{background:var(--moss);border-color:var(--moss);color:#fff}
+.gd-mycard{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#fff;
+  border:1.5px solid #E2DCC4;border-radius:12px;padding:12px 14px;margin-top:9px}
+.gd-myname{font-weight:800;font-size:14px;color:#2f4030}
+.gd-myinfo{font-size:12px;color:#7a8378;margin-top:2px}
+.gd-myacts{display:flex;gap:6px;flex:0 0 auto}
+.gd-myacts button{border:1.5px solid var(--moss);background:var(--moss);color:#fff;border-radius:9px;
+  padding:8px 11px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit}
+.gd-myacts button.del{background:#fff;color:#c8503a;border-color:#e0c4bc}
+
+/* ── v3 멀티 요소 ── */
+#view-garden .tech-card{position:relative}
+#view-garden .tech-card.off{opacity:.55;cursor:not-allowed}
+#view-garden .tech-card .cntb{position:absolute;top:8px;right:10px;background:var(--gd-green);color:#fff;font-size:11px;font-weight:800;min-width:20px;height:20px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;padding:0 6px}
+#view-garden .gd-placedhead{font-size:13px;font-weight:800;color:var(--soil);margin:14px 0 6px}
+#view-garden .gd-echip{display:flex;align-items:center;gap:8px;background:var(--gd-card);border:1.5px solid var(--gd-bd);border-radius:11px;padding:9px 11px;margin-bottom:7px;font-size:13.5px}
+#view-garden .gd-echip .ee{font-size:18px}
+#view-garden .gd-echip .esz{margin-left:auto;color:var(--muted);font-size:12.5px;display:flex;align-items:center;gap:2px}
+#view-garden .gd-echip .edel{border:none;background:#f3e6e2;color:#c8503a;border-radius:8px;width:26px;height:26px;font-weight:800;cursor:pointer;flex:0 0 auto}
+#view-garden .szbtn{border:1px solid #cdc3aa;background:#fff;border-radius:6px;width:20px;height:20px;font-size:12px;font-weight:800;color:var(--gd-green);cursor:pointer;padding:0;line-height:1}
+#view-garden .gd-prevwrap{margin-top:14px;background:var(--gd-card);border:2px solid var(--gd-bd);border-radius:var(--radius);padding:10px 12px}
+#view-garden .gd-prevhead{font-size:12px;font-weight:800;color:var(--soil);margin-bottom:6px}
+#view-garden #gdPlotPrev svg{width:100%;height:auto;display:block}
+#view-garden .gd-explain{background:#fbf7ec;border:1.5px solid var(--gd-bd);border-left:5px solid var(--gd-gold);border-radius:12px;padding:13px 15px;margin:10px 0 14px;font-size:13.5px;line-height:1.6}
+#view-garden .gd-explain .xh{font-weight:800;color:#2f4030;margin-bottom:6px;font-size:14px}
+#view-garden .gd-explain .xo{color:#3f4a40;margin-bottom:8px}
+#view-garden .gd-explain .xs{font-weight:700;color:var(--soil);margin-bottom:6px;font-size:12.5px}
+#view-garden .gd-explain ul{margin:0 0 8px;padding-left:18px}
+#view-garden .gd-explain li{margin:4px 0;color:#3a4438}
+#view-garden .gd-explain .xc{font-size:12.5px;color:#8a5a2a;border-top:1px dashed #d8cdb3;padding-top:7px}
+
+/* ===== 커뮤니티 게시판 (#view-board 스코프) ===== */
+#view-board{position:relative}
+#view-board .bd-head{display:flex;align-items:center;gap:8px}
+#view-board .bd-mock{font-size:9.5px;font-weight:800;letter-spacing:.05em;color:#a9855e;border:1px solid #d8c9a8;border-radius:6px;padding:2px 6px;background:#faf3e0}
+#view-board .bd-cats{display:flex;gap:6px;overflow-x:auto;margin:12px -2px;padding:0 2px 2px;scrollbar-width:none}
+#view-board .bd-cats::-webkit-scrollbar{display:none}
+#view-board .bd-cat{white-space:nowrap;border:none;background:#e7decb;color:#6b6450;border-radius:999px;padding:7px 13px;font-size:13px;font-weight:800;cursor:pointer}
+#view-board .bd-cat.sel{background:var(--moss);color:#fff}
+#view-board .bd-card{background:#FCFAF1;border:2px solid #E2DCC4;border-radius:14px;padding:13px 14px 11px;margin-bottom:10px;cursor:pointer;
+  box-shadow:0 5px 14px -9px rgba(58,51,39,.3)}
+#view-board .bd-top{display:flex;align-items:center;gap:8px}
+#view-board .bd-ava{width:32px;height:32px;border-radius:50%;background:#EFE8D2;display:flex;align-items:center;justify-content:center;font-size:17px}
+#view-board .bd-name{font-weight:800;font-size:13.5px;color:#2f4030}
+#view-board .bd-badge{font-size:10px;color:#2E5339}
+#view-board .bd-time{font-size:11px;color:#a9a390;margin-left:auto}
+#view-board .bd-cattag{font-size:10px;font-weight:800;color:#a9855e;background:#faf3e0;border-radius:6px;padding:2px 6px}
+#view-board .bd-text{font-size:14px;color:#3a3327;line-height:1.55;margin:8px 0}
+#view-board .bd-img{border-radius:11px;overflow:hidden;border:1.5px solid #E2DCC4;margin:4px 0 8px}
+#view-board .bd-img svg{display:block;width:100%;height:auto}
+#view-board .bd-meta{display:flex;gap:14px;font-size:12.5px;color:#7a8378;font-weight:700}
+#view-board .bd-meta .lk.on{color:#c8503a}
+#view-board .bd-fab{position:fixed;right:calc(50% - 250px);bottom:calc(96px + env(safe-area-inset-bottom));z-index:60;
+  width:52px;height:52px;border-radius:50%;border:none;background:var(--moss);color:#fff;font-size:20px;cursor:pointer;
+  box-shadow:0 6px 16px rgba(31,58,39,.45)}
+@media (max-width:540px){#view-board .bd-fab{right:18px}}
+/* 상세/쓰기 시트 */
+#view-board .bd-detail,#view-board .bd-write{display:none;position:fixed;inset:0;z-index:120;background:#F4EFE0;overflow-y:auto}
+#view-board .bd-detail.show,#view-board .bd-write.show{display:block}
+#view-board .bd-dbar{position:sticky;top:0;background:#F4EFE0ee;backdrop-filter:blur(6px);display:flex;align-items:center;gap:10px;
+  padding:14px 16px;border-bottom:1.5px solid #E2DCC4;font-size:14px;z-index:2}
+#view-board .bd-dbar button{border:none;background:none;font-size:14.5px;font-weight:800;color:var(--moss);cursor:pointer;font-family:inherit;padding:0}
+#view-board .bd-dbar b{color:#2f4030}
+#view-board .bd-dbody{max-width:540px;margin:0 auto;padding:16px 16px 90px}
+#view-board .bd-cbox{margin-top:16px;border-top:1.5px dashed #d8cdb3;padding-top:12px}
+#view-board .bd-cmt{display:flex;gap:9px;padding:8px 0}
+#view-board .bd-cmt .bd-ava{width:28px;height:28px;font-size:14px;flex:0 0 auto}
+#view-board .bd-cmt .c-name{font-size:12.5px;font-weight:800;color:#2f4030}
+#view-board .bd-cmt .c-text{font-size:13.5px;color:#3a3327;line-height:1.5}
+#view-board .bd-cinput{position:fixed;left:0;right:0;bottom:0;background:#FCFAF1;border-top:2px solid #E2DCC4;
+  display:flex;gap:8px;padding:10px 14px calc(12px + env(safe-area-inset-bottom));max-width:540px;margin:0 auto;z-index:3}
+#view-board .bd-cinput input{flex:1;border:1.5px solid #d8cdb3;border-radius:999px;padding:10px 14px;font-size:14px;font-family:inherit;background:#fff}
+#view-board .bd-cinput button{border:none;background:var(--moss);color:#fff;border-radius:999px;padding:0 16px;font-weight:800;cursor:pointer;font-family:inherit}
+/* 글쓰기 */
+#view-board .bd-wbody{max-width:540px;margin:0 auto;padding:16px}
+#view-board .bd-wcats{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+#view-board .bd-wcats .bd-cat{background:#fff;border:1.5px solid #d8cdb3;color:#6b6450}
+#view-board .bd-wcats .bd-cat.sel{background:var(--moss);border-color:var(--moss);color:#fff}
+#view-board textarea{width:100%;min-height:120px;border:2px solid #E2DCC4;border-radius:12px;padding:12px;font-size:14.5px;font-family:inherit;background:#fff;resize:vertical;box-sizing:border-box}
+#view-board .bd-photo{margin-top:10px;border:1.5px dashed #cdc3aa;background:#faf6ea;color:#7a8378;border-radius:11px;padding:12px;width:100%;font-weight:800;font-size:13.5px;cursor:pointer;font-family:inherit}
+#view-board #bdWpreview .bd-img{margin-top:10px}
+#view-board .bd-submit{margin-top:14px;width:100%;border:none;background:var(--moss);color:#fff;border-radius:12px;padding:15px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 0 #1f3a27}
+
+/* ===== 목업 공용 UI ===== */
+.mk-toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(8px);
+  background:#2f4030;color:#fff;font-size:13.5px;font-weight:700;padding:10px 16px;border-radius:999px;
+  opacity:0;pointer-events:none;transition:.25s;z-index:200;box-shadow:0 6px 18px rgba(0,0,0,.3);max-width:86vw;text-align:center}
+.mk-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.mk-dim{position:fixed;inset:0;background:rgba(40,34,22,.45);z-index:150;display:flex;align-items:center;justify-content:center;padding:20px}
+.mk-dim.bottom{align-items:flex-end;padding:0}
+.mk-modal{background:#FCFAF1;border-radius:18px;max-width:420px;width:100%;padding:20px 18px 14px;box-shadow:0 20px 50px rgba(0,0,0,.35)}
+.mk-mtitle{font-weight:800;font-size:17px;color:#2f4030;margin-bottom:10px}
+.mk-mbody{font-size:14px;color:#3f4a40;line-height:1.55}
+.mk-mbtns{display:flex;gap:8px;margin-top:16px}
+.mk-btn{flex:1;border:1.5px solid #cdc3aa;background:#fff;border-radius:11px;padding:12px;font-size:15px;font-weight:800;color:#6b7468;cursor:pointer;font-family:inherit}
+.mk-btn.primary{background:#2E5339;border-color:#2E5339;color:#fff;box-shadow:0 3px 0 #1f3a27}
+.mk-sheet{background:#FCFAF1;border-radius:20px 20px 0 0;width:100%;max-width:540px;margin:0 auto;padding:10px 20px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -10px 40px rgba(0,0,0,.3)}
+.mk-shandle{width:40px;height:4px;border-radius:2px;background:#d8cdb3;margin:6px auto 14px}
+.mk-stitle{font-weight:800;font-size:17px;color:#2f4030;text-align:center}
+.mk-ssub{font-size:13px;color:#7a8378;text-align:center;margin:6px 0 16px}
+.mk-kakao{width:100%;border:none;background:#FEE500;color:#191600;font-weight:800;font-size:15.5px;padding:14px;border-radius:12px;cursor:pointer;font-family:inherit}
+.mk-later{width:100%;border:none;background:transparent;color:#8a8a78;font-weight:700;font-size:13.5px;padding:12px;cursor:pointer;font-family:inherit}
+.mk-fine{font-size:11px;color:#a9a390;text-align:center;margin-top:2px}
+/* 프리미엄 가격 카드 */
+.mk-plans{display:flex;gap:8px;margin:12px 0 4px}
+.mk-plan{flex:1;border:2px solid #E2DCC4;border-radius:12px;padding:10px;text-align:center;cursor:pointer;background:#fff}
+.mk-plan.sel{border-color:#2E5339;background:#f1f7ef}
+.mk-plan .pl-name{font-size:12px;font-weight:800;color:#7a8378}
+.mk-plan .pl-price{font-size:16px;font-weight:900;color:#2f4030;margin-top:2px}
+.mk-plan .pl-sub{font-size:10.5px;color:#a9855e;font-weight:700}
+.mk-bene{margin:8px 0 0;padding:0;list-style:none}
+.mk-bene li{font-size:13px;color:#3f4a40;padding:4px 0;display:flex;gap:7px}
+
 </style>
 </head>
 <body>
@@ -553,100 +739,134 @@ button.gd-play{
     <div id="farm-list"></div>
   </section>
 
-  <!-- 🏡 텃밭 설계 -->
-  <section id="view-design" class="view">
-    <h2 class="sec">텃밭 설계</h2>
-    <p class="sec-desc">크기를 정하고 작물을 심으면 동반작물 효과를 바로 알려드려요</p>
-
-    <!-- 밭 -->
-    <div class="card">
-      <div class="gd-head">
-        <span class="gd-dim" id="gd-dim">나의 밭</span>
-        <span class="gd-compass">⬆️ 북쪽 · 해는 남쪽(아래)에서</span>
-      </div>
-      <div class="gd-wrap" id="gd-wrap"><div class="gd-grid" id="gd-grid"></div></div>
-      <div class="gd-legend">
-        <span><i style="background:var(--leaf)"></i>시너지(동반효과)</span>
-        <span><i style="background:var(--danger)"></i>상극 조합</span>
-        <span><i style="background:repeating-linear-gradient(45deg,#5A6A85 0 3px,#CBD2DE 3px 6px)"></i>그늘짐</span>
-      </div>
-    </div>
-
-    <!-- 작물 심기 -->
-    <div class="card">
-      <h3>🥬 작물 심기</h3>
-      <div class="meta">작물을 고른 뒤 밭을 눌러 심고, 지우개로 지워요</div>
-      <div class="chips" id="gd-cat" style="padding-bottom:8px;margin-top:9px">
-        <button class="chip on" data-cat="채소">채소</button>
-        <button class="chip" data-cat="허브">허브</button>
-        <button class="chip" data-cat="꽃">꽃</button>
-      </div>
-      <div class="chips gd-pal" id="gd-pal"></div>
-    </div>
-
-    <!-- 분석 -->
-    <div class="card">
-      <h3>📊 텃밭 종합 분석</h3>
-      <div class="gd-score" style="margin-top:11px">
-        <div class="n"><span id="gd-total">–</span> <span id="gd-grade" style="font-size:1rem"></span></div>
-        <div class="l">종합 점수</div>
-      </div>
-      <div class="gd-meter"><div class="t"><span>🐞 해충 방제</span><b id="gd-v-pest">0</b></div><div class="bar"><div class="fill" id="gd-m-pest"></div></div></div>
-      <div class="gd-meter honey"><div class="t"><span>🐝 수분(꽃가루받이)</span><b id="gd-v-poll">0</b></div><div class="bar"><div class="fill" id="gd-m-poll"></div></div></div>
-      <div class="gd-meter sky"><div class="t"><span>🌈 생물 다양성</span><b id="gd-v-div">0</b></div><div class="bar"><div class="fill" id="gd-m-div"></div></div></div>
-      <div class="gd-meter plum"><div class="t"><span>🧺 예상 수확 지수</span><b id="gd-v-yield">0</b></div><div class="bar"><div class="fill" id="gd-m-yield"></div></div></div>
-      <div id="gd-alerts"></div>
-    </div>
-
-    <!-- 성장 시뮬레이션 -->
-    <div class="card">
-      <h3>📅 성장 시뮬레이션</h3>
-      <div class="gd-time">
-        <button class="gd-play" id="gd-play">▶ 1년 재생</button>
-        <input type="range" id="gd-month" min="1" max="12" value="5" aria-label="월 선택">
-        <span class="mv" id="gd-month-val">5월</span>
-      </div>
-      <div class="region-note" id="gd-report" style="margin-top:0"></div>
-    </div>
-
-    <!-- 자동 디자인 -->
-    <div class="card">
-      <h3>🧩 퍼머컬처 자동 디자인</h3>
-      <div class="meta" style="margin-bottom:11px">밭 크기에 맞춰 알아서 배치해요</div>
-      <div class="gd-tpl" id="gd-tpl">
-        <button class="gd-tpl-btn" data-tpl="spiral"><span class="em">🌀</span>허브 나선</button>
-        <button class="gd-tpl-btn" data-tpl="keyhole"><span class="em">🗝️</span>키홀 가든</button>
-        <button class="gd-tpl-btn" data-tpl="sisters"><span class="em">🌽</span>삼자매</button>
-        <button class="gd-tpl-btn" data-tpl="mandala"><span class="em">🌸</span>만다라</button>
-      </div>
-      <select class="region" id="gd-guild" style="margin:11px 0 0" aria-label="길드 조합 선택">
-        <option value="">🍅 도감의 길드 조합으로 자동 배치…</option>
-      </select>
-    </div>
-
-    <!-- 크기 -->
-    <div class="card">
-      <h3>📐 텃밭 크기 <span style="font-weight:400;font-size:.78rem;color:var(--muted)">1칸 = 50cm</span></h3>
-      <div class="gd-row" style="margin-top:11px"><label>가로 (m)</label><input type="number" id="gd-w" min="1" max="10" step="0.5" value="3"></div>
-      <div class="gd-row"><label>세로 (m)</label><input type="number" id="gd-h" min="1" max="10" step="0.5" value="2"></div>
-      <button class="gd-main" id="gd-make">텃밭 만들기 / 초기화</button>
-      <div class="gd-note" id="gd-size-note"></div>
-    </div>
-
-    <!-- 원리 체크 -->
-    <div class="card">
-      <h3>♻️ 퍼머컬처 원리 체크</h3>
-      <ul class="gd-check" id="gd-check"></ul>
-    </div>
-  </section>
-
   <!-- 📅 이벤트 -->
   <section id="view-event" class="view">
     <h2 class="sec">이벤트 소식</h2>
     <p class="sec-desc">워크숍 · 가든투어 · 교육 일정</p>
     <div id="event-list"></div>
   </section>
-</main>
+
+  <!-- 🌿 텃밭 디자인 -->
+  <section id="view-garden" class="view">
+    <h2 class="sec">텃밭 디자인</h2>
+    <p class="sec-desc">퍼머컬처 기법으로 나만의 텃밭을 설계해요</p>
+
+    <div class="gd-steps">
+      <div class="dot on"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    </div>
+
+    <!-- STEP 0 기법 -->
+    <section class="gd-panel show" id="gdP0">
+      <div class="gd-step-label">STEP 2 · 디자인</div>
+      <h3 class="gd-h2">무엇을 배치할까요?</h3>
+      <p class="gd-hint">밭에 넣고 싶은 두둑을 골라 담으세요. 여러 개 조합해도 됩니다.</p>
+      <button class="gd-mybtn" id="gdMyBtn">🌾 내 텃밭 <b id="gdMyCnt">0</b></button>
+      <div class="tech-grid" id="gdTechGrid"></div>
+      <div id="gdPlaced"></div>
+      <div class="gd-prevwrap" id="gdPrevWrap" style="display:none">
+        <div class="gd-prevhead">밭 미리보기 <span id="gdPrevDim"></span></div>
+        <div id="gdPlotPrev"></div>
+      </div>
+      <div class="tech-detail" id="gdTechDetail"></div>
+      <div class="mat-block" id="gdMatBlock">
+        <div class="mat-head">🧱 나선 벽을 무엇으로 쌓을까요?</div>
+        <p class="gd-hint" id="gdMatRec" style="margin:2px 0 10px"></p>
+        <div class="mat-grid" id="gdMatGrid"></div>
+        <div class="mat-detail" id="gdMatDetail"></div>
+      </div>
+
+    </section>
+
+    <!-- STEP 1 밭 -->
+    <section class="gd-panel" id="gdP1b">
+      <div class="gd-step-label">STEP 1 · 밭</div>
+      <h3 class="gd-h2">어떤 밭인가요?</h3>
+      <p class="gd-hint">대략이면 충분해요. 나중에 직접 고칠 수 있어요.</p>
+      <div class="size-grid" id="gdSizeGrid"></div>
+      <div class="gd-custom">
+        <div><label>가로 (m)</label><input id="gdCw" type="number" min="0.3" step="0.1" value="2"></div>
+        <span class="x">×</span>
+        <div><label>세로 (m)</label><input id="gdCh" type="number" min="0.3" step="0.1" value="1.5"></div>
+        <div style="margin-left:auto;font-size:12px;color:var(--muted);padding-bottom:6px">직접 입력</div>
+      </div>
+      <div class="sun-row" id="gdSunRow">
+        <span style="font-size:12px;font-weight:800;color:var(--soil);align-self:center;margin-right:2px">햇빛이 드는 쪽 ☀️</span>
+      </div>
+    </section>
+
+    <!-- STEP 2 작물 -->
+    <section class="gd-panel" id="gdP1">
+      <div class="gd-step-label">STEP 3 · 작물</div>
+      <h3 class="gd-h2">무엇을 키우고 싶나요?</h3>
+      <p class="gd-hint" id="gdPlantHint">2~6가지가 가장 잘 어울려요. 탭으로 종류를 넘겨보세요.</p>
+      <div class="cat-tabs" id="gdCatTabs"></div>
+      <div class="plant-grid" id="gdPlantGrid"></div>
+      <div class="gd-basket" id="gdBasket">아직 고른 작물이 없어요</div>
+    </section>
+
+    <!-- STEP 3 결과 -->
+    <section class="gd-panel" id="gdP2">
+      <div class="gd-step-label">STEP 4 · 배치도</div>
+      <h3 class="gd-h2" id="gdResultTitle">이렇게 심어보세요</h3>
+      <div class="gd-actions">
+        <button id="gdSaveBtn">💾 저장</button>
+        <button id="gdEditBtn">✏️ 편집</button>
+        <button id="gdExportBtn">🖼 내보내기</button>
+      </div>
+      <div class="three-wrap" id="gdThreeWrap">
+        <div class="three-stage" id="gdThreeStage"><div class="three-scene" id="gdThreeScene"></div></div>
+        <div class="three-cap" id="gdThreeCap">손으로 돌려보세요 · 자동 회전 중</div>
+      </div>
+      <div class="bed-wrap">
+        <div class="bed-meta"><span id="gdBedDim">—</span><span class="compass" id="gdBedSun">⬆ 햇빛</span></div>
+        <div id="gdBedHost"><svg id="gdBed" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg"></svg></div>
+      </div>
+      <div class="gd-report" id="gdReport"></div>
+    </section>
+
+    <div class="gd-bar">
+      <button class="gd-btn ghost" id="gdBackBtn" style="display:none">이전</button>
+      <button class="gd-btn primary" id="gdNextBtn">밭 정하기 →</button>
+    </div>
+  </section>
+
+  <!-- 💬 커뮤니티 게시판 (목업) -->
+  <section id="view-board" class="view">
+    <div class="bd-head">
+      <h2 class="sec">커뮤니티</h2>
+      <span class="bd-mock">MOCK · 예시 데이터</span>
+    </div>
+    <p class="sec-desc">고흥에서, 베란다에서 — 서로의 텃밭을 나눠요</p>
+
+    <div class="bd-cats" id="bdCats"></div>
+    <div class="bd-list" id="bdList"></div>
+
+    <button class="bd-fab" id="bdFab" aria-label="글쓰기">✏️</button>
+
+    <!-- 글 상세 -->
+    <div class="bd-detail" id="bdDetail">
+      <div class="bd-dbar"><button id="bdBack">← 목록</button></div>
+      <div class="bd-dbody" id="bdDbody"></div>
+      <div class="bd-cinput">
+        <input id="bdCfield" placeholder="따뜻한 댓글을 남겨주세요" maxlength="200">
+        <button id="bdCsend">등록</button>
+      </div>
+    </div>
+
+    <!-- 글쓰기 -->
+    <div class="bd-write" id="bdWrite">
+      <div class="bd-dbar"><button id="bdWback">← 취소</button><b>새 글 쓰기</b><span></span></div>
+      <div class="bd-wbody">
+        <div class="bd-wcats" id="bdWcats"></div>
+        <textarea id="bdWtext" placeholder="텃밭 이야기를 들려주세요 🌱" maxlength="500"></textarea>
+        <button class="bd-photo" id="bdWphoto">📷 사진 추가 (목업)</button>
+        <div id="bdWpreview"></div>
+        <button class="bd-submit" id="bdWsubmit">올리기</button>
+      </div>
+    </div>
+  </section>
+
+  </main>
 
 <nav class="tabs">
   <div class="inner">
@@ -662,13 +882,17 @@ button.gd-play{
       <svg viewBox="0 0 24 24"><path d="M3.5 11.5L12 4.5l8.5 7"/><path d="M5.5 10.5V19a1 1 0 001 1h11a1 1 0 001-1v-8.5"/><path d="M12 20v-4.5"/><path d="M12 15.5c0-2 1.5-3.5 3.7-3.5 0 2-1.6 3.5-3.7 3.5z"/></svg>
       농가
     </button>
-    <button data-view="design" aria-label="설계">
-      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9.5h18M3 14.5h18M9 4v16M15 4v16"/></svg>
-      설계
-    </button>
     <button data-view="event" aria-label="이벤트">
       <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="4"/><path d="M3 10h18M8 3v4M16 3v4"/><circle cx="12" cy="15" r="2.2"/><path d="M12 12.8v-1M12 18.2v-1M14.2 15h1M8.8 15h1"/></svg>
       이벤트
+    </button>
+    <button data-view="garden" aria-label="텃밭디자인">
+      <svg viewBox="0 0 24 24"><path d="M12 21v-7"/><path d="M12 14c-3.5 0-6-2.5-6-6 3.5 0 6 2.5 6 6z"/><path d="M12 12c0-3 2.2-5.5 5.5-5.5C17.5 9.5 15.3 12 12 12z"/><path d="M5 21h14"/></svg>
+      텃밭
+    </button>
+    <button data-view="board" aria-label="커뮤니티">
+      <svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg>
+      커뮤니티
     </button>
   </div>
 </nav>
@@ -677,7 +901,2565 @@ button.gd-play{
 <script src="data/plantdata.js"></script>
 <script src="data/content.js"></script>
 <script src="app.js"></script>
-<script src="garden.js"></script>
+<script>
+/* ============================================================
+   퍼머컬처ON 목업 공용 — 세션 / 카카오 시트 / 토스트 / 모달
+   (실제 로그인·결제 없음. 화면 결정용 목업)
+   ============================================================ */
+window.Mock = (function(){
+  const session = { user:null, premium:false, gardens:[] };
+
+  function toast(msg, ms=2200){
+    let t = document.getElementById("mkToast");
+    if(!t){ t = document.createElement("div"); t.id="mkToast"; t.className="mk-toast"; document.body.appendChild(t); }
+    t.textContent = msg; t.classList.add("show");
+    clearTimeout(t._tm); t._tm = setTimeout(()=>t.classList.remove("show"), ms);
+  }
+
+  function modal({title, body, buttons}){
+    const wrap = document.createElement("div");
+    wrap.className = "mk-dim";
+    wrap.innerHTML = `<div class="mk-modal">
+      <div class="mk-mtitle">${title}</div>
+      <div class="mk-mbody">${body}</div>
+      <div class="mk-mbtns"></div>
+    </div>`;
+    const btnBox = wrap.querySelector(".mk-mbtns");
+    (buttons||[{label:"닫기"}]).forEach(b=>{
+      const el = document.createElement("button");
+      el.className = "mk-btn" + (b.primary?" primary":"");
+      el.textContent = b.label;
+      el.onclick = ()=>{ close(); b.onClick && b.onClick(); };
+      btnBox.appendChild(el);
+    });
+    function close(){ wrap.remove(); }
+    wrap.addEventListener("click", e=>{ if(e.target===wrap) close(); });
+    document.body.appendChild(wrap);
+    return close;
+  }
+
+  /* 카카오 로그인 목업 시트 */
+  function kakao(onDone){
+    if(session.user){ onDone && onDone(); return; }
+    const wrap = document.createElement("div");
+    wrap.className = "mk-dim bottom";
+    wrap.innerHTML = `<div class="mk-sheet">
+      <div class="mk-shandle"></div>
+      <div class="mk-stitle">퍼머컬처ON에 오신 걸 환영해요 🌱</div>
+      <div class="mk-ssub">텃밭 자랑, 질문, 나눔 — 로그인하고 함께해요</div>
+      <button class="mk-kakao">💬 카카오로 3초 만에 시작하기</button>
+      <button class="mk-later">나중에 할게요</button>
+      <div class="mk-fine">목업 화면입니다 · 실제 로그인되지 않습니다</div>
+    </div>`;
+    wrap.querySelector(".mk-kakao").onclick = ()=>{
+      session.user = { name:"고흥텃밭러", avatar:"🧑‍🌾" };
+      wrap.remove(); toast("고흥텃밭러님, 환영합니다! (목업)");
+      onDone && onDone();
+    };
+    wrap.querySelector(".mk-later").onclick = ()=> wrap.remove();
+    wrap.addEventListener("click", e=>{ if(e.target===wrap) wrap.remove(); });
+    document.body.appendChild(wrap);
+  }
+
+  return { session, toast, modal, kakao };
+})();
+
+</script>
+<script>
+(function(){
+"use strict";
+const GD_ROOT = document.getElementById("view-garden");
+if(!GD_ROOT) return;
+
+/* ============================================================
+   퍼머컬처ON — 텃밭 디자인용 작물 데이터
+   ------------------------------------------------------------
+   각 작물:
+     id        고유키 (영문)
+     name      한글 이름
+     emoji     아이콘
+     cat       분류 (veg 채소 / herb 허브 / flower 꽃 / fruit 열매채소)
+     height    다 자란 키 (cm) — 그늘 판정에 사용
+     spacing   포기 간격 (cm) — 공간/포기수 계산에 사용
+     sow       파종·정식 월 [시작, 끝] (남해안·고흥 기준)
+     sun       햇빛 요구  full(양지) / part(반양지) / shade(반음지)
+     note      한 줄 설명
+   궁합(COMPANION)은 별도 표로 관리 — good(좋음) / bad(상극)
+   ============================================================ */
+
+const PLANTS = [
+  // ── 열매채소 ─────────────────────────────
+  { id:"tomato",   feed:"heavy", water:"mid", name:"토마토", emoji:"🍅", cat:"fruit", height:150, spacing:50, sow:[4,5],  sun:"full",  note:"키가 크고 햇빛을 많이 먹는 여름 대표작물" , },
+  { id:"pepper",   feed:"heavy", water:"mid", name:"고추",   emoji:"🌶️", cat:"fruit", height:100, spacing:40, sow:[4,5],  sun:"full",  note:"토마토와 같은 가지과, 따로 심는 게 안전" , },
+  { id:"eggplant", feed:"heavy", water:"mid", name:"가지",   emoji:"🍆", cat:"fruit", height:90,  spacing:50, sow:[4,5],  sun:"full",  note:"가지과, 넓은 간격을 좋아함" , },
+  { id:"cucumber", feed:"heavy", water:"wet", climb:true, name:"오이",   emoji:"🥒", cat:"fruit", height:180, spacing:40, sow:[4,5],  sun:"full",  note:"덩굴, 지지대 필요. 키가 매우 큼" , },
+  { id:"zucchini", feed:"heavy", water:"mid", name:"애호박", emoji:"🥒", cat:"fruit", height:60,  spacing:80, sow:[4,6],  sun:"full",  note:"옆으로 크게 퍼져 자리를 많이 차지" , },
+  { id:"pumpkin",  feed:"heavy", water:"mid", climb:true, name:"호박",   emoji:"🎃", cat:"fruit", height:50,  spacing:120,sow:[5,6],  sun:"full",  note:"넝쿨이 사방으로 뻗음, 가장자리에 심기" , },
+  { id:"strawberry",name:"딸기",  emoji:"🍓", cat:"fruit", height:25,  spacing:30, sow:[9,10], sun:"full",  note:"가을 정식, 이듬해 봄 수확. 낮게 퍼짐" , },
+
+  // ── 잎채소 ───────────────────────────────
+  { id:"lettuce",  feed:"light", water:"wet", name:"상추",   emoji:"🥬", cat:"veg", height:25,  spacing:20, sow:[3,9],  sun:"part",  note:"빨리 자라고 그늘도 견딤. 사이사이 채우기 좋음" , },
+  { id:"cabbage",  feed:"heavy", water:"mid", name:"양배추", emoji:"🥬", cat:"veg", height:40,  spacing:45, sow:[3,8],  sun:"full",  note:"넓게 자람. 배추흰나비 주의" , },
+  { id:"napa",     feed:"heavy", water:"mid", name:"배추",   emoji:"🥬", cat:"veg", height:40,  spacing:45, sow:[8,9],  sun:"full",  note:"가을 작물, 넓은 간격 필요" , },
+  { id:"spinach",  feed:"light", water:"wet", name:"시금치", emoji:"🌿", cat:"veg", height:20,  spacing:15, sow:[3,10], sun:"part",  note:"서늘한 때 잘 자람, 좁게 심어도 OK" , },
+  { id:"chard",    feed:"mid", water:"wet", name:"근대",   emoji:"🌿", cat:"veg", height:35,  spacing:25, sow:[3,8],  sun:"part",  note:"오래 수확 가능한 잎채소" , },
+  { id:"kale",     feed:"heavy", water:"mid", name:"케일",   emoji:"🥬", cat:"veg", height:60,  spacing:40, sow:[3,8],  sun:"full",  note:"키가 제법 큼, 잎을 계속 따 먹음" , },
+  { id:"perilla",  feed:"mid", water:"dry", name:"들깨",   emoji:"🌿", cat:"veg", height:80,  spacing:40, sow:[5,6],  sun:"full",  note:"향이 강해 벌레를 쫓음. 키가 큼" , },
+
+  // ── 뿌리채소 ─────────────────────────────
+  { id:"radish",   feed:"light", water:"mid", name:"무",     emoji:"🥕", cat:"veg", height:30,  spacing:25, sow:[8,9],  sun:"full",  note:"뿌리가 깊게 들어감, 가을 작물" , },
+  { id:"carrot",   feed:"light", water:"mid", name:"당근",   emoji:"🥕", cat:"veg", height:30,  spacing:10, sow:[3,8],  sun:"full",  note:"좁게 심고 솎아줌. 토양 깊이 필요" , },
+  { id:"onion",    feed:"light", water:"dry", name:"양파",   emoji:"🧅", cat:"veg", height:30,  spacing:15, sow:[9,10], sun:"full",  note:"가을에 심어 이듬해 수확" , },
+  { id:"garlic",   feed:"light", water:"dry", name:"마늘",   emoji:"🧄", cat:"veg", height:40,  spacing:15, sow:[9,10], sun:"full",  note:"가을 정식, 해충을 쫓는 효과" , },
+  { id:"potato",   feed:"mid", water:"mid", name:"감자",   emoji:"🥔", cat:"veg", height:50,  spacing:30, sow:[3,4],  sun:"full",  note:"봄 작물, 북주기 필요" , },
+  { id:"scallion", feed:"light", water:"mid", name:"대파",   emoji:"🌱", cat:"veg", height:50,  spacing:10, sow:[3,9],  sun:"full",  note:"좁게 심어도 됨, 해충 기피 효과" , },
+
+  // ── 콩과 ─────────────────────────────────
+  { id:"bean",     feed:"light", water:"mid", climb:true, name:"강낭콩", emoji:"🫘", cat:"veg", height:50,  spacing:25, sow:[5,6],  sun:"full",  note:"뿌리가 땅을 비옥하게 함(질소고정)" , },
+  { id:"pea",      feed:"light", water:"mid", climb:true, name:"완두",   emoji:"🫛", cat:"veg", height:60,  spacing:20, sow:[3,4],  sun:"full",  note:"서늘한 봄 작물, 땅을 살림" , },
+
+  // ── 허브 ─────────────────────────────────
+  { id:"basil",    feed:"mid", water:"wet", name:"바질",   emoji:"🌿", cat:"herb", height:40,  spacing:25, sow:[5,6],  sun:"full",  note:"토마토의 단짝. 해충을 쫓고 풍미를 살림" , },
+  { id:"chamomile",name:"캐모마일",emoji:"🌼", cat:"herb", height:30,  spacing:20, sow:[3,5],  sun:"full",  note:"벌·익충을 부르는 동반 허브" , },
+  { id:"dill",     feed:"light", water:"mid", name:"딜",     emoji:"🌿", cat:"herb", height:80,  spacing:25, sow:[4,6],  sun:"full",  note:"익충을 부름. 당근과는 상극" , },
+  { id:"mint",     feed:"light", water:"wet", name:"민트",   emoji:"🌿", cat:"herb", height:40,  spacing:30, sow:[4,6],  sun:"part",  note:"번식력이 강해 화분에 따로 심기 권장" , },
+  { id:"rosemary", feed:"light", water:"dry", name:"로즈마리",emoji:"🌿", cat:"herb", height:70,  spacing:40, sow:[4,6],  sun:"full",  note:"향으로 해충 기피. 여러해살이" , },
+
+  // ── 꽃(동반화) ──────────────────────────
+  { id:"marigold", feed:"light", water:"mid", name:"메리골드",emoji:"🌼", cat:"flower",height:40, spacing:25, sow:[4,6],  sun:"full",  note:"뿌리 선충을 쫓는 텃밭의 수호화" , },
+  { id:"nasturt",  feed:"light", water:"dry", name:"한련화", emoji:"🌺", cat:"flower",height:30, spacing:30, sow:[4,6],  sun:"full",  note:"진딧물을 유인해 작물 대신 받아줌" , },
+  { id:"sunflower",name:"해바라기",emoji:"🌻", cat:"flower",height:200,spacing:50, sow:[4,6],  sun:"full",  note:"매우 큼. 북쪽 끝에 심어 그늘 활용" , },
+  { id:"borage",   feed:"light", water:"mid", name:"보리지", emoji:"💠", cat:"flower",height:60, spacing:35, sow:[4,6],  sun:"full",  note:"벌을 부르고 토마토 곁에서 잘 어울림" , },
+];
+
+/* 궁합표: 한 쌍을 한 번만 적음. type: good(좋음) / bad(상극) */
+const COMPANION = [
+  // 좋은 궁합
+  { a:"tomato",  b:"basil",     type:"good", why:"바질이 토마토 해충을 쫓고 풍미를 살림" },
+  { a:"tomato",  b:"marigold",  type:"good", why:"메리골드가 뿌리 선충을 막아줌" },
+  { a:"tomato",  b:"borage",    type:"good", why:"보리지가 벌을 불러 수정을 도움" },
+  { a:"tomato",  b:"carrot",    type:"good", why:"공간을 위아래로 나눠 효율적으로 사용" },
+  { a:"carrot",  b:"onion",     type:"good", why:"양파 향이 당근파리를 쫓음" },
+  { a:"carrot",  b:"scallion",  type:"good", why:"파 향이 당근 해충을 막음" },
+  { a:"carrot",  b:"lettuce",   type:"good", why:"자라는 속도가 달라 자리를 겹치지 않음" },
+  { a:"cucumber",b:"bean",      type:"good", why:"콩이 땅을 비옥하게 해 오이가 잘 자람" },
+  { a:"cucumber",b:"nasturt",   type:"good", why:"한련화가 오이벌레를 유인해 막음" },
+  { a:"cabbage", b:"chamomile", type:"good", why:"캐모마일이 익충을 불러 배추벌레를 줄임" },
+  { a:"cabbage", b:"scallion",  type:"good", why:"파 향이 배추흰나비를 쫓음" },
+  { a:"napa",    b:"scallion",  type:"good", why:"파가 배추 해충을 기피시킴" },
+  { a:"lettuce", b:"radish",    type:"good", why:"무가 흙을 부드럽게 해 상추가 잘 큼" },
+  { a:"pepper",  b:"basil",     type:"good", why:"바질이 고추 해충도 함께 쫓음" },
+  { a:"bean",    b:"marigold",  type:"good", why:"메리골드가 콩 주변 해충을 줄임" },
+  { a:"pumpkin", b:"nasturt",   type:"good", why:"한련화가 호박벌레를 막음" },
+  { a:"potato",  b:"bean",      type:"good", why:"콩이 감자 곁 땅을 살림" },
+  { a:"eggplant",b:"bean",      type:"good", why:"콩이 가지에 양분을 보탬" },
+  { a:"strawberry",b:"borage",  type:"good", why:"보리지가 딸기 풍미와 수정을 도움" },
+
+  // 상극
+  { a:"tomato",  b:"potato",    type:"bad",  why:"같은 가지과라 역병이 옮기 쉬움" },
+  { a:"tomato",  b:"pepper",    type:"bad",  why:"같은 가지과, 같은 해충·병을 공유" },
+  { a:"tomato",  b:"cucumber",  type:"bad",  why:"물·양분 경쟁이 심하고 병을 나눔" },
+  { a:"carrot",  b:"dill",      type:"bad",  why:"딜이 당근 생장을 방해함" },
+  { a:"bean",    b:"onion",     type:"bad",  why:"파·양파 향이 콩 생장을 억제" },
+  { a:"bean",    b:"garlic",    type:"bad",  why:"마늘이 콩 뿌리 발달을 막음" },
+  { a:"pea",     b:"onion",     type:"bad",  why:"양파가 완두 생장을 방해" },
+  { a:"pea",     b:"garlic",    type:"bad",  why:"마늘이 완두에 좋지 않음" },
+  { a:"cabbage", b:"tomato",    type:"bad",  why:"서로 양분 경쟁이 심함" },
+  { a:"potato",  b:"pumpkin",   type:"bad",  why:"둘 다 병에 약해 함께 두면 위험" },
+  { a:"potato",  b:"cucumber",  type:"bad",  why:"감자 역병이 오이로 옮길 수 있음" },
+];
+
+/* 궁합 빠른 조회: lookup[id1][id2] = {type, why} */
+const COMP_LOOKUP = (() => {
+  const m = {};
+  for (const c of COMPANION) {
+    (m[c.a] ??= {})[c.b] = { type:c.type, why:c.why };
+    (m[c.b] ??= {})[c.a] = { type:c.type, why:c.why };
+  }
+  return m;
+})();
+
+const PLANT_BY_ID = Object.fromEntries(PLANTS.map(p => [p.id, p]));
+
+
+/* ============================================================
+   퍼머컬처ON — 퍼머컬처 디자인 기법 데이터
+   각 기법은 "밭의 형태"와 "작물을 어디에 두는가"의 규칙이 다름.
+   ------------------------------------------------------------
+   id        고유키
+   name      한글 이름
+   emoji     아이콘
+   tagline   한 줄 소개
+   best      이 기법이 빛나는 상황
+   zones     배치 구역 정의 (기법별 의미가 다름)
+   recommend 추천 작물 id 목록 (gardendata.js의 PLANTS와 연결)
+   tips      실전 팁 (배열)
+   ============================================================ */
+
+const TECHNIQUES = [
+  {
+    id:"keyhole",
+    name:"키홀 가든",
+    emoji:"🔑",
+    tagline:"열쇠구멍 모양 두둑 + 가운데 퇴비통",
+    best:"좁은 텃밭에서 손이 닿는 면적을 최대로. 퇴비를 밭 한가운데서 바로 순환.",
+    shape:"keyhole",
+    zones:[
+      { key:"center",  label:"중앙 퇴비통", desc:"음식·풀 찌꺼기를 넣어 영양분이 사방으로 퍼짐", sun:"any" },
+      { key:"inner",   label:"안쪽 (퇴비 곁)", desc:"양분을 많이 먹는 작물 — 잎채소·열매채소", sun:"part" },
+      { key:"outer",   label:"바깥 가장자리", desc:"덜 먹는 작물·허브·동반화", sun:"full" },
+    ],
+    recommend:["lettuce","chard","kale","tomato","basil","marigold","scallion","spinach"],
+    tips:[
+      "지름 1.8~2m 원이 손 닿기에 딱 좋아요(가운데까지 60cm).",
+      "한쪽에 사람이 들어갈 통로(열쇠구멍)를 V자로 터 둡니다.",
+      "중앙 퇴비통은 철망이나 구멍 뚫은 통이면 충분해요.",
+    ],
+  },
+  {
+    id:"spiral",
+    name:"허브 스파이럴",
+    emoji:"🌀",
+    tagline:"위로 올라가는 나선형 입체 화단",
+    best:"한 평 안에서 건조~습윤, 양지~반음지 미기후를 다 만들어 허브를 다양하게.",
+    shape:"spiral",
+    zones:[
+      { key:"top",    label:"꼭대기 (건조·양지)", desc:"물이 잘 빠지는 곳 — 지중해 허브", sun:"full" },
+      { key:"mid",    label:"중간 (보통)", desc:"무난한 환경 — 대부분의 허브·잎채소", sun:"full" },
+      { key:"bottom", label:"아래 (습윤·반음지)", desc:"물이 모이는 곳 — 물 좋아하는 허브", sun:"part" },
+    ],
+    recommend:["rosemary","basil","dill","chamomile","mint","chard","lettuce","borage"],
+    tips:[
+      "지름 1.5m, 높이 60~90cm로 돌·벽돌을 나선으로 쌓아요.",
+      "꼭대기엔 로즈마리처럼 건조에 강한 허브, 아래엔 민트처럼 물 좋아하는 허브.",
+      "남쪽 면은 햇볕을, 북쪽 면은 반그늘을 — 같은 화단에서 미기후가 생깁니다.",
+    ],
+  },
+  {
+    id:"trellis",
+    name:"트렐리스 · 수직밭",
+    emoji:"🪜",
+    tagline:"덩굴작물을 위로 올려 공간 절약",
+    best:"바닥 면적이 좁을 때. 덩굴을 세우면 그 아래 그늘에 잎채소까지 이모작.",
+    shape:"trellis",
+    zones:[
+      { key:"climb",  label:"지지대 위 (덩굴)", desc:"위로 타고 오르는 작물", sun:"full" },
+      { key:"under",  label:"지지대 아래 (그늘)", desc:"덩굴 그늘에서도 잘 견디는 잎채소", sun:"part" },
+      { key:"front",  label:"앞쪽 (햇빛)", desc:"낮고 햇빛 좋아하는 작물", sun:"full" },
+    ],
+    recommend:["cucumber","bean","pea","pumpkin","lettuce","spinach","chard","strawberry"],
+    tips:[
+      "지지대는 사람 키(1.8m) 정도, 남북으로 세워 그늘이 한쪽으로만 지게.",
+      "오이·강낭콩·완두처럼 스스로 감는 덩굴이 좋아요.",
+      "지지대 북쪽 그늘엔 상추·시금치 — 한여름에도 덜 시들어요.",
+    ],
+  },
+  {
+    id:"mandala",
+    name:"만다라 베드",
+    emoji:"❁",
+    tagline:"원을 꽃잎처럼 나눈 방사형 두둑",
+    best:"넓은 밭을 아름답게. 가운데서 모든 두둑에 손이 닿고, 돌려짓기(윤작)에 유리.",
+    shape:"mandala",
+    zones:[
+      { key:"core",   label:"중심 원", desc:"물·퇴비 자리 또는 키 작은 핵심 작물", sun:"any" },
+      { key:"petals", label:"꽃잎 두둑", desc:"두둑마다 다른 작물 — 윤작 단위로 활용", sun:"full" },
+      { key:"edge",   label:"바깥 테두리", desc:"동반화·허브로 해충 방어선", sun:"full" },
+    ],
+    recommend:["tomato","cabbage","carrot","bean","onion","marigold","nasturt","basil"],
+    tips:[
+      "지름 3~4m 원을 6~8개 꽃잎으로 나눠요.",
+      "꽃잎마다 다른 과(科) 작물을 심어 매년 시계방향으로 한 칸씩 돌리면 윤작 완성.",
+      "바깥 테두리는 메리골드·한련화로 둘러 해충을 막아요.",
+    ],
+  },
+  {
+    id:"hugel",
+    name:"후겔컬처 두둑",
+    emoji:"🪵",
+    tagline:"통나무를 묻어 만든 높은 두둑",
+    best:"물 주기가 힘든 곳. 썩는 나무가 스펀지처럼 물을 머금어 가뭄에 강해요.",
+    shape:"hugel",
+    zones:[
+      { key:"crest",  label:"두둑 꼭대기 (건조)", desc:"물 빠짐 좋아하는 작물", sun:"full" },
+      { key:"slope",  label:"비탈면 (보통)", desc:"대부분의 채소", sun:"full" },
+      { key:"foot",   label:"두둑 발치 (습윤)", desc:"물이 모이는 아래 — 물 좋아하는 작물", sun:"part" },
+    ],
+    recommend:["zucchini","pumpkin","tomato","bean","potato","lettuce","chard","perilla"],
+    tips:[
+      "굵은 통나무→가는 가지→낙엽→흙 순으로 쌓아 50~80cm 높이 두둑을 만들어요.",
+      "처음 1~2년은 나무가 질소를 먹으니 콩과(강낭콩)를 함께 심으면 좋아요.",
+      "해가 갈수록 나무가 썩어 흙이 비옥해지고 물도 덜 줘도 됩니다.",
+    ],
+  },
+];
+
+const TECH_BY_ID = Object.fromEntries(TECHNIQUES.map(t=>[t.id,t]));
+
+/* ============================================================
+   허브 스파이럴 벽 재료
+   ------------------------------------------------------------
+   id      고유키
+   name    한글 이름
+   emoji   아이콘
+   color   3D 벽 기본색 (hsl 베이스용 [h,s,l])
+   pattern 3D 벽 질감 종류 (brick/stone/wood/block/bottle)
+   cost    비용 (1 저렴 ~ 3 비쌈)
+   effort  난이도 (1 쉬움 ~ 3 어려움)
+   life    내구성 (1 짧음 ~ 3 오래감)
+   look    미관 점수 (1~3)
+   pros    장점 한 줄
+   cons    단점 한 줄
+   tip     실전 팁
+   ============================================================ */
+const SPIRAL_MATERIALS = [
+  {
+    id:"brick", name:"붉은 벽돌", emoji:"🧱",
+    color:[12,55,48], pattern:"brick",
+    cost:2, effort:2, life:3, look:3,
+    pros:"쌓기 쉽고 모양이 안정적, 가장 무난한 선택",
+    cons:"벽돌 값이 들고 무게가 좀 나감",
+    tip:"표준 벽돌 100~140장이면 지름 1.5m 스파이럴 한 개. 모르타르 없이 엇갈려 쌓아도 됩니다.",
+  },
+  {
+    id:"stone", name:"막돌·자연석", emoji:"🪨",
+    color:[28,12,55], pattern:"stone",
+    cost:1, effort:3, life:3, look:3,
+    pros:"주변에서 주워 쓰면 거의 공짜, 자연스러운 멋",
+    cons:"크기가 제각각이라 균형 맞춰 쌓기 어려움",
+    tip:"밑단엔 큰 돌, 위로 갈수록 작은 돌. 시골 텃밭에 가장 어울리고 돌 틈에 이끼·허브가 자랍니다.",
+  },
+  {
+    id:"wood", name:"통나무·목재", emoji:"🪵",
+    color:[30,40,42], pattern:"wood",
+    cost:1, effort:2, life:1,
+    look:3,
+    pros:"고흥 주변에서 구하기 쉽고 따뜻한 느낌",
+    cons:"2~3년이면 썩음 (후겔컬처처럼 양분은 됨)",
+    tip:"굵은 통나무를 세로로 둘러 박거나 가로로 쌓아요. 썩으면서 흙을 비옥하게 하니 단점이 장점이 되기도 합니다.",
+  },
+  {
+    id:"block", name:"시멘트 블록", emoji:"⬜",
+    color:[40,6,68], pattern:"block",
+    cost:2, effort:1, life:3, look:1,
+    pros:"규격이 일정해 가장 빠르고 튼튼하게 완성",
+    cons:"투박한 회색, 미관은 떨어짐",
+    tip:"블록 구멍에 흙을 채워 거기에도 허브를 심으면 공간을 더 씁니다. 빨리 끝내고 싶을 때 최고.",
+  },
+  {
+    id:"bottle", name:"유리병·재활용", emoji:"🍾",
+    color:[160,30,55], pattern:"bottle",
+    cost:1, effort:2, life:2, look:2,
+    pros:"버리는 병을 재활용, 햇빛이 통과해 예쁨",
+    cons:"깨질 수 있고 단열·보온은 약함",
+    tip:"병을 거꾸로 흙에 박아 벽을 만들어요. 퍼머컬처 '쓰레기를 자원으로' 원리에 딱 맞는 재료.",
+  },
+];
+
+const MAT_BY_ID = Object.fromEntries(SPIRAL_MATERIALS.map(m=>[m.id,m]));
+
+/* 밭 크기·여건으로 재료 추천: 점수 매겨 1순위 반환 */
+function recommendMaterial(bedW, bedH){
+  // 작은 밭이면 쉬운 것, 큰 밭이면 튼튼+미관 우선
+  const area = bedW*bedH;
+  let best=null, bestScore=-1, why="";
+  for(const m of SPIRAL_MATERIALS){
+    // 기본: 미관+내구 높고 난이도 낮을수록 가점
+    let s = m.look*1.2 + m.life*1.2 - m.effort*0.8 - m.cost*0.5;
+    if(area < 1.5) s += (3-m.effort)*0.8;          // 작으면 쉬운 재료 가점
+    if(area >= 3)  s += m.life*0.6 + m.look*0.4;    // 크면 튼튼/예쁜 것
+    if(s>bestScore){ bestScore=s; best=m; }
+  }
+  if(best.id==="brick") why="쌓기 쉽고 모양이 안정적이라 처음 만들 때 실패가 적어요.";
+  else if(best.id==="stone") why="자연스럽고 재료비가 거의 안 들어요.";
+  else why="이 밭 크기에 균형이 좋아요.";
+  return { material:best, why };
+}
+
+/* ── 자유 두둑(커스텀) — 스퀘어풋 기반 ── */
+TECHNIQUES.push({
+  id:"custom", name:"자유 두둑", emoji:"⬜",
+  tagline:"원하는 크기의 네모 두둑 — 직접 배치",
+  best:"어떤 작물이든 OK. 스퀘어풋 간격 규칙으로 자동 배치 후 자유롭게 옮기세요.",
+  shape:"custom",
+  zones:[
+    { key:"back",  label:"뒷줄 (해 반대편)", desc:"키 큰 작물 — 그늘이 밭 밖으로", sun:"full" },
+    { key:"mid",   label:"가운데 줄", desc:"중간 키 작물", sun:"full" },
+    { key:"front", label:"앞줄 (햇빛쪽)", desc:"낮고 해 좋아하는 작물", sun:"full" },
+  ],
+  recommend:[],
+  tips:["폭은 1.2m 이하로 — 팔이 가운데까지 닿아야 밟지 않고 가꿉니다."],
+});
+Object.assign(TECH_BY_ID, { custom: TECHNIQUES[TECHNIQUES.length-1] });
+
+/* ── 요소 규격: 권장/최소 크기(m), 정사각 여부, 크기조절 가능 ── */
+const ELEM_SPEC = {
+  keyhole: { pref:[2.0,2.0], min:[1.6,1.6], square:true },
+  spiral:  { pref:[1.8,1.8], min:[1.3,1.3], square:true },
+  trellis: { pref:[2.2,0.9], min:[1.2,0.8] },
+  mandala: { pref:[3.0,3.0], min:[2.2,2.2], square:true },
+  hugel:   { pref:[2.4,1.2], min:[1.6,1.0] },
+  custom:  { pref:[1.2,0.9], min:[0.6,0.6], sizable:true },
+};
+/* 3D 기준 폭(px) — 스케일 계산용 */
+const ELEM_N3 = { keyhole:206, spiral:212, trellis:224, mandala:214, hugel:232, custom:212 };
+
+/* ── 배치 원리 상세 (실제 문헌 기반) ── */
+const EXPLAIN = {
+  keyhole: {
+    origin:"1990년대 아프리카 레소토에서 국제구호 컨소시엄 C-SAFE가 개발했습니다(짐바브웨 CARE의 높임 화단에서 영감). 가뭄과 척박한 흙, 그리고 몸이 아파 오래 일하기 힘든 사람들을 위해 '서서, 기대서, 팔만 뻗어' 가꿀 수 있게 만든 디자인이에요.",
+    size:"지름 약 2m · 돌벽 높이 60cm~1m — 팔이 중심까지 닿는 한계에서 나온 치수",
+    rules:[
+      "중앙에 철망 퇴비 바구니(지름 30cm 안팎, 흙보다 30cm쯤 높게)를 세우고 채소 부스러기·재·허드렛물을 계속 넣습니다 — 물과 양분이 바구니에서 사방 뿌리로 스며 나옵니다.",
+      "흙은 중앙이 높고 가장자리로 완만히 낮아지게 — 빗물·양분이 방사형으로 고르게 퍼집니다.",
+      "상추·케일·시금치 같은 잎채소와 양파·당근 뿌리채소가 최적. 퇴비 곁(안쪽)에 양분 많이 먹는 작물을 둡니다.",
+      "통로(열쇠구멍)는 밭을 밟지 않고 중심에 닿기 위한 길 — 흙 다짐을 막습니다.",
+    ],
+    caution:"건조지에서 태어난 디자인이라, 장마가 긴 우리나라에선 퇴비 바구니에 비가림을 해주면 좋아요.",
+  },
+  spiral: {
+    origin:"퍼머컬처 공동 창시자 빌 몰리슨이 『Permaculture: A Designer's Manual』(1988)에서 정식화한 디자인입니다. 자연 어디에나 있는 나선 형태로, 좁은 자리에 여러 기후대를 겹쳐 넣는 발상이에요.",
+    size:"바닥 지름 1.5~2m · 높이 1m 안팎 (몰리슨 권장)",
+    rules:[
+      "꼭대기는 모래를 섞어 물이 잘 빠지게 — 건조·양지를 좋아하는 지중해 허브(로즈마리·타임) 자리입니다.",
+      "아래로 내려올수록 물이 모여 촉촉 — 민트·파슬리처럼 물 좋아하는 허브는 발치에.",
+      "북쪽 사면은 반음지, 남쪽 사면은 양지(북반구 기준) — 한 구조물에서 네 방향 미기후가 생깁니다.",
+      "몰리슨 원안은 남쪽 발치에 미니 연못 — 반사광으로 남벽을 데우고 개구리가 해충을 잡아줍니다.",
+      "부엌 문 바로 앞에 두세요 — \"슬리퍼 신고 나가도 젖지 않는 거리\"가 몰리슨의 배치 규칙입니다.",
+    ],
+    caution:"돌 틈이 배수로 역할을 하니 벽을 시멘트로 완전히 막지 않는 게 좋아요.",
+  },
+  trellis: {
+    origin:"덩굴을 세워 키우는 수직재배는 시설원예의 기본이자, 멜 바돌로뮤의 스퀘어풋 가드닝에서도 좁은 밭의 핵심 확장법으로 씁니다.",
+    size:"높이 1.8m 안팎 — 사람 키에서 관리 가능한 최대치",
+    rules:[
+      "지지대는 밭의 북쪽(해 반대편)에 — 덩굴 그늘이 다른 작물이 아니라 밭 밖·통로로 지게 합니다.",
+      "긴 지지대 열은 남북 방향으로 세우면 아침·오후 해가 양면에 고르게 듭니다.",
+      "오이·완두·강낭콩처럼 스스로 감는 덩굴이 최적. 호박은 열매가 무거워 그물 보강이 필요합니다.",
+      "지지대 발치 그늘은 버리는 자리가 아니라 한여름 상추·시금치의 피서지입니다.",
+    ],
+    caution:"지지대는 심기 전에 먼저 세우세요 — 나중에 박으면 뿌리를 다칩니다.",
+  },
+  mandala: {
+    origin:"호주의 린다 우드로가 『The Permaculture Home Garden』에서 제안한 원형 밭 시스템입니다. 원과 열쇠구멍 통로로 '밭을 밟지 않는 무경운'과 윤작을 한 디자인에 담았어요.",
+    size:"지름 3~4m — 통로에서 팔이 닿는 반경으로 두둑 폭을 정합니다",
+    rules:[
+      "원 안으로 파고드는 키홀 통로(스포크) 덕에 흙을 한 번도 밟지 않고 모든 두둑에 손이 닿습니다.",
+      "꽃잎(구역)마다 다른 과(科)의 작물을 심고 해마다 한 칸씩 돌리면 윤작이 저절로 됩니다 — 우드로 원안은 닭 이동장을 원마다 옮기며 김매기·거름을 닭에게 맡깁니다.",
+      "중심에는 연못·허브 스파이럴·퇴비처럼 '자주 들르는 요소'를 — 퍼머컬처의 상대적 배치(relative location) 원리입니다.",
+      "가장자리는 메리골드·한련화 동반화 테두리로 해충 방어선을 칩니다.",
+    ],
+    caution:"지름 3m 아래로 줄이면 통로가 좁아져 장점이 죽습니다 — 작은 밭엔 키홀 가든이 낫습니다.",
+  },
+  hugel: {
+    origin:"통나무를 묻어 두둑을 쌓는 독일어권 전통 농법입니다. '후겔쿨투어'라는 용어는 1962년 헤르만 안드레가 쓰기 시작했고, 오스트리아 크라메터호프의 제프 홀처가 고산지 농사로 전 세계에 알렸습니다.",
+    size:"가정용은 높이 50cm~1m (홀처의 원형은 2m) — 첫해에 1/3쯤 가라앉는 걸 감안하세요",
+    rules:[
+      "굵은 통나무를 맨 아래, 위로 잔가지→낙엽·풀→거름, 흙은 15cm 이상 덮습니다.",
+      "첫해엔 나무가 흙 속 질소를 빨아들입니다(질소 기근) — 콩과 작물을 함께 심거나 깻묵·거름으로 보충하세요.",
+      "통나무가 물을 머금기 시작하면(첫해 충분히 관수) 스펀지가 됩니다 — 2년차부터 물주기가 크게 줍니다.",
+      "능선은 건조, 발치는 습윤 — 위엔 물 빠짐 좋아하는 작물, 아래엔 물 좋아하는 작물.",
+      "두둑을 남북 방향으로 놓으면 동·서 양면에 해가 고르게 듭니다.",
+      "분해열이 흙을 데워 봄 파종이 빨라지고 계절이 늘어납니다.",
+    ],
+    caution:"호두나무는 금지(주글론 독성). 살아있는 버드나무 가지는 싹이 트니 말린 것만.",
+  },
+  custom: {
+    origin:"네모 두둑의 간격 규칙은 멜 바돌로뮤의 스퀘어풋 가드닝(1981년 책·PBS 방송)에서 왔습니다. 은퇴 엔지니어였던 그는 '줄 사이 김매기에 인생을 쓰지 말자'며 30cm 격자 시스템을 만들었어요.",
+    size:"폭 1.2m(4피트) 이하 — 팔이 60cm 닿으니 양쪽에서 가운데까지 밟지 않고 관리",
+    rules:[
+      "30cm 한 칸에 작물 크기 따라 1·4·9·16포기 — 토마토 1, 상추 4, 강낭콩 9, 당근 16이 기준입니다.",
+      "키 큰 작물은 해 반대편(뒷줄)에 — 그늘이 이웃 작물이 아니라 바깥으로 지게.",
+      "한 칸을 수확하면 그 칸만 다른 작물로 이어짓기 — 자연스러운 소규모 윤작이 됩니다.",
+    ],
+    caution:"'1포기'로 표시된 큰 작물(방울토마토 등)은 실제로 더 벌어질 수 있어요 — 여유를 주세요.",
+  },
+};
+
+/* 공통 배치 원리(리포트 하단) */
+const PRINCIPLE_NOTES = [
+  ["☀️","<b>키 큰 작물은 해 반대편으로.</b> 북반구에서 해는 남쪽에서 오므로 키 큰 작물·지지대를 북쪽(뒷줄)에 두면 그늘이 밭 밖으로 집니다 — 스파이럴의 북사면이 반음지가 되는 것과 같은 원리."],
+  ["📏","<b>간격은 스퀘어풋 1·4·9·16 규칙.</b> 30cm 한 칸에 토마토 1 · 상추 4 · 강낭콩 9 · 당근 16 (멜 바돌로뮤, 1981). 이 앱의 포기 수 계산도 같은 발상입니다."],
+  ["💧","<b>물은 아래로 모입니다.</b> 높은 곳=건조(로즈마리), 낮은 곳=습윤(민트) — 스파이럴 꼭대기/발치, 후겔 능선/발치에 같은 원리가 반복됩니다."],
+];
+
+
+/* ============================================================
+   퍼머컬처ON — 기법별 정밀 배치 엔진
+   STEP1에서 고른 기법의 실제 형태에 맞춰 작물을 구역에 배정.
+   각 함수는 배치 결과(placements)를 반환:
+     [{ plant, zone, cx, cy, r, count, reason }]
+   좌표는 400×300 SVG 기준. r은 심는 원 반지름(시각용).
+   ============================================================ */
+
+/* 작물을 조건별로 정렬하는 도우미 */
+function byHeightDesc(a,b){ return b.height - a.height; }
+function waterRank(w){ return w==="dry"?0 : w==="mid"?1 : 2; }
+
+/* ============================================================
+   1) 키홀 — 도넛형. 통로(앞쪽 V) 비우고, 안쪽=양분多, 바깥=양분少
+   ============================================================ */
+function layoutKeyhole(plants, bed){
+  const cx=200, cy=155, rOut=120, rIn=42;
+  const heavy = plants.filter(p=>p.feed==="heavy");
+  const light = plants.filter(p=>p.feed!=="heavy");
+  const ordered = [...heavy, ...light];      // 안쪽(퇴비 곁)부터 양분 많이 먹는 것
+
+  const gapA = Math.PI*0.42, gapB = Math.PI*0.58; // 앞쪽(아래) 통로 각도 범위
+  const N = ordered.length;
+  const usable = [];
+  // 통로를 피한 각도 슬롯 생성
+  let slots = [];
+  const total = 40;
+  for(let i=0;i<total;i++){
+    const ang = -Math.PI/2 + (i/total)*Math.PI*2;
+    const norm = (ang+Math.PI*2)%(Math.PI*2);
+    if(norm>gapA && norm<gapB) continue;
+    slots.push(ang);
+  }
+  const place = [];
+  ordered.forEach((p,idx)=>{
+    // 양분 많은 건 안쪽 링, 적은 건 바깥 링
+    const inner = p.feed==="heavy";
+    const ring = inner ? rIn+34 : rOut-24;
+    const seg = slots.filter((_,k)=> k%N===idx%N);
+    const ang = seg.length ? seg[Math.floor(seg.length/2)] : slots[idx%slots.length];
+    place.push({
+      plant:p, zone: inner?"안쪽(퇴비 곁)":"바깥 가장자리",
+      cx: cx+Math.cos(ang)*ring, cy: cy+Math.sin(ang)*ring,
+      r: 16, count: countFor(p,bed),
+      reason: inner ? "양분을 많이 먹어 퇴비통 가까이" : "덜 먹는 작물이라 바깥쪽"
+    });
+  });
+  return { place, meta:{cx,cy,rOut,rIn,gapA,gapB} };
+}
+
+/* ============================================================
+   2) 허브 스파이럴 — 나선. 건조(위)→습윤(아래) 물 요구도 순
+   ============================================================ */
+function layoutSpiral(plants, bed){
+  const cx=200, cy=160;
+  const ordered = [...plants].sort((a,b)=> waterRank(a.water)-waterRank(b.water)); // dry 먼저(위)
+  const N = ordered.length;
+  const place = [];
+  ordered.forEach((p,i)=>{
+    const t = N===1 ? 0 : i/(N-1);       // 0=위(건조) → 1=아래(습윤)
+    const ang = -Math.PI/2 + t*Math.PI*3.0; // 1.5바퀴 나선
+    const rad = 26 + t*92;                // 위는 중심 가까이(작은 반경)
+    const zone = t<0.34?"꼭대기(건조·양지)" : t<0.67?"중간" : "아래(습윤·반음지)";
+    place.push({
+      plant:p, zone,
+      cx: cx+Math.cos(ang)*rad, cy: cy+Math.sin(ang)*rad*0.72,
+      r: 15, count: countFor(p,bed),
+      reason: p.water==="dry"?"물 적게 필요해 꼭대기" : p.water==="wet"?"물 좋아해 아래쪽" : "중간 환경"
+    });
+  });
+  return { place, meta:{cx,cy} };
+}
+
+/* ============================================================
+   3) 트렐리스 — 덩굴은 지지대(뒤), 그늘작물은 그 앞(북), 햇빛작물은 앞줄
+   ============================================================ */
+function layoutTrellis(plants, bed){
+  const climbers = plants.filter(p=>p.climb);
+  const shade    = plants.filter(p=>!p.climb && p.sun!=="full");
+  const sunny    = plants.filter(p=>!p.climb && p.sun==="full");
+  const place = [];
+  const bw=300, ox=50;
+  // 지지대 줄(y=90) 위 덩굴
+  climbers.forEach((p,i)=>{
+    const x = ox + (bw*(i+1)/(climbers.length+1));
+    place.push({ plant:p, zone:"지지대 위(덩굴)", cx:x, cy:95, r:16,
+      count:countFor(p,bed), reason:"덩굴이라 지지대를 타고 오름" });
+  });
+  // 그늘줄(y=150) — 덩굴 바로 앞
+  shade.forEach((p,i)=>{
+    const x = ox + (bw*(i+1)/(shade.length+1));
+    place.push({ plant:p, zone:"지지대 그늘", cx:x, cy:165, r:15,
+      count:countFor(p,bed), reason:"반그늘을 견뎌 덩굴 발치에 적합" });
+  });
+  // 햇빛줄(y=225) — 맨 앞
+  sunny.forEach((p,i)=>{
+    const x = ox + (bw*(i+1)/(sunny.length+1));
+    place.push({ plant:p, zone:"앞쪽(햇빛)", cx:x, cy:235, r:15,
+      count:countFor(p,bed), reason:"햇빛을 좋아해 맨 앞줄" });
+  });
+  return { place, meta:{} };
+}
+
+/* ============================================================
+   4) 만다라 — 중심 + 꽃잎. 동반화/허브는 바깥 테두리, 나머지는 꽃잎마다
+   ============================================================ */
+function layoutMandala(plants, bed){
+  const cx=200, cy=150;
+  const edge = plants.filter(p=>p.cat==="flower"||p.cat==="herb");
+  const petalPlants = plants.filter(p=>!(p.cat==="flower"||p.cat==="herb"));
+  const place = [];
+  // 꽃잎 (안쪽 링)
+  const M = Math.max(petalPlants.length,1);
+  petalPlants.forEach((p,i)=>{
+    const ang = -Math.PI/2 + (i/M)*Math.PI*2;
+    place.push({ plant:p, zone:`${i+1}번 꽃잎`, cx:cx+Math.cos(ang)*64, cy:cy+Math.sin(ang)*64*0.82,
+      r:16, count:countFor(p,bed), reason:"꽃잎마다 다른 과(科) — 윤작 단위" });
+  });
+  // 테두리 (바깥 링)
+  const E = Math.max(edge.length,1);
+  edge.forEach((p,i)=>{
+    const ang = -Math.PI/2 + ((i+0.5)/E)*Math.PI*2;
+    place.push({ plant:p, zone:"바깥 테두리", cx:cx+Math.cos(ang)*108, cy:cy+Math.sin(ang)*108*0.82,
+      r:14, count:countFor(p,bed), reason:"동반화·허브로 해충 방어선" });
+  });
+  return { place, meta:{cx,cy} };
+}
+
+/* ============================================================
+   5) 후겔 — 능선 두둑. 건조(꼭대기)→습윤(발치), 좌우 비탈로 퍼짐
+   ============================================================ */
+function layoutHugel(plants, bed){
+  const ordered = [...plants].sort((a,b)=> waterRank(a.water)-waterRank(b.water));
+  const place = [];
+  const ox=60, bw=280;
+  ordered.forEach((p,i)=>{
+    const t = ordered.length===1?0.5 : i/(ordered.length-1); // 0 건조 → 1 습윤
+    // 건조는 위(꼭대기 y=120), 습윤은 아래(발치 y=210)
+    const y = 120 + t*95;
+    const x = ox + bw*((i%2===0)? 0.32 : 0.68) + (i*7 % 40) - 20; // 좌우 지그재그
+    const zone = t<0.34?"꼭대기(건조)" : t<0.67?"비탈면" : "발치(습윤)";
+    place.push({ plant:p, zone, cx:Math.max(ox+20,Math.min(ox+bw-20,x)), cy:y, r:15,
+      count:countFor(p,bed), reason: p.water==="dry"?"물 잘 빠지는 꼭대기" : p.water==="wet"?"물 모이는 발치":"비탈 중간" });
+  });
+  return { place, meta:{} };
+}
+
+/* 포기 수 계산 (밭 면적 균등배분 + 상한) */
+function countFor(p, bed){
+  const area = bed.w*100*bed.h*100;
+  // 배치는 대략치이므로 작물 수로 나눠 배분
+  const share = area / (window.__gdPlantCount||4);
+  let c = Math.max(1, Math.floor(share/(p.spacing*p.spacing)));
+  const cap = p.spacing<=15?30 : p.spacing<=30?24 : 12;
+  return Math.min(c, cap);
+}
+
+const LAYOUT_BY_TECH = {
+  keyhole: layoutKeyhole,
+  spiral:  layoutSpiral,
+  trellis: layoutTrellis,
+  mandala: layoutMandala,
+  hugel:   layoutHugel,
+};
+
+/* ── 자유 두둑: 키 순서 줄배치 (스퀘어풋 간격) ── */
+function layoutCustom(plants, bed){
+  const bedArea = bed.w*100*bed.h*100;
+  const share = bedArea / Math.max(1,plants.length);
+  const rowsDef = [
+    { name:"뒷줄 (해 반대편)", test:p=>p.height>=80,           y:78,  reason:"키가 커서 뒷줄에 — 그늘이 밭 밖으로 지게 (스퀘어풋 배치 원칙)" },
+    { name:"가운데 줄",        test:p=>p.height>=35&&p.height<80, y:150, reason:"중간 키라 가운데 줄" },
+    { name:"앞줄 (햇빛쪽)",    test:p=>p.height<35,             y:222, reason:"낮아서 앞줄 — 해를 가리지 않고 듬뿍 받아요" },
+  ];
+  const buckets = rowsDef.map(r=>({ ...r, items: plants.filter(r.test) }));
+  const used = buckets.filter(b=>b.items.length);
+  // 줄 수에 맞춰 y 재분배
+  used.forEach((b,i)=>{ b.y = 60 + (i+0.5) * (200/used.length); });
+  const place = [];
+  used.forEach(b=>{
+    const n = b.items.length;
+    b.items.forEach((p,i)=>{
+      const foot = p.spacing*p.spacing;
+      let c = Math.max(1, Math.floor(share/foot));
+      const cap = p.spacing<=15?30 : p.spacing<=30?24 : 12;
+      c = Math.min(c, cap);
+      place.push({
+        plant:p, count:c,
+        cx: 40 + (i+0.5)*(320/n),
+        cy: b.y,
+        r: 17,
+        zone: "자유 두둑 · "+b.name,
+        reason: b.reason,
+      });
+    });
+  });
+  return { place, meta:{} };
+}
+LAYOUT_BY_TECH.custom = layoutCustom;
+
+
+/* ============================================================
+   퍼머컬처ON — 기법별 배치도 SVG 렌더러
+   각 기법의 실제 형태(도넛/나선/수직/방사/능선)를 그리고
+   그 위에 layout 엔진의 좌표대로 작물을 얹는다.
+   ============================================================ */
+
+function svgEl(s){ return s; }
+function plantMarker(pl){
+  // 작물 하나: 옅은 원 + 이모지 + 이름 + 포기수
+  const {plant:p, cx, cy, r, count} = pl;
+  return `
+    <g data-gd-i="${pl._i}">
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="#fffdf6" stroke="#cdbf9a" stroke-width="1.2" opacity="0.95"/>
+      <text x="${cx}" y="${cy+1}" font-size="${r*1.1}" text-anchor="middle" dominant-baseline="central">${p.emoji}</text>
+      <text x="${cx}" y="${cy+r+9}" font-size="9" font-weight="800" text-anchor="middle" fill="#2f4030">${p.name}</text>
+      <text x="${cx}" y="${cy+r+18}" font-size="7.5" text-anchor="middle" fill="#7a8378">${count}포기</text>
+    </g>`;
+}
+
+/* 흙 텍스처 defs (모든 기법 공용) */
+function soilDefs(){
+  return `
+  <defs>
+    <radialGradient id="gdSoilR" cx="45%" cy="38%" r="70%">
+      <stop offset="0%" stop-color="#b08a5e"/><stop offset="100%" stop-color="#8a6a44"/>
+    </radialGradient>
+    <linearGradient id="gdSoilL" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#9c7a52"/><stop offset="100%" stop-color="#7c5c3c"/>
+    </linearGradient>
+    <pattern id="gdSoilDots" width="12" height="12" patternUnits="userSpaceOnUse">
+      <circle cx="3" cy="4" r="0.8" fill="#5c4326" opacity="0.25"/>
+      <circle cx="9" cy="9" r="0.7" fill="#5c4326" opacity="0.2"/>
+    </pattern>
+  </defs>`;
+}
+
+/* 햇빛 화살표 */
+function sunArrow(sunId){
+  const map = {
+    N:[200,10,"▲ 해"], S:[200,292,"▼ 해"],
+    E:[388,150,"▶ 해"], W:[12,150,"◀ 해"]
+  };
+  const [x,y,t] = map[sunId] || map.S;
+  return `<text x="${x}" y="${y}" font-size="11" text-anchor="middle" fill="#e0a02e" font-weight="900">${t}</text>`;
+}
+
+const BED_SHAPE = {
+  /* ── 키홀: 도넛 + 앞쪽 통로 쐐기 + 중앙 퇴비통 ── */
+  keyhole(meta){
+    const {cx,cy,rOut,rIn,gapA,gapB} = meta;
+    // 통로 쐐기 경로
+    const a1=gapA, a2=gapB;
+    const x1=cx+Math.cos(a1)*rOut, y1=cy+Math.sin(a1)*rOut;
+    const x2=cx+Math.cos(a2)*rOut, y2=cy+Math.sin(a2)*rOut;
+    return `
+      <circle cx="${cx}" cy="${cy}" r="${rOut}" fill="url(#gdSoilR)"/>
+      <circle cx="${cx}" cy="${cy}" r="${rOut}" fill="url(#gdSoilDots)"/>
+      <!-- 통로 -->
+      <path d="M${cx},${cy} L${x1},${y1} A${rOut},${rOut} 0 0,1 ${x2},${y2} Z" fill="#efe6d0" opacity="0.85"/>
+      <!-- 중앙 퇴비통 -->
+      <circle cx="${cx}" cy="${cy}" r="${rIn}" fill="#efe6d0"/>
+      <circle cx="${cx}" cy="${cy}" r="${rIn-6}" fill="#6b4d2e"/>
+      <circle cx="${cx}" cy="${cy}" r="${rIn-6}" fill="none" stroke="#5a3f24" stroke-width="3" stroke-dasharray="3 3"/>
+      <text x="${cx}" y="${cy+3}" font-size="9" text-anchor="middle" fill="#f3eddc" font-weight="700">퇴비</text>`;
+  },
+
+  /* ── 스파이럴: 위에서 본 나선 흙길 ── */
+  spiral(meta){
+    const {cx,cy} = meta;
+    // 아르키메데스 나선 경로
+    let d=`M ${cx} ${cy}`;
+    for(let a=0; a<=Math.PI*3.2; a+=0.15){
+      const rad = 8 + a*13;
+      const x = cx+Math.cos(a-Math.PI/2)*rad;
+      const y = cy+Math.sin(a-Math.PI/2)*rad*0.72;
+      d += ` L ${x.toFixed(1)} ${y.toFixed(1)}`;
+    }
+    return `
+      <ellipse cx="${cx}" cy="${cy}" rx="130" ry="96" fill="url(#gdSoilR)"/>
+      <ellipse cx="${cx}" cy="${cy}" rx="130" ry="96" fill="url(#gdSoilDots)"/>
+      <path d="${d}" fill="none" stroke="#6b4d2e" stroke-width="10" stroke-linecap="round" opacity="0.55"/>
+      <path d="${d}" fill="none" stroke="#c9a876" stroke-width="4" stroke-linecap="round" opacity="0.7"/>`;
+  },
+
+  /* ── 트렐리스: 두둑 + 뒤쪽 격자 지지대 ── */
+  trellis(){
+    let lattice="";
+    for(let x=70;x<=330;x+=26) lattice+=`<line x1="${x}" y1="55" x2="${x}" y2="120" stroke="#8a6a44" stroke-width="3"/>`;
+    for(let y=60;y<=118;y+=22) lattice+=`<line x1="60" y1="${y}" x2="340" y2="${y}" stroke="#8a6a44" stroke-width="3"/>`;
+    return `
+      <rect x="50" y="120" width="300" height="150" rx="12" fill="url(#gdSoilL)"/>
+      <rect x="50" y="120" width="300" height="150" rx="12" fill="url(#gdSoilDots)"/>
+      <rect x="50" y="120" width="300" height="18" fill="#000" opacity="0.08"/>
+      ${lattice}`;
+  },
+
+  /* ── 만다라: 큰 원 + 방사 꽃잎선 + 중심 ── */
+  mandala(meta){
+    const {cx,cy}=meta;
+    let spokes="";
+    const P=8;
+    for(let i=0;i<P;i++){
+      const ang=-Math.PI/2+(i/P)*Math.PI*2;
+      spokes+=`<line x1="${cx}" y1="${cy}" x2="${cx+Math.cos(ang)*128}" y2="${cy+Math.sin(ang)*128*0.82}" stroke="#6b4d2e" stroke-width="2" opacity="0.4"/>`;
+    }
+    return `
+      <ellipse cx="${cx}" cy="${cy}" rx="130" ry="107" fill="url(#gdSoilR)"/>
+      <ellipse cx="${cx}" cy="${cy}" rx="130" ry="107" fill="url(#gdSoilDots)"/>
+      ${spokes}
+      <circle cx="${cx}" cy="${cy}" r="22" fill="#6b4d2e"/>
+      <text x="${cx}" y="${cy+3}" font-size="8" text-anchor="middle" fill="#f3eddc" font-weight="700">중심</text>`;
+  },
+
+  /* ── 후겔: 옆에서 본 능선 두둑(층) ── */
+  hugel(){
+    return `
+      <path d="M40,235 Q200,205 360,235 L360,250 Q200,225 40,250 Z" fill="#7c5c3c"/>
+      <path d="M55,225 Q200,170 345,225 Q200,195 55,225 Z" fill="url(#gdSoilL)"/>
+      <path d="M55,225 Q200,170 345,225 Q200,195 55,225 Z" fill="url(#gdSoilDots)"/>
+      <path d="M80,210 Q200,120 320,210 Q200,165 80,210 Z" fill="#9c7a52"/>
+      <path d="M80,210 Q200,120 320,210 Q200,165 80,210 Z" fill="url(#gdSoilDots)"/>
+      <!-- 통나무 심 (반투명) -->
+      <ellipse cx="200" cy="205" rx="90" ry="10" fill="#5a3f24" opacity="0.3"/>`;
+  },
+};
+
+/* 메인: 기법 배치도 그리기 */
+function renderTechBed(techId, plants, bed, sunId, override){
+  window.__gdPlantCount = plants.length;
+  const layoutFn = LAYOUT_BY_TECH[techId] || layoutSpiral;
+  let place, meta;
+  if(override && override.place){ place = override.place; meta = override.meta || {}; }
+  else { const r = layoutFn(plants, bed); place = r.place; meta = r.meta; }
+  place.forEach((pl,i)=>{ if(pl._i===undefined) pl._i=i; });
+  const shapeFn = BED_SHAPE[techId] || BED_SHAPE.spiral;
+
+  let svg = `<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">`;
+  svg += soilDefs();
+  svg += shapeFn(meta);
+  // 작물은 y좌표 순으로 그려 겹침 자연스럽게
+  place.sort((a,b)=>a.cy-b.cy).forEach(pl=> svg += plantMarker(pl));
+  svg += sunArrow(sunId);
+  svg += `</svg>`;
+  return { svg, place, meta };
+}
+
+/* 자유 두둑 모양 (로컬 400×300) */
+BED_SHAPE.custom = function(){
+  let rows="";
+  for(let y=90;y<=250;y+=55) rows += `<line x1="36" y1="${y}" x2="364" y2="${y}" stroke="#6b4d2e" stroke-width="1.5" opacity="0.25" stroke-dasharray="4 6"/>`;
+  return `
+    <rect x="26" y="26" width="348" height="248" rx="14" fill="url(#gdSoilL)"/>
+    <rect x="26" y="26" width="348" height="248" rx="14" fill="url(#gdSoilDots)"/>
+    <rect x="26" y="26" width="348" height="16" fill="#000" opacity="0.07"/>
+    ${rows}`;
+};
+/* 요소 이름 칩 (플롯 좌표) */
+function elemChip(x, y, label){
+  const w = 12 + label.length*10;
+  return `<g><rect x="${x}" y="${y}" width="${w}" height="15" rx="7" fill="#fffdf6" stroke="#cdbf9a" opacity="0.92"/>
+    <text x="${x+w/2}" y="${y+10.5}" font-size="9" font-weight="800" text-anchor="middle" fill="#2f4030">${label}</text></g>`;
+}
+
+
+/* ============================================================
+   퍼머컬처ON — 정밀 3D 입체 (v2)
+   기법별 실제 구조 분석 반영:
+   키홀=돌테두리+철망퇴비통+통로 / 스파이럴=나선 돌벽띠
+   트렐리스=기둥+그물+덩굴 / 만다라=꽃잎두둑+통로 / 후겔=통나무심 언덕
+   배치도(place)와 같은 좌표를 공유해 작물 위치 일치.
+   ============================================================ */
+
+const SOIL = (i, light=0) => `hsl(${34 - i*1.5}, 34%, ${40 + i*3 + light}%)`;
+
+function el(tag, cls, css){
+  const e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(css) Object.assign(e.style, css);
+  return e;
+}
+function disc(size, z, color, extra={}){
+  return el("div", null, Object.assign({
+    position:"absolute", left:"50%", top:"50%",
+    width:size+"px", height:size+"px",
+    marginLeft:(-size/2)+"px", marginTop:(-size/2)+"px",
+    borderRadius:"50%", background:color,
+    transform:`translateZ(${z}px)`,
+    boxShadow:"0 3px 7px rgba(60,44,24,.28)",
+    transformStyle:"preserve-3d",
+  }, extra));
+}
+/* 세워진 빌보드(작물/라벨) */
+function sprout(emoji, x, y, z, scale=1){
+  const s = el("div", null, {
+    position:"absolute", left:"50%", top:"50%",
+    transform:`translate3d(${x}px,${y}px,${z}px) rotateX(-90deg)`,
+    transformStyle:"preserve-3d", fontSize:(20*scale)+"px",
+    marginLeft:"-11px", marginTop:"-11px", lineHeight:1,
+    textShadow:"0 1px 2px rgba(0,0,0,.25)", pointerEvents:"none",
+  });
+  s.textContent = emoji;
+  return s;
+}
+/* 수직 원기둥 근사: 얇은 판 N장을 회전 배치 */
+function cylinder(parent, cx, cy, r, h, zBase, color, sides=10, opac=1){
+  for(let i=0;i<sides;i++){
+    const ang=(i/sides)*Math.PI*2;
+    const w = 2*r*Math.tan(Math.PI/sides)+1;
+    const p = el("div",null,{
+      position:"absolute", left:"50%", top:"50%",
+      width:w+"px", height:h+"px",
+      marginLeft:(-w/2)+"px", marginTop:(-h)+"px",
+      background:color, opacity:opac,
+      transform:`translate3d(${cx+Math.cos(ang)*r}px,${cy+Math.sin(ang)*r}px,${zBase}px) rotateZ(${ang+Math.PI/2}rad) rotateX(-90deg)`,
+      transformOrigin:"bottom center",
+      transformStyle:"preserve-3d",
+    });
+    parent.appendChild(p);
+  }
+}
+/* 돌멩이 하나(테두리 장식) */
+function stone(parent, x, y, z, s=10, hue=30){
+  const st = el("div",null,{
+    position:"absolute",left:"50%",top:"50%",
+    width:s+"px",height:(s*0.8)+"px",
+    marginLeft:(-s/2)+"px",marginTop:(-s*0.4)+"px",
+    borderRadius:"46% 54% 50% 50%",
+    background:`hsl(${hue},14%,${52+Math.random()*10}%)`,
+    boxShadow:"inset -1px -2px 3px rgba(0,0,0,.3), 0 2px 3px rgba(0,0,0,.25)",
+    transform:`translate3d(${x}px,${y}px,${z}px)`,
+    transformStyle:"preserve-3d",
+  });
+  parent.appendChild(st);
+}
+
+/* place(배치도 좌표계 400×300, 중심 200,150) → 3D 좌표(중심 0,0) */
+function p2xy(pl){ return [ (pl.cx-200)*0.62, (pl.cy-150)*0.62 ]; }
+
+const BUILD = {
+  /* ── 키홀: 돌 테두리 + 흙 두둑 + 철망 퇴비통 + 통로 ── */
+  keyhole(scene, plants, opts){
+    const R=86;
+    scene.appendChild(disc(R*2+26, 2, "#c9b892", {opacity:.55})); // 주변 땅
+    // 두둑(도넛 흙)
+    scene.appendChild(disc(R*2, 12, SOIL(2)));
+    scene.appendChild(disc(R*2, 13, "transparent", {backgroundImage:"radial-gradient(circle at 30% 30%, rgba(0,0,0,.12) 0 2px, transparent 3px)", backgroundSize:"14px 14px"}));
+    // 통로(앞쪽 V) - 밝은 쐐기
+    const path = el("div",null,{position:"absolute",left:"50%",top:"50%",width:"52px",height:R+14+"px",
+      marginLeft:"-26px",marginTop:"-4px",background:"#e8ddc2",
+      clipPath:"polygon(50% 0,100% 100%,0 100%)",transform:"translateZ(13.5px)",transformStyle:"preserve-3d"});
+    scene.appendChild(path);
+    // 테두리 돌담(원 둘레 돌 24개, 통로 각도 비움)
+    for(let i=0;i<26;i++){
+      const ang=-Math.PI/2 + (i/26)*Math.PI*2;
+      const norm=(ang+Math.PI*2)%(Math.PI*2);
+      if(norm>Math.PI*0.40 && norm<Math.PI*0.60) continue;
+      stone(scene, Math.cos(ang)*R, Math.sin(ang)*R, 18, 13+(i%3)*2);
+    }
+    // 중앙 퇴비통: 철망 원기둥
+    cylinder(scene, 0,0, 20, 34, 14,
+      "repeating-linear-gradient(0deg,#777 0 2px,transparent 2px 7px),repeating-linear-gradient(90deg,#777 0 2px,transparent 2px 7px)",
+      12, .9);
+    const compostTop = disc(36, 46, "#4e3a22");
+    scene.appendChild(compostTop);
+    scene.appendChild(sprout("♻️",0,-1,50,.7));
+    // 작물: place 좌표 사용
+    (opts.place||[]).forEach(pl=>{
+      const [x,y]=p2xy(pl);
+      scene.appendChild(sprout(pl.plant.emoji, x, y, 22, 1));
+    });
+  },
+
+  /* ── 스파이럴: 나선 '돌벽 띠'가 올라가는 진짜 구조 ── */
+  spiral(scene, plants, opts){
+    const mat = opts.material || null;
+    scene.appendChild(disc(210, 2, "#c9b892", {opacity:.5}));
+    // 흙 심(작은 언덕): 층 원반은 벽 안 채움용으로 은은하게
+    for(let i=0;i<6;i++) scene.appendChild(disc(140-i*20, 6+i*13, SOIL(i,2)));
+    // 나선 벽: 아르키메데스 나선 따라 '벽 조각'을 촘촘히 세움
+    const [h,s,l] = mat ? mat.color : [30,20,50];
+    const patternCss = (()=>{
+      if(!mat) return null;
+      switch(mat.pattern){
+        case "brick": return "repeating-linear-gradient(0deg,rgba(0,0,0,.25) 0 1.5px,transparent 1.5px 8px)";
+        case "stone": return "radial-gradient(circle at 40% 40%, rgba(255,255,255,.25) 0 2px, rgba(0,0,0,.15) 5px, transparent 6px)";
+        case "wood":  return "repeating-linear-gradient(90deg,rgba(0,0,0,.2) 0 2px,transparent 2px 9px)";
+        case "block": return "repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 2px,transparent 2px 12px)";
+        case "bottle":return "repeating-linear-gradient(90deg,rgba(255,255,255,.35) 0 4px,rgba(0,0,0,.1) 4px 8px)";
+      }
+    })();
+    const steps=64;
+    for(let i=0;i<steps;i++){
+      const t=i/steps;
+      const a=t*Math.PI*3.2;
+      const rad=98-t*66;
+      const zb=4+t*76;
+      const wallH=26;
+      const x=Math.cos(a-Math.PI/2)*rad, y=Math.sin(a-Math.PI/2)*rad;
+      const seg = el("div",null,{
+        position:"absolute",left:"50%",top:"50%",
+        width:"12px",height:wallH+"px",marginLeft:"-6px",marginTop:(-wallH)+"px",
+        background:`hsl(${h},${s}%,${l - t*6}%)`,
+        backgroundImage:patternCss||"none",
+        boxShadow:"inset -1px 0 2px rgba(0,0,0,.25)",
+        transform:`translate3d(${x}px,${y}px,${zb}px) rotateZ(${a}rad) rotateX(-90deg)`,
+        transformOrigin:"bottom center", transformStyle:"preserve-3d",
+      });
+      scene.appendChild(seg);
+    }
+    // 꼭대기 마감돌
+    scene.appendChild(disc(34, 86, `hsl(${h},${s}%,${l+8}%)`));
+    // 작물: place의 zone(t) 반영해 나선 위 높이까지 일치
+    (opts.place||[]).forEach((pl,i)=>{
+      const [x,y]=p2xy(pl);
+      // place는 위→아래 순서이므로 z 근사: 중심距離로 높이 추정
+      const dist=Math.hypot(x,y);
+      const z = 88 - (dist/70)*70;   // 중심 가까울수록 높이↑
+      scene.appendChild(sprout(pl.plant.emoji, x, y, Math.max(16,Math.min(92,z)), 1-(z/240)));
+    });
+  },
+
+  /* ── 트렐리스: 기둥 2 + 가로대 + 그물 + 덩굴줄기 ── */
+  trellis(scene, plants, opts){
+    scene.appendChild(el("div",null,{position:"absolute",left:"50%",top:"50%",width:"210px",height:"140px",
+      marginLeft:"-105px",marginTop:"-70px",borderRadius:"14px",background:SOIL(2),
+      transform:"translateZ(8px)",transformStyle:"preserve-3d",
+      boxShadow:"0 4px 9px rgba(60,44,24,.3)"}));
+    // 이랑 결
+    scene.appendChild(el("div",null,{position:"absolute",left:"50%",top:"50%",width:"210px",height:"140px",
+      marginLeft:"-105px",marginTop:"-70px",borderRadius:"14px",
+      backgroundImage:"repeating-linear-gradient(90deg, rgba(0,0,0,.1) 0 2px, transparent 2px 16px)",
+      transform:"translateZ(8.5px)",transformStyle:"preserve-3d"}));
+    // 기둥 2개 (뒤쪽 y=-52)
+    [-80,80].forEach(px=>{
+      const post = el("div",null,{position:"absolute",left:"50%",top:"50%",width:"7px",height:"92px",
+        marginLeft:"-3.5px",marginTop:"-92px",background:"linear-gradient(90deg,#7a5a38,#9a7448,#7a5a38)",
+        transform:`translate3d(${px}px,-52px,9px) rotateX(-90deg)`,transformOrigin:"bottom center",
+        transformStyle:"preserve-3d",boxShadow:"inset -2px 0 3px rgba(0,0,0,.3)"});
+      scene.appendChild(post);
+    });
+    // 가로대(맨 위)
+    const beam = el("div",null,{position:"absolute",left:"50%",top:"50%",width:"172px",height:"7px",
+      marginLeft:"-86px",marginTop:"-7px",background:"#8a6a44",
+      transform:"translate3d(0px,-52px,96px) rotateX(-90deg)",transformOrigin:"bottom center",
+      transformStyle:"preserve-3d"});
+    scene.appendChild(beam);
+    // 그물(반투명 격자판)
+    const net = el("div",null,{position:"absolute",left:"50%",top:"50%",width:"160px",height:"86px",
+      marginLeft:"-80px",marginTop:"-86px",
+      backgroundImage:"repeating-linear-gradient(0deg,#c8b98e 0 1.5px,transparent 1.5px 14px),repeating-linear-gradient(90deg,#c8b98e 0 1.5px,transparent 1.5px 14px)",
+      transform:"translate3d(0px,-52px,9px) rotateX(-90deg)",transformOrigin:"bottom center",
+      transformStyle:"preserve-3d",opacity:.95});
+    scene.appendChild(net);
+    // 덩굴 줄기(초록 지그재그) 2줄
+    [[-46,1],[38,-1]].forEach(([sx,dir])=>{
+      for(let k=0;k<5;k++){
+        const seg = el("div",null,{position:"absolute",left:"50%",top:"50%",width:"3.5px",height:"20px",
+          marginLeft:"-1.75px",marginTop:"-20px",background:"#3f8a52",borderRadius:"3px",
+          transform:`translate3d(${sx+Math.sin(k*1.3)*8*dir}px,-52px,${10+k*17}px) rotateX(-90deg) rotateY(${dir*14}deg)`,
+          transformOrigin:"bottom center",transformStyle:"preserve-3d"});
+        scene.appendChild(seg);
+      }
+    });
+    // 작물: place 좌표 (climb는 그물 위 높이로)
+    (opts.place||[]).forEach(pl=>{
+      const [x,y]=p2xy(pl);
+      const isClimb = !!pl.plant.climb;
+      scene.appendChild(sprout(pl.plant.emoji, x, isClimb? -52 : y, isClimb? 58+((x/40)%2)*18 : 12, 1));
+    });
+  },
+
+  /* ── 만다라: 꽃잎 두둑 8개(사이 통로) + 중심 ── */
+  mandala(scene, plants, opts){
+    scene.appendChild(disc(212, 2, "#c9b892",{opacity:.5}));
+    scene.appendChild(disc(196, 8, "#e8ddc2")); // 통로 바닥(밝음)
+    const P=8;
+    for(let i=0;i<P;i++){
+      const ang=-Math.PI/2 + (i/P)*Math.PI*2;
+      // 꽃잎 두둑: 타원형 흙판을 방사 배치
+      const petal = el("div",null,{position:"absolute",left:"50%",top:"50%",
+        width:"58px",height:"84px",marginLeft:"-29px",marginTop:"-42px",
+        borderRadius:"50% 50% 46% 46%",
+        background:SOIL(3),
+        backgroundImage:"radial-gradient(circle at 35% 30%, rgba(0,0,0,.1) 0 2px, transparent 3px)",
+        backgroundSize:"12px 12px",
+        boxShadow:"0 3px 6px rgba(60,44,24,.3)",
+        transform:`translate3d(${Math.cos(ang)*62}px,${Math.sin(ang)*62}px,12px) rotateZ(${ang+Math.PI/2}rad)`,
+        transformStyle:"preserve-3d"});
+      scene.appendChild(petal);
+    }
+    // 중심 (물확/퇴비)
+    scene.appendChild(disc(42, 16, "#6b4d2e"));
+    scene.appendChild(disc(30, 18, "#8fb4c9", {boxShadow:"inset 0 2px 5px rgba(0,0,0,.35)"})); // 물
+    // 작물
+    (opts.place||[]).forEach(pl=>{
+      const [x,y]=p2xy(pl);
+      scene.appendChild(sprout(pl.plant.emoji, x, y, 20, 1));
+    });
+  },
+
+  /* ── 후겔: 단면에 통나무 심이 보이는 긴 언덕 ── */
+  hugel(scene, plants, opts){
+    function mound(w,h,z,color,img){
+      return el("div", null, {position:"absolute",left:"50%",top:"50%",width:w+"px",height:h+"px",
+        marginLeft:(-w/2)+"px",marginTop:(-h/2)+"px",borderRadius:h+"px",
+        background:color, backgroundImage:img||"none",
+        transform:`translateZ(${z}px)`,transformStyle:"preserve-3d",
+        boxShadow:"0 3px 8px rgba(60,44,24,.28)"});
+    }
+    scene.appendChild(el("div",null,{position:"absolute",left:"50%",top:"50%",width:"230px",height:"120px",
+      marginLeft:"-115px",marginTop:"-60px",borderRadius:"18px",background:"#c9b892",opacity:.5,
+      transform:"translateZ(1px)",transformStyle:"preserve-3d"}));
+    scene.appendChild(mound(206, 92, 6, SOIL(0)));
+    scene.appendChild(mound(188, 68, 24, SOIL(3),
+      "radial-gradient(circle at 30% 35%, rgba(0,0,0,.1) 0 2px, transparent 3px)"));
+    scene.appendChild(mound(164, 44, 42, SOIL(5)));
+    // 단면 통나무 심: 언덕 앞면에 나이테 원 3개
+    [-42,0,42].forEach((lx,i)=>{
+      const log = el("div",null,{position:"absolute",left:"50%",top:"50%",width:"26px",height:"26px",
+        marginLeft:"-13px",marginTop:"-26px",borderRadius:"50%",
+        background:"radial-gradient(circle, #caa46e 0 3px, #8a6238 4px 7px, #6b4a28 8px 11px, #543a1e 12px)",
+        transform:`translate3d(${lx}px,46px,${14+i%2*4}px) rotateX(-90deg)`,
+        transformOrigin:"bottom center",transformStyle:"preserve-3d",
+        boxShadow:"0 2px 4px rgba(0,0,0,.4)"});
+      scene.appendChild(log);
+    });
+    // 작물: place 좌표, y(습윤도)→능선 높이 변환
+    (opts.place||[]).forEach(pl=>{
+      const [x,y]=p2xy(pl);
+      const z = y<-10? 52 : y<15? 32 : 14;  // 꼭대기/비탈/발치
+      scene.appendChild(sprout(pl.plant.emoji, x*0.9, y*0.62, z, 1));
+    });
+  },
+};
+
+/* ---------- 무대 제어 ---------- */
+let threeCtrl = null;
+function renderThree(techId, plants, opts={}){
+  const scene = document.getElementById("gdThreeScene");
+  scene.innerHTML = "";
+  if(opts.multi){ buildMultiScene(scene, opts.multi); }
+  else { (BUILD[techId] || BUILD.spiral)(scene, plants, opts); }
+
+  if(threeCtrl) threeCtrl.destroy();
+  let rx=58, rz=18, auto=true, raf=null, dragging=false, lx=0, ly=0;
+  const reduce = window.matchMedia("(prefers-reduced-motion:reduce)").matches;
+  function apply(){ scene.style.transform = `rotateX(${rx}deg) rotateZ(${rz}deg)`; }
+  function loop(){ if(auto && !reduce){ rz=(rz+0.25)%360; apply(); } raf=requestAnimationFrame(loop); }
+  apply(); loop();
+  const stage = document.getElementById("gdThreeStage") || scene.parentElement;
+  const cap = document.getElementById("gdThreeCap");
+  function down(e){ dragging=true; auto=false; const p=e.touches?e.touches[0]:e; lx=p.clientX; ly=p.clientY; if(cap)cap.textContent="손으로 돌려보세요"; }
+  function move(e){ if(!dragging)return; const p=e.touches?e.touches[0]:e; rz+=(p.clientX-lx)*0.5; rx=Math.max(20,Math.min(80,rx-(p.clientY-ly)*0.3)); lx=p.clientX; ly=p.clientY; apply(); if(e.cancelable)e.preventDefault(); }
+  function up(){ dragging=false; }
+  stage.addEventListener("mousedown",down); window.addEventListener("mousemove",move); window.addEventListener("mouseup",up);
+  stage.addEventListener("touchstart",down,{passive:false}); stage.addEventListener("touchmove",move,{passive:false}); window.addEventListener("touchend",up);
+  threeCtrl = { destroy(){ cancelAnimationFrame(raf);
+    stage.removeEventListener("mousedown",down); window.removeEventListener("mousemove",move); window.removeEventListener("mouseup",up);
+    stage.removeEventListener("touchstart",down); stage.removeEventListener("touchmove",move); window.removeEventListener("touchend",up);
+  }};
+}
+
+/* ── 자유 두둑 3D ── */
+BUILD.custom = function(scene, plants, opts={}){
+  const mk=(w,h,z,c)=>el("div",null,{position:"absolute",left:"50%",top:"50%",
+    width:w+"px",height:h+"px",marginLeft:(-w/2)+"px",marginTop:(-h/2)+"px",
+    borderRadius:"14px",background:c,transform:`translateZ(${z}px)`,
+    transformStyle:"preserve-3d",boxShadow:"0 3px 7px rgba(60,44,24,.28)"});
+  scene.appendChild(mk(212,150,4,"#c9b892"));
+  const bed=mk(196,134,14,SOIL(3));
+  bed.style.backgroundImage="repeating-linear-gradient(0deg, rgba(0,0,0,.09) 0 2px, transparent 2px 26px)";
+  scene.appendChild(bed);
+  (opts.place||[]).forEach(pl=>{
+    const [x,y]=p2xy(pl);
+    scene.appendChild(sprout(pl.plant.emoji, x*0.86, y*0.8, 18, 0.95));
+  });
+};
+
+/* ── 멀티 요소 씬: 밭 바닥 + 요소별 축소 배치 ── */
+function buildMultiScene(scene, M){
+  const K = Math.min(250/M.bed.w, 185/M.bed.h);
+  const gw = M.bed.w*K, gh = M.bed.h*K;
+  const mk=(w,h,z,c,r)=>el("div",null,{position:"absolute",left:"50%",top:"50%",
+    width:w+"px",height:h+"px",marginLeft:(-w/2)+"px",marginTop:(-h/2)+"px",
+    borderRadius:(r||14)+"px",background:c,transform:`translateZ(${z}px)`,
+    transformStyle:"preserve-3d",boxShadow:"0 3px 9px rgba(60,44,24,.22)"});
+  scene.appendChild(mk(gw+18, gh+18, 1, "#dccfae", 20));
+  scene.appendChild(mk(gw, gh, 2.5, "#e8ddc2"));
+  M.elements.forEach(e=>{
+    const s3 = Math.max(0.34, Math.min(1.15, e.wM*K/(ELEM_N3[e.tech]||212)));
+    const sub = el("div", null, {position:"absolute", left:"50%", top:"50%",
+      width:"1px", height:"1px", transformStyle:"preserve-3d",
+      transform:`translate3d(${((e.cxM-M.bed.w/2)*K).toFixed(1)}px,${((e.cyM-M.bed.h/2)*K).toFixed(1)}px,0) scale3d(${s3.toFixed(3)},${s3.toFixed(3)},${s3.toFixed(3)})`});
+    scene.appendChild(sub);
+    (BUILD[e.tech]||BUILD.custom)(sub, [], {material:e.material, place:e.place});
+  });
+}
+
+
+/* ============================================================
+   퍼머컬처ON — 텃밭 디자인 로직
+   - 자동 배치: 키 순서로 북→남 줄세움 + 면적당 포기수 계산
+   - 4중 체크: 궁합 / 공간·간격 / 재배시기 / 그늘
+   ============================================================ */
+
+const MONTHS = ["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
+
+const SIZE_PRESETS = [
+  { ico:"🪴", ttl:"베란다 화분",  w:0.8, h:0.4, dim:"화분 몇 개 규모" },
+  { ico:"📦", ttl:"상자텃밭",     w:1.2, h:0.6, dim:"1.2 × 0.6 m" },
+  { ico:"🌱", ttl:"작은 텃밭",    w:2,   h:1.5, dim:"2 × 1.5 m" },
+  { ico:"🌾", ttl:"넉넉한 밭",    w:4,   h:2.5, dim:"4 × 2.5 m" },
+];
+
+const SUNS = [
+  { id:"N", label:"북쪽" }, { id:"E", label:"동쪽" },
+  { id:"S", label:"남쪽" }, { id:"W", label:"서쪽" },
+];
+
+const state = {
+  step: 0,             // 0 기법 · 1 밭 · 2 작물 · 3 결과
+  tech: null,          // 선택한 기법 id
+  bed: { w:2, h:1.5 },
+  sun: "S",            // 햇빛 드는 방향 (기본 남향)
+  material: null,      // 스파이럴 벽 재료 id
+  selected: [],        // 선택한 작물 id
+  cat: "all",
+};
+
+/* ---------- 화면 전환 ---------- */
+const panels = [...GD_ROOT.querySelectorAll(".gd-panel")];   // [p0기법, p1b밭, p1작물, p2결과]
+const dots   = [...GD_ROOT.querySelectorAll(".gd-steps .dot")];
+const nextBtn = document.getElementById("gdNextBtn");
+const backBtn = document.getElementById("gdBackBtn");
+
+function goto(step){
+  state.step = step;
+  panels.forEach((p,i)=>p.classList.toggle("show", i===step));
+  dots.forEach((d,i)=>{
+    d.classList.toggle("on", i===step);
+    d.classList.toggle("done", i<step);
+  });
+  backBtn.style.display = step===0 ? "none" : "block";
+  if(step===0) nextBtn.textContent = "밭 정하기 →";
+  if(step===1) nextBtn.textContent = "작물 고르기 →";
+  if(step===2) nextBtn.textContent = "배치도 만들기 🌿";
+  if(step===3) nextBtn.textContent = "다시 만들기 ↻";
+  updateNextEnabled();
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+function updateNextEnabled(){
+  if(state.step===0){ nextBtn.disabled = !state.tech; }
+  else if(state.step===2){ nextBtn.disabled = state.selected.length < 1; }
+  else { nextBtn.disabled = false; }
+}
+
+nextBtn.addEventListener("click", ()=>{
+  if(state.step===0){ setupMaterials(); goto(1); }
+  else if(state.step===1){ readBed(); renderPlants(); goto(2); }
+  else if(state.step===2){ buildLayout(); goto(3); }
+  else if(state.step===3){ resetAll(); goto(0); }
+});
+
+function resetAll(){
+  state.selected = [];
+  state.cat = "all";
+  state.tech = null;
+  state.material = null;
+  GD_ROOT.querySelectorAll(".tech-card").forEach(c=>c.classList.remove("sel"));
+  document.getElementById("gdTechDetail").classList.remove("show");
+  document.getElementById("gdMatBlock").classList.remove("show");
+  document.getElementById("gdMatDetail").classList.remove("show");
+  catTabs.querySelectorAll(".cat-tab").forEach((t,i)=>t.classList.toggle("sel", i===0));
+  renderPlants();
+  renderBasket();
+}
+backBtn.addEventListener("click", ()=> goto(Math.max(0, state.step-1)));
+
+/* ---------- STEP0: 디자인 기법 선택 ---------- */
+const techGrid = document.getElementById("gdTechGrid");
+const techDetail = document.getElementById("gdTechDetail");
+TECHNIQUES.forEach((t,i)=>{
+  const card = document.createElement("button");
+  // 마지막 1개가 홀수로 남으면 전체폭
+  card.className = "tech-card" + (i===TECHNIQUES.length-1 && TECHNIQUES.length%2 ? " full":"");
+  card.innerHTML = `<div class="te">${t.emoji}</div><div class="tt">${t.name}</div><div class="tg">${t.tagline}</div>`;
+  card.onclick = ()=>{
+    state.tech = t.id;
+    GD_ROOT.querySelectorAll(".tech-card").forEach(c=>c.classList.remove("sel"));
+    card.classList.add("sel");
+    showTechDetail(t);
+    updateNextEnabled();
+  };
+  techGrid.appendChild(card);
+});
+
+function showTechDetail(t){
+  let zones = t.zones.map(z=>
+    `<div class="zone"><span class="zk">${z.label}</span><span>${z.desc}</span></div>`).join("");
+  techDetail.innerHTML =
+    `<div class="dh">${t.emoji} ${t.name}</div>
+     <div class="db">${t.best}</div>${zones}`;
+  techDetail.classList.add("show");
+}
+
+/* ---------- 스파이럴 재료 선택 ---------- */
+const matBlock = document.getElementById("gdMatBlock");
+const matGrid = document.getElementById("gdMatGrid");
+const matDetail = document.getElementById("gdMatDetail");
+
+function setupMaterials(){
+  // 스파이럴이 아니면 재료 영역 숨김
+  if(state.tech !== "spiral"){
+    matBlock.classList.remove("show");
+    return;
+  }
+  matBlock.classList.add("show");
+  // 현재 밭 크기로 추천
+  const w = parseFloat(document.getElementById("gdCw").value)||2;
+  const h = parseFloat(document.getElementById("gdCh").value)||1.5;
+  const { material:rec, why } = recommendMaterial(w,h);
+  // 추천이 아직 없으면 추천 재료를 기본 선택
+  if(!state.material) state.material = rec.id;
+  document.getElementById("gdMatRec").innerHTML =
+    `우리 밭엔 <b style="color:var(--green)">${rec.emoji} ${rec.name}</b>를 추천해요 — ${why}`;
+  renderMaterials(rec.id);
+}
+
+function renderMaterials(recId){
+  matGrid.innerHTML = "";
+  SPIRAL_MATERIALS.forEach(m=>{
+    const card = document.createElement("button");
+    card.className = "mat-card" + (m.id===state.material ? " sel":"");
+    card.innerHTML = `<div class="me">${m.emoji}</div><div class="mn">${m.name}</div>`
+      + (m.id===recId ? `<div class="pick">추천</div>` : "");
+    card.onclick = ()=>{
+      state.material = m.id;
+      renderMaterials(recId);
+      showMatDetail(m);
+    };
+    matGrid.appendChild(card);
+  });
+  // 현재 선택 상세
+  showMatDetail(MAT_BY_ID[state.material]);
+}
+
+function bars(label, val, cls=""){
+  let pips="";
+  for(let i=1;i<=3;i++) pips += `<span class="pip ${cls} ${i<=val?"on":""}"></span>`;
+  return `<span class="bk">${label}</span><span class="bar">${pips}</span>`;
+}
+
+function showMatDetail(m){
+  matDetail.innerHTML =
+    `<div class="mt">${m.emoji} ${m.name}</div>
+     <div class="mat-bars">
+       ${bars("내구성", m.life)}
+       ${bars("미관", m.look)}
+       ${bars("비용", m.cost, "cost")}
+       ${bars("난이도", m.effort, "effort")}
+     </div>
+     <div class="mat-pc"><span class="ok">좋아요</span> · ${m.pros}</div>
+     <div class="mat-pc"><span class="no">아쉬워요</span> · ${m.cons}</div>
+     <div class="mat-tip">🪴 ${m.tip}</div>`;
+  matDetail.classList.add("show");
+}
+
+/* ---------- STEP1: 밭 설정 ---------- */
+const sizeGrid = document.getElementById("gdSizeGrid");
+SIZE_PRESETS.forEach((s,i)=>{
+  const el = document.createElement("button");
+  el.className = "size-card" + (i===2 ? " sel":"");
+  el.innerHTML = `<div class="ico">${s.ico}</div>
+    <div class="ttl">${s.ttl}</div><div class="dim">${s.dim}</div>`;
+  el.onclick = ()=>{
+    GD_ROOT.querySelectorAll(".size-card").forEach(c=>c.classList.remove("sel"));
+    el.classList.add("sel");
+    document.getElementById("gdCw").value = s.w;
+    document.getElementById("gdCh").value = s.h;
+    if(state.tech==="spiral") setupMaterials();
+  };
+  sizeGrid.appendChild(el);
+});
+// 직접 입력 시 프리셋 선택 해제
+["gdCw","gdCh"].forEach(id=>{
+  document.getElementById(id).addEventListener("input", ()=>{
+    GD_ROOT.querySelectorAll(".size-card").forEach(c=>c.classList.remove("sel"));
+    if(state.tech==="spiral") setupMaterials();
+  });
+});
+
+const sunRow = document.getElementById("gdSunRow");
+SUNS.forEach(s=>{
+  const el = document.createElement("button");
+  el.className = "chip" + (s.id==="S" ? " sel":"");
+  el.textContent = s.label;
+  el.onclick = ()=>{
+    sunRow.querySelectorAll(".chip").forEach(c=>c.classList.remove("sel"));
+    el.classList.add("sel");
+    state.sun = s.id;
+  };
+  sunRow.appendChild(el);
+});
+
+function readBed(){
+  state.bed.w = Math.max(0.3, parseFloat(document.getElementById("gdCw").value)||2);
+  state.bed.h = Math.max(0.3, parseFloat(document.getElementById("gdCh").value)||1.5);
+}
+
+/* ---------- STEP2: 작물 선택 ---------- */
+const CATS = [
+  {id:"all",   name:"전체"},
+  {id:"fruit", name:"열매채소"},
+  {id:"veg",   name:"잎·뿌리채소"},
+  {id:"herb",  name:"허브"},
+  {id:"flower",name:"동반화"},
+];
+const catTabs = document.getElementById("gdCatTabs");
+CATS.forEach(c=>{
+  const el = document.createElement("button");
+  el.className = "cat-tab" + (c.id==="all" ? " sel":"");
+  el.textContent = c.name;
+  el.onclick = ()=>{
+    state.cat = c.id;
+    catTabs.querySelectorAll(".cat-tab").forEach(t=>t.classList.remove("sel"));
+    el.classList.add("sel");
+    renderPlants();
+  };
+  catTabs.appendChild(el);
+});
+
+const plantGrid = document.getElementById("gdPlantGrid");
+function renderPlants(){
+  plantGrid.innerHTML = "";
+  const rec = state.tech ? (TECH_BY_ID[state.tech].recommend||[]) : [];
+  let list = PLANTS.filter(p=> state.cat==="all" || p.cat===state.cat);
+  // 전체 탭에서는 기법 추천 작물을 앞으로 정렬
+  if(state.cat==="all" && rec.length){
+    list = [...list].sort((a,b)=> (rec.includes(b.id)?1:0)-(rec.includes(a.id)?1:0));
+  }
+  list.forEach(p=>{
+    const el = document.createElement("button");
+    const on = state.selected.includes(p.id);
+    const isRec = rec.includes(p.id);
+    el.className = "plant" + (on ? " sel":"") + (isRec ? " rec":"");
+    el.innerHTML = `<div class="e">${p.emoji}</div><div class="n">${p.name}</div>`
+      + (isRec ? `<div class="rectag">추천</div>` : "");
+    el.onclick = ()=>{
+      const i = state.selected.indexOf(p.id);
+      if(i>=0) state.selected.splice(i,1);
+      else state.selected.push(p.id);
+      renderPlants(); renderBasket(); updateNextEnabled();
+    };
+    plantGrid.appendChild(el);
+  });
+  // 힌트: 기법 추천 안내
+  const hint = document.getElementById("gdPlantHint");
+  if(hint && state.tech){
+    const t = TECH_BY_ID[state.tech];
+    hint.innerHTML = `<b style="color:var(--green)">${t.name}</b>에 잘 맞는 작물을 <b>추천</b>으로 표시했어요. 2~6가지가 좋아요.`;
+  }
+}
+function renderBasket(){
+  const b = document.getElementById("gdBasket");
+  if(!state.selected.length){ b.textContent = "아직 고른 작물이 없어요"; return; }
+  const names = state.selected.map(id=>PLANT_BY_ID[id].emoji+PLANT_BY_ID[id].name).join("  ");
+  b.innerHTML = `고른 작물 <b>${state.selected.length}</b>가지 · ${names}`;
+}
+
+/* ============================================================
+   자동 배치 + 4중 체크
+   ============================================================ */
+let lastResult = null;
+
+function buildLayout(){
+  const plants = state.selected.map(id=>PLANT_BY_ID[id]);
+  const bed = state.bed;
+  const bedW_cm = bed.w*100, bedH_cm = bed.h*100;
+
+  // ── 1) 키 순서로 줄 세우기 (큰 작물이 햇빛 안 가리는 쪽으로) ──
+  //   "햇빛 드는 방향"의 반대쪽(=그늘쪽)에 큰 작물을 둠.
+  //   화면은 항상 위=북 기준으로 그리되, 햇빛쪽을 아래로 가정해 큰 키를 위(뒤)로.
+  const sorted = [...plants].sort((a,b)=> b.height - a.height); // 큰 키 먼저(뒤줄)
+
+  // ── 2) 줄(row) 나누기: 키가 비슷한 것끼리 묶음 ──
+  const rows = [];
+  for(const p of sorted){
+    let row = rows.find(r=> Math.abs(r.h - p.height) <= 35);
+    if(!row){ row = {h:p.height, items:[]}; rows.push(row); }
+    row.items.push(p);
+  }
+
+  // ── 3) 각 작물 포기 수 계산 (밭 면적 ÷ 작물 차지면적, 균등 배분) ──
+  const bedArea = bedW_cm * bedH_cm;
+  const shareArea = bedArea / plants.length;
+  const counts = {};
+  for(const p of plants){
+    const foot = p.spacing * p.spacing;     // 한 포기 차지면적(cm²)
+    let c = Math.max(1, Math.floor(shareArea / foot));
+    // 좁은 간격 작물이 비현실적으로 많아지지 않게 상한 (작물별 권장 한 줄 분량 기준)
+    const cap = p.spacing <= 15 ? 30 : p.spacing <= 30 ? 24 : 12;
+    counts[p.id] = Math.min(c, cap);
+  }
+
+  lastResult = { plants, rows, counts, bedW_cm, bedH_cm };
+  const mat = state.tech==="spiral" && state.material ? MAT_BY_ID[state.material] : null;
+
+  // ── 기법별 정밀 배치 (STEP1 형태 반영) ──
+  const bedResult = renderTechBed(state.tech, plants, bed, state.sun);
+  const host = document.getElementById("gdBedHost");
+  if(host && bedResult){
+    host.innerHTML = bedResult.svg.replace("<svg ", '<svg id="gdBed" ');
+  }
+  lastResult.place = bedResult ? bedResult.place : null;
+  lastResult.meta  = bedResult ? bedResult.meta  : null;
+  // 밭 크기/햇빛 메타 갱신
+  const bdim=document.getElementById("gdBedDim");
+  if(bdim) bdim.textContent = `${bed.w} × ${bed.h} m · ${TECH_BY_ID[state.tech].name}`;
+  const bsun=document.getElementById("gdBedSun");
+  if(bsun) bsun.textContent = "☀ " + (SUNS.find(s=>s.id===state.sun)?.label||"") + " 햇빛";
+
+  // 3D — 같은 배치(place) 공유해 배치도와 일치
+  renderThree(state.tech, plants, { material: mat, place: lastResult.place });
+  renderReport(lastResult);
+
+  // 제목에 기법명 반영
+  const t = TECH_BY_ID[state.tech];
+  document.getElementById("gdResultTitle").textContent =
+    t ? `${t.emoji} ${t.name}, 이렇게 심어보세요` : "이렇게 심어보세요";
+}
+
+/* ---------- SVG 배치도 그리기 ---------- */
+function renderBed(R){
+  const svg = document.getElementById("gdBed");
+  const W=400, H=300, pad=14;
+  const innerW=W-pad*2, innerH=H-pad*2;
+  // 밭 비율 반영
+  const ratio = R.bedW_cm / R.bedH_cm;
+  let bw=innerW, bh=innerW/ratio;
+  if(bh>innerH){ bh=innerH; bw=innerH*ratio; }
+  const ox=(W-bw)/2, oy=(H-bh)/2;
+
+  document.getElementById("gdBedDim").textContent =
+    `${state.bed.w} × ${state.bed.h} m 밭`;
+  document.getElementById("gdBedSun").textContent =
+    "☀ " + (SUNS.find(s=>s.id===state.sun).label) + " 햇빛";
+
+  let s = "";
+  // 흙 배경 + 이랑 결
+  s += `<rect x="${ox}" y="${oy}" width="${bw}" height="${bh}" rx="8" fill="#a9855e"/>`;
+  s += `<rect x="${ox}" y="${oy}" width="${bw}" height="${bh}" rx="8" fill="#8a6a44" opacity=".35"/>`;
+  for(let gx=ox+10; gx<ox+bw-6; gx+=14){
+    s += `<line x1="${gx}" y1="${oy+5}" x2="${gx}" y2="${oy+bh-5}" stroke="#7a5a3a" stroke-width="1" opacity=".18"/>`;
+  }
+
+  // 줄(row)별 영역 분할 — 위(뒤줄=큰키)부터
+  const n = R.rows.length;
+  const rowH = bh / n;
+  R.rows.forEach((row, ri)=>{
+    const ry = oy + ri*rowH;
+    // 줄 안에서 작물 가로 분배
+    const m = row.items.length;
+    const cellW = bw / m;
+    row.items.forEach((p, ci)=>{
+      const cx = ox + ci*cellW + cellW/2;
+      const cy = ry + rowH/2;
+      const cnt = R.counts[p.id];
+      // 작물 칸 옅은 배경
+      s += `<rect x="${ox+ci*cellW+3}" y="${ry+3}" width="${cellW-6}" height="${rowH-6}" rx="7" fill="#f3eddc" opacity=".82"/>`;
+      // 키 띠(뒤줄일수록 진한 초록 = 그늘 정보)
+      const shade = 0.25 + 0.5*(1 - ri/Math.max(1,n-1||1));
+      s += `<rect x="${ox+ci*cellW+3}" y="${ry+3}" width="6" height="${rowH-6}" rx="3" fill="#2f6b3f" opacity="${shade.toFixed(2)}"/>`;
+      // 이모지 + 이름 + 포기수
+      s += `<text x="${cx}" y="${cy-4}" font-size="${Math.min(26, rowH*.45)}" text-anchor="middle">${p.emoji}</text>`;
+      s += `<text x="${cx}" y="${cy+15}" font-size="11" font-weight="800" text-anchor="middle" fill="#1f2d23">${p.name}</text>`;
+      s += `<text x="${cx}" y="${cy+28}" font-size="9.5" text-anchor="middle" fill="#6b7468">${cnt}포기</text>`;
+    });
+  });
+
+  // 햇빛 방향 화살표(밭 바깥)
+  const sunPos = {N:[W/2,oy-2,"▲"], S:[W/2,oy+bh+12,"▼"], E:[ox+bw+6,H/2,"▶"], W:[ox-6,H/2,"◀"]}[state.sun];
+  s += `<text x="${sunPos[0]}" y="${sunPos[1]}" font-size="13" text-anchor="middle" fill="#e0a02e" font-weight="900">${sunPos[2]}☀</text>`;
+
+  svg.innerHTML = s;
+}
+
+/* ---------- 4중 체크 리포트 ---------- */
+function renderReport(R){
+  const box = document.getElementById("gdReport");
+  const plants = R.plants;
+  let html = "";
+
+  // ===== 0) 자리 배치 (기법 형태 기준) =====
+  if(R.place && R.place.length){
+    html += `<h3>📍 자리 배치 — 왜 여기에?</h3>`;
+    R.place.forEach(pl=>{
+      html += note("info", pl.plant.emoji,
+        `<b>${pl.plant.name}</b> → <b>${pl.zone}</b> · ${pl.reason} (약 ${pl.count}포기)`);
+    });
+  }
+
+  // ===== 1) 궁합 체크 =====
+  html += `<h3>🌿 동반작물 궁합</h3>`;
+  const goods=[], bads=[];
+  for(let i=0;i<plants.length;i++)for(let j=i+1;j<plants.length;j++){
+    const a=plants[i], b=plants[j];
+    const rel = COMP_LOOKUP[a.id]?.[b.id];
+    if(rel?.type==="good") goods.push({a,b,why:rel.why});
+    if(rel?.type==="bad")  bads.push({a,b,why:rel.why});
+  }
+  if(bads.length){
+    bads.forEach(g=> html += note("bad","⚠️",
+      `<b class="pair">${g.a.name} ✕ ${g.b.name}</b> — ${g.why}. 멀리 떨어뜨려 심으세요.`));
+  }
+  if(goods.length){
+    goods.forEach(g=> html += note("good","🤝",
+      `<b class="pair">${g.a.name} + ${g.b.name}</b> — ${g.why}.`));
+  }
+  if(!goods.length && !bads.length){
+    html += note("info","🌱","서로 특별한 궁합 관계는 없어요. 나란히 심어도 무방합니다.");
+  }
+
+  // ===== 2) 공간·간격 체크 =====
+  html += `<h3>📏 공간 · 포기 수</h3>`;
+  const totalNeed = plants.reduce((s,p)=> s + R.counts[p.id]*(p.spacing*p.spacing),0);
+  const bedArea = R.bedW_cm*R.bedH_cm;
+  plants.forEach(p=>{
+    html += note("info","•",
+      `<b>${p.name}</b> 약 <b>${R.counts[p.id]}포기</b> (포기 간격 ${p.spacing}cm)`);
+  });
+  if(totalNeed > bedArea*0.95){
+    html += note("warn","📐","밭이 살짝 빡빡해요. 포기 수를 조금 줄이면 더 잘 자랍니다.");
+  } else {
+    html += note("good","✅","밭 크기에 알맞게 들어갑니다. 통로 여유도 있어요.");
+  }
+
+  // ===== 3) 재배 시기 체크 =====
+  html += `<h3>📅 심는 시기</h3>`;
+  const months = plants.map(p=>p.sow[0]);
+  const minM=Math.min(...months), maxM=Math.max(...months);
+  plants.forEach(p=>{
+    const [a,b]=p.sow;
+    const range = a===b ? MONTHS[a-1] : `${MONTHS[a-1]}~${MONTHS[b-1]}`;
+    html += note("info","•", `<b>${p.name}</b> — ${range}에 심기`);
+  });
+  if(maxM-minM >= 3){
+    // 시기 그룹 나누기
+    const spring = plants.filter(p=>p.sow[0]<=6).map(p=>p.name);
+    const fall   = plants.filter(p=>p.sow[0]>=7).map(p=>p.name);
+    let msg = "심는 시기가 많이 달라요. ";
+    if(spring.length) msg += `봄(${spring.join("·")})`;
+    if(spring.length&&fall.length) msg += " 먼저 심고, ";
+    if(fall.length) msg += `가을(${fall.join("·")})`;
+    msg += " 자리를 비워두면 같은 밭을 이어서 쓸 수 있어요.";
+    html += note("warn","🕒", msg);
+  } else {
+    html += note("good","✅","비슷한 시기에 함께 심을 수 있어요.");
+  }
+
+  // ===== 4) 그늘(햇빛) 체크 =====
+  html += `<h3>☀️ 햇빛 · 그늘</h3>`;
+  const tall = plants.filter(p=>p.height>=80).sort((a,b)=>b.height-a.height);
+  const low  = plants.filter(p=>p.height<40);
+  if(tall.length){
+    const sunLabel = SUNS.find(s=>s.id===state.sun).label;
+    html += note("good","🌳",
+      `키 큰 <b>${tall.map(p=>p.name).join("·")}</b>은(는) 햇빛 드는 ${sunLabel} 반대쪽(뒷줄)에 두었어요. 작은 작물을 가리지 않아요.`);
+  }
+  if(tall.length && low.length){
+    const shadeOk = low.filter(p=>p.sun!=="full");
+    if(shadeOk.length){
+      html += note("good","🌤",
+        `<b>${shadeOk.map(p=>p.name).join("·")}</b>은(는) 반그늘도 잘 견뎌, 큰 작물 발치에 심어도 좋아요.`);
+    }
+    const shadeBad = low.filter(p=>p.sun==="full");
+    if(shadeBad.length){
+      html += note("warn","🔆",
+        `<b>${shadeBad.map(p=>p.name).join("·")}</b>은(는) 햇빛을 좋아해요. 큰 작물 그늘에 가리지 않게 앞줄·햇빛쪽에 배치하세요.`);
+    }
+  }
+  if(!tall.length){
+    html += note("info","🌱","모두 키가 비슷해 서로 그늘 걱정은 적어요.");
+  }
+
+  // ===== 5) 스파이럴 재료 =====
+  if(state.tech==="spiral" && state.material){
+    const m = MAT_BY_ID[state.material];
+    html += `<h3>${m.emoji} 나선 벽 재료 — ${m.name}</h3>`;
+    html += note("good","🧱", `<b>${m.name}</b>로 쌓기 — ${m.pros}.`);
+    html += note("info","🪴", m.tip);
+  }
+
+  // ===== 6) 이 디자인 기법 팁 =====
+  const tech = TECH_BY_ID[state.tech];
+  if(tech){
+    html += `<h3>${tech.emoji} ${tech.name} 만들기 팁</h3>`;
+    tech.tips.forEach(tip=> html += note("info","🪴", tip));
+  }
+
+  box.innerHTML = html;
+}
+
+function note(type, ic, text){
+  return `<div class="note ${type}"><span class="ic">${ic}</span><span>${text}</span></div>`;
+}
+
+/* ---------- 초기화 (탭 최초 진입 시 1회) ---------- */
+let GD_INITED = false;
+function gardenInit(){
+  if(GD_INITED) return;
+  GD_INITED = true;
+  renderPlants();
+  renderBasket();
+  goto(0);
+}
+// 외부(app.js 탭 전환)에서 호출할 수 있도록 노출
+window.gardenInit = gardenInit;
+
+
+/* ============================================================
+   멀티 요소 플로우 (v3)
+   밭 크기 → 두둑 여러 개 담기(팔레트) → 작물 → 밭 전체 배치도
+   logic의 goto/renderPlants/buildLayout/renderReport/resetAll 재정의
+   ============================================================ */
+
+state.elements = [];          // {uid, tech, w, h, x, y} (m)
+let elemSeq = 1;
+
+/* ── 버튼 노드 교체(옛 리스너 제거) ── */
+const _on = document.getElementById("gdNextBtn");
+const nextB = _on.cloneNode(true); _on.replaceWith(nextB);
+const _ob = document.getElementById("gdBackBtn");
+const backB = _ob.cloneNode(true); _ob.replaceWith(backB);
+
+/* ── 패널 순서: [밭, 디자인, 작물, 결과] ── */
+const P = ["gdP1b","gdP0","gdP1","gdP2"].map(id=>document.getElementById(id));
+const NEXT_LABELS = ["디자인 고르기 →","작물 고르기 →","배치도 만들기 🌿","다시 만들기 ↻"];
+
+goto = function(step){
+  state.step = step;
+  P.forEach((pp,i)=>pp.classList.toggle("show", i===step));
+  dots.forEach((d,i)=>{ d.classList.toggle("on",i===step); d.classList.toggle("done",i<step); });
+  backB.style.display = step===0 ? "none" : "block";
+  nextB.textContent = NEXT_LABELS[step];
+  updateNextEnabled();
+  window.scrollTo({top:0, behavior:"smooth"});
+};
+updateNextEnabled = function(){
+  if(state.step===1)      nextB.disabled = state.elements.length < 1;
+  else if(state.step===2) nextB.disabled = state.selected.length < 1;
+  else nextB.disabled = false;
+};
+nextB.addEventListener("click", ()=>{
+  if(state.step===0){ readBed(); repackAll(true); renderPalette(); renderPlaced(); renderPrev(); refreshMat(); goto(1); }
+  else if(state.step===1){ renderPlants(); goto(2); }
+  else if(state.step===2){ buildLayout(); goto(3); }
+  else { resetAll(); goto(0); }
+});
+backB.addEventListener("click", ()=> goto(Math.max(0, state.step-1)));
+
+resetAll = function(){
+  state.selected = []; state.cat = "all"; state.material = null; state.elements = [];
+  matBlock.classList.remove("show"); matDetail.classList.remove("show");
+  document.getElementById("gdTechDetail").classList.remove("show");
+  catTabs.querySelectorAll(".cat-tab").forEach((t,i)=>t.classList.toggle("sel", i===0));
+  renderPalette(); renderPlaced(); renderPrev();
+  renderPlants(); renderBasket();
+};
+
+/* ── 요소 크기/패킹 ── */
+function specSize(tech){
+  const sp = ELEM_SPEC[tech];
+  const availW = state.bed.w-0.4, availH = state.bed.h-0.4;
+  let w = Math.min(sp.pref[0], availW), h = Math.min(sp.pref[1], availH);
+  if(sp.square){ const s=Math.min(w,h); w=h=s; }
+  if(w < sp.min[0]-1e-9 || h < sp.min[1]-1e-9) return null;
+  return { w:+w.toFixed(2), h:+h.toFixed(2) };
+}
+const TALL_RANK = { trellis:3, hugel:2, spiral:2, keyhole:1, mandala:1, custom:0 };
+function packOrder(list){
+  const arr=[...list].sort((a,b)=>(TALL_RANK[b.tech]-TALL_RANK[a.tech]) || (a.uid-b.uid));
+  if(state.sun==="N") arr.reverse();   // 해가 북쪽이면 키 큰 요소를 남쪽(아래)로
+  return arr;
+}
+function tryPack(list){
+  const M=0.2, G=0.3, BW=state.bed.w, BH=state.bed.h;
+  let x=M, y=M, rowH=0; const pos=new Map();
+  for(const el of packOrder(list)){
+    if(x>M && x+el.w > BW-M+1e-9){ y+=rowH+G; x=M; rowH=0; }
+    if(x+el.w > BW-M+1e-9 || y+el.h > BH-M+1e-9) return null;
+    pos.set(el.uid, {x:+x.toFixed(2), y:+y.toFixed(2)});
+    x += el.w+G; rowH = Math.max(rowH, el.h);
+  }
+  return pos;
+}
+function repackAll(dropOverflow){
+  let list=[...state.elements], pos=tryPack(list);
+  const dropped=[];
+  while(!pos && dropOverflow && list.length){ dropped.push(list.pop()); pos=tryPack(list); }
+  if(dropped.length){
+    state.elements=list;
+    window.Mock && Mock.toast(`밭이 좁아 ${dropped.map(d=>TECH_BY_ID[d.tech].name).join("·")}을(를) 뺐어요`);
+  }
+  if(pos) state.elements.forEach(el=>{ const p=pos.get(el.uid); el.x=p.x; el.y=p.y; });
+  return !!pos;
+}
+function canAdd(tech){
+  const s = specSize(tech);
+  if(!s) return {ok:false, why:`밭이 좁아요 · 최소 ${ELEM_SPEC[tech].min[0]}×${ELEM_SPEC[tech].min[1]}m`};
+  if(!tryPack([...state.elements, {uid:-1, tech, w:s.w, h:s.h}]))
+    return {ok:false, why:"남은 자리가 부족해요 — 두둑을 빼거나 밭을 키워보세요"};
+  return {ok:true, size:s};
+}
+
+/* ── 팔레트 / 담은 목록 / 미리보기 ── */
+const techGridEl = document.getElementById("gdTechGrid");
+const placedEl   = document.getElementById("gdPlaced");
+const prevWrap   = document.getElementById("gdPrevWrap");
+const prevEl     = document.getElementById("gdPlotPrev");
+
+function renderPalette(){
+  techGridEl.innerHTML = "";
+  TECHNIQUES.forEach(t=>{
+    const chk = canAdd(t.id);
+    const cnt = state.elements.filter(e=>e.tech===t.id).length;
+    const card = document.createElement("button");
+    card.className = "tech-card" + (chk.ok?"":" off");
+    card.innerHTML =
+      `<div class="te">${t.emoji}${cnt?`<span class="cntb">${cnt}</span>`:""}</div>
+       <div class="tt">${t.name}</div>
+       <div class="tg">${chk.ok?`약 ${chk.size.w}×${chk.size.h}m · 탭해서 추가`:chk.why}</div>`;
+    card.onclick = ()=>{ if(!chk.ok){ Mock.toast(chk.why); return; } addElement(t.id, chk.size); };
+    techGridEl.appendChild(card);
+  });
+}
+function addElement(tech, size){
+  state.elements.push({uid:elemSeq++, tech, w:size.w, h:size.h, x:0, y:0});
+  repackAll(false);
+  renderPalette(); renderPlaced(); renderPrev(); refreshMat(); showExplainPeek(tech);
+  updateNextEnabled();
+}
+function removeElement(uid){
+  state.elements = state.elements.filter(e=>e.uid!==uid);
+  repackAll(false);
+  renderPalette(); renderPlaced(); renderPrev(); refreshMat(); updateNextEnabled();
+}
+function resizeCustom(uid, dw, dh){
+  const el = state.elements.find(e=>e.uid===uid); if(!el) return;
+  const sp = ELEM_SPEC.custom;
+  const old = {w:el.w, h:el.h};
+  el.w = Math.max(sp.min[0], +(el.w+dw).toFixed(1));
+  el.h = Math.max(sp.min[1], +(el.h+dh).toFixed(1));
+  if(!tryPack(state.elements)){ el.w=old.w; el.h=old.h; Mock.toast("그 크기는 자리가 부족해요"); return; }
+  repackAll(false); renderPlaced(); renderPrev(); renderPalette();
+}
+function renderPlaced(){
+  if(!state.elements.length){ placedEl.innerHTML=""; prevWrap.style.display="none"; return; }
+  prevWrap.style.display = "block";
+  placedEl.innerHTML =
+    `<div class="gd-placedhead">담은 두둑 <b>${state.elements.length}</b>개</div>` +
+    state.elements.map(e=>{
+      const t = TECH_BY_ID[e.tech];
+      const sz = e.tech==="custom"
+        ? `<button class="szbtn" data-a="w-" data-u="${e.uid}">−</button>${e.w}<button class="szbtn" data-a="w+" data-u="${e.uid}">＋</button>×<button class="szbtn" data-a="h-" data-u="${e.uid}">−</button>${e.h}<button class="szbtn" data-a="h+" data-u="${e.uid}">＋</button>m`
+        : `${e.w} × ${e.h} m`;
+      return `<div class="gd-echip"><span class="ee">${t.emoji}</span><b>${t.name}</b><span class="esz">${sz}</span><button class="edel" data-del="${e.uid}">✕</button></div>`;
+    }).join("");
+}
+placedEl.addEventListener("click", e=>{
+  const d = e.target.closest("[data-del]");
+  if(d){ removeElement(+d.dataset.del); return; }
+  const s = e.target.closest(".szbtn");
+  if(s){ const a=s.dataset.a;
+    resizeCustom(+s.dataset.u, a==="w+"?0.3:a==="w-"?-0.3:0, a==="h+"?0.3:a==="h-"?-0.3:0);
+  }
+});
+function plotTransform(){
+  const PAD=16;
+  const S = Math.min((400-PAD*2)/state.bed.w, (300-PAD*2)/state.bed.h);
+  return { S, ox:(400-state.bed.w*S)/2, oy:(300-state.bed.h*S)/2 };
+}
+function renderPrev(){
+  if(!state.elements.length){ prevEl.innerHTML=""; return; }
+  const {S,ox,oy} = plotTransform();
+  document.getElementById("gdPrevDim").textContent = `· ${state.bed.w}×${state.bed.h}m`;
+  let s = `<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">`;
+  s += `<rect x="${ox}" y="${oy}" width="${state.bed.w*S}" height="${state.bed.h*S}" rx="10" fill="#e8ddc2" stroke="#cdbf9a" stroke-width="2"/>`;
+  state.elements.forEach(e=>{
+    s += `<rect x="${ox+e.x*S}" y="${oy+e.y*S}" width="${e.w*S}" height="${e.h*S}" rx="8" fill="#a9855e" opacity="0.82"/>`;
+    s += `<text x="${ox+(e.x+e.w/2)*S}" y="${oy+(e.y+e.h/2)*S+5}" font-size="14" text-anchor="middle">${TECH_BY_ID[e.tech].emoji}</text>`;
+  });
+  s += `</svg>`;
+  prevEl.innerHTML = s;
+}
+function showExplainPeek(tech){
+  const t = TECH_BY_ID[tech], ex = EXPLAIN[tech];
+  const td = document.getElementById("gdTechDetail");
+  td.innerHTML = `<div class="dh">${t.emoji} ${t.name}</div><div class="db">${ex.origin}</div>
+    <div class="zone"><span class="zk">규격</span><span>${ex.size}</span></div>
+    <div class="zone"><span class="zk">핵심</span><span>${ex.rules[0]}</span></div>`;
+  td.classList.add("show");
+}
+function refreshMat(){
+  const sp = state.elements.find(e=>e.tech==="spiral");
+  if(!sp){ matBlock.classList.remove("show"); return; }
+  matBlock.classList.add("show");
+  const { material:rec, why } = recommendMaterial(sp.w, sp.h);
+  if(!state.material) state.material = rec.id;
+  document.getElementById("gdMatRec").innerHTML =
+    `나선 벽 재료 — <b style="color:var(--gd-green)">${rec.emoji} ${rec.name}</b> 추천: ${why}`;
+  renderMaterials(rec.id);
+}
+setupMaterials = refreshMat;   // 옛 호출 경로 무해화
+
+/* ── 작물 추천(담은 두둑 합집합) ── */
+renderPlants = function(){
+  plantGrid.innerHTML = "";
+  const rec = [...new Set(state.elements.flatMap(e=>(TECH_BY_ID[e.tech].recommend||[])))];
+  let list = PLANTS.filter(p=> state.cat==="all" || p.cat===state.cat);
+  if(state.cat==="all" && rec.length)
+    list = [...list].sort((a,b)=>(rec.includes(b.id)?1:0)-(rec.includes(a.id)?1:0));
+  list.forEach(p=>{
+    const b = document.createElement("button");
+    const on = state.selected.includes(p.id), isRec = rec.includes(p.id);
+    b.className = "plant"+(on?" sel":"")+(isRec?" rec":"");
+    b.innerHTML = `<div class="e">${p.emoji}</div><div class="n">${p.name}</div>`+(isRec?`<div class="rectag">추천</div>`:"");
+    b.onclick = ()=>{
+      const i = state.selected.indexOf(p.id);
+      if(i>=0) state.selected.splice(i,1); else state.selected.push(p.id);
+      renderPlants(); renderBasket(); updateNextEnabled();
+    };
+    plantGrid.appendChild(b);
+  });
+  const hint = document.getElementById("gdPlantHint");
+  if(hint) hint.innerHTML = state.elements.length
+    ? `담은 두둑(${state.elements.map(e=>TECH_BY_ID[e.tech].name).join("·")})에 맞는 작물을 <b style="color:var(--gd-green)">추천</b>으로 표시했어요.`
+    : "2~6가지가 가장 잘 어울려요.";
+};
+
+/* ── 작물 → 두둑 배정 ── */
+function scoreCropEl(p, el){
+  const t = el.tech;
+  let s = t==="custom" ? 1 : 0.4;
+  if(p.climb) s += t==="trellis" ? 4 : 0;
+  if(["pumpkin","zucchini","potato"].includes(p.id)) s += t==="hugel" ? 3 : 0;
+  if(p.water==="dry") s += t==="spiral" ? 3 : t==="hugel" ? 1 : 0;
+  if(p.water==="wet") s += t==="keyhole" ? 1.5 : (t==="spiral"||t==="hugel") ? 1 : 0;
+  if(p.feed==="heavy") s += t==="keyhole" ? 3 : t==="hugel" ? 1.5 : t==="mandala" ? 1 : 0;
+  if(p.cat==="herb")   s += t==="spiral" ? 3 : 0;
+  if(p.cat==="flower") s += t==="mandala" ? 2 : t==="keyhole" ? 1 : 0;
+  if(p.height>=120 && t==="keyhole") s -= 2;   // 키홀은 키 큰 작물 부적합(문헌)
+  return s;
+}
+function assignCrops(plants){
+  const caps = new Map(state.elements.map(el=>[el.uid, Math.max(1, Math.round(el.w*el.h/0.4))]));
+  const buckets = new Map(state.elements.map(el=>[el.uid, []]));
+  const order = [...plants].sort((a,b)=>{
+    const ma = Math.max(...state.elements.map(el=>scoreCropEl(a,el)));
+    const mb = Math.max(...state.elements.map(el=>scoreCropEl(b,el)));
+    return mb-ma;
+  });
+  for(const p of order){
+    const ranked = [...state.elements].sort((x,y)=>scoreCropEl(p,y)-scoreCropEl(p,x));
+    const target = ranked.find(el=>buckets.get(el.uid).length < caps.get(el.uid)) || ranked[0];
+    buckets.get(target.uid).push(p);
+  }
+  return buckets;
+}
+
+/* ── 메인 빌드 ── */
+buildLayout = function(){
+  readBed(); repackAll(true);
+  const plants = state.selected.map(id=>PLANT_BY_ID[id]);
+  const buckets = assignCrops(plants);
+  const {S,ox,oy} = plotTransform();
+  const RT=[], place=[]; let gi=0;
+  state.elements.forEach(el=>{
+    const mine = buckets.get(el.uid) || [];
+    const { place:lp, meta } = (LAYOUT_BY_TECH[el.tech]||layoutCustom)(mine, {w:el.w, h:el.h});
+    const exPx = ox+el.x*S, eyPx = oy+el.y*S;
+    const sx = el.w*S/400, sy = el.h*S/300;
+    lp.forEach(q=>{
+      place.push({ plant:q.plant, count:q.count, zone:q.zone, reason:q.reason,
+        cx:+(exPx+q.cx*sx).toFixed(1), cy:+(eyPx+q.cy*sy).toFixed(1),
+        r:Math.max(9, Math.min(15, (q.r||16)*(sx+sy)/2)),
+        elUid:el.uid, _i:gi++ });
+    });
+    RT.push({ el, meta, exPx, eyPx, sx, sy });
+  });
+  lastResult = { plants, bed:{...state.bed}, sun:state.sun, S, ox, oy, elements:RT, place };
+  renderPlotAll();
+  renderReport(lastResult);
+  document.getElementById("gdResultTitle").textContent =
+    state.elements.length===1
+      ? `${TECH_BY_ID[state.elements[0].tech].emoji} ${TECH_BY_ID[state.elements[0].tech].name}, 이렇게 심어보세요`
+      : `두둑 ${state.elements.length}개, 이렇게 배치했어요 🌿`;
+};
+
+/* ── 렌더 (레이아웃 재계산 없이 place 기반) ── */
+function renderPlotAll(){
+  const R = lastResult; if(!R) return;
+  let s = `<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">` + soilDefs();
+  s += `<rect x="${R.ox-6}" y="${R.oy-6}" width="${R.bed.w*R.S+12}" height="${R.bed.h*R.S+12}" rx="14" fill="#dccfae"/>`;
+  s += `<rect x="${R.ox}" y="${R.oy}" width="${R.bed.w*R.S}" height="${R.bed.h*R.S}" rx="10" fill="#e8ddc2"/>`;
+  R.elements.forEach(rt=>{
+    const shape = (BED_SHAPE[rt.el.tech]||BED_SHAPE.custom)(rt.meta);
+    s += `<g transform="translate(${rt.exPx},${rt.eyPx}) scale(${rt.sx.toFixed(4)},${rt.sy.toFixed(4)})">${shape}</g>`;
+  });
+  [...R.place].sort((a,b)=>a.cy-b.cy).forEach(pl=> s += plantMarker(pl));
+  R.elements.forEach(rt=> s += elemChip(rt.exPx+3, rt.eyPx+2, TECH_BY_ID[rt.el.tech].name));
+  s += `<line x1="${R.ox}" y1="293" x2="${R.ox+R.S}" y2="293" stroke="#7a6a48" stroke-width="2.5"/>
+        <text x="${R.ox+R.S/2}" y="288" font-size="8.5" text-anchor="middle" fill="#7a6a48" font-weight="800">1 m</text>`;
+  s += sunArrow(R.sun) + `</svg>`;
+  document.getElementById("gdBedHost").innerHTML = s;
+  document.getElementById("gdBedDim").textContent = `${R.bed.w} × ${R.bed.h} m 밭 · 두둑 ${R.elements.length}개`;
+  const sl = SUNS.find(x=>x.id===R.sun);
+  document.getElementById("gdBedSun").textContent = "☀ " + (sl?sl.label:"남쪽") + " 햇빛";
+  renderThree(null, R.plants, { multi:{
+    bed:R.bed,
+    elements:R.elements.map(rt=>({
+      tech:rt.el.tech,
+      material: rt.el.tech==="spiral" && state.material ? MAT_BY_ID[state.material] : null,
+      cxM: rt.el.x+rt.el.w/2, cyM: rt.el.y+rt.el.h/2, wM: rt.el.w,
+      place: R.place.filter(p=>p.elUid===rt.el.uid)
+                    .map(p=>({ plant:p.plant, cx:(p.cx-rt.exPx)/rt.sx, cy:(p.cy-rt.eyPx)/rt.sy })),
+    })),
+  }});
+}
+
+/* ── 리포트 (요소별 + 문헌 근거) ── */
+renderReport = function(R){
+  const box = document.getElementById("gdReport");
+  let html = "";
+  R.elements.forEach(rt=>{
+    const t = TECH_BY_ID[rt.el.tech];
+    html += `<h3>${t.emoji} ${t.name} · ${rt.el.w}×${rt.el.h}m</h3>`;
+    const mine = R.place.filter(p=>p.elUid===rt.el.uid);
+    if(!mine.length) html += note("info","·","이 두둑에 배정된 작물이 없어요 — 작물을 더 고르거나 두둑 수를 줄여보세요.");
+    mine.forEach(p=> html += note("info", p.plant.emoji,
+      `<b>${p.plant.name}</b> → <b>${p.zone}</b> · ${p.reason} (약 ${p.count}포기)`));
+  });
+  html += `<h3>🌿 동반작물 궁합</h3>`;
+  const plants=R.plants, goods=[], bads=[];
+  for(let i=0;i<plants.length;i++)for(let j=i+1;j<plants.length;j++){
+    const rel = COMP_LOOKUP[plants[i].id]?.[plants[j].id];
+    if(rel?.type==="good") goods.push({a:plants[i],b:plants[j],why:rel.why});
+    if(rel?.type==="bad")  bads.push({a:plants[i],b:plants[j],why:rel.why});
+  }
+  bads.forEach(g=> html += note("bad","⚠️",`<b>${g.a.name} ✕ ${g.b.name}</b> — ${g.why}. 서로 다른 두둑으로 나눠 심으세요.`));
+  goods.forEach(g=> html += note("good","🤝",`<b>${g.a.name} + ${g.b.name}</b> — ${g.why}.`));
+  if(!goods.length && !bads.length) html += note("info","🌱","특별한 궁합 관계는 없어요.");
+  html += `<h3>📅 심는 시기</h3>`;
+  plants.forEach(p=>{ const[a,b]=p.sow;
+    html += note("info","·",`<b>${p.name}</b> — ${a===b?MONTHS[a-1]:MONTHS[a-1]+"~"+MONTHS[b-1]}에 심기`); });
+  const ms = plants.map(p=>p.sow[0]);
+  if(ms.length && Math.max(...ms)-Math.min(...ms)>=3)
+    html += note("warn","🕒","심는 시기가 갈립니다 — 봄 작물 먼저 심고, 가을 작물 자리는 비워 이어짓기 하세요.");
+  else if(ms.length) html += note("good","✅","비슷한 시기에 함께 심을 수 있어요.");
+  if(state.material && state.elements.some(e=>e.tech==="spiral")){
+    const m = MAT_BY_ID[state.material];
+    html += `<h3>${m.emoji} 나선 벽 재료 — ${m.name}</h3>`
+          + note("good","🧱",`<b>${m.name}</b> — ${m.pros}.`)
+          + note("info","🪴", m.tip);
+  }
+  html += `<h3>📚 왜 이렇게 배치하나요 — 실제 근거</h3>`;
+  PRINCIPLE_NOTES.forEach(([ic,tx])=> html += note("info", ic, tx));
+  [...new Set(state.elements.map(e=>e.tech))].forEach(id=>{
+    const t=TECH_BY_ID[id], ex=EXPLAIN[id];
+    html += `<div class="gd-explain">
+      <div class="xh">${t.emoji} ${t.name} — 어디서 온 방법인가요?</div>
+      <div class="xo">${ex.origin}</div>
+      <div class="xs">📐 ${ex.size}</div>
+      <ul>${ex.rules.map(r=>`<li>${r}</li>`).join("")}</ul>
+      <div class="xc">⚠️ ${ex.caution}</div>
+    </div>`;
+  });
+  box.innerHTML = html;
+};
+
+/* ── 초기 렌더 ── */
+renderPalette(); renderPlaced(); renderPrev();
+
+
+/* ============================================================
+   프리미엄 "내 텃밭" 목업 — 저장/결제벽/드래그편집/내보내기
+   (garden IIFE 내부: state, lastResult, goto, buildLayout,
+    renderTechBed, renderThree, *_BY_ID 접근 가능)
+   ============================================================ */
+const MK = window.Mock;
+const gdSaveBtn = document.getElementById("gdSaveBtn");
+const gdEditBtn = document.getElementById("gdEditBtn");
+const gdExportBtn = document.getElementById("gdExportBtn");
+const gdMyBtn = document.getElementById("gdMyBtn");
+let gdEditing = false;
+
+function gdBedSvg(){ const h=document.getElementById("gdBedHost"); return h && h.querySelector("svg"); }
+
+function gdRefreshMyCnt(){
+  const c=document.getElementById("gdMyCnt");
+  if(c) c.textContent = MK.session.gardens.length;
+}
+
+/* ---------- 결제벽 ---------- */
+function gdPaywall(afterSubscribe){
+  MK.modal({
+    title:"내 텃밭 프리미엄 🌿",
+    body:`
+      <ul class="mk-bene">
+        <li>💾 텃밭 디자인 <b>무제한 저장</b></li>
+        <li>✏️ 작물 <b>드래그로 직접 편집</b></li>
+        <li>🖼 인쇄용 <b>배치도 이미지 내보내기</b></li>
+        <li>🔔 내 작물 기준 <b>월별 할 일 알림</b></li>
+        <li>📔 텃밭 일지 · 게시판 🌿 배지</li>
+      </ul>
+      <div class="mk-plans">
+        <div class="mk-plan" data-pl="m"><div class="pl-name">월간</div><div class="pl-price">3,900원</div><div class="pl-sub">부담 없이</div></div>
+        <div class="mk-plan sel" data-pl="y"><div class="pl-name">연간</div><div class="pl-price">29,000원</div><div class="pl-sub">2.6개월 무료</div></div>
+      </div>
+      <div class="mk-fine" style="text-align:left;margin-top:8px">목업 화면 · 실제 결제되지 않습니다</div>`,
+    buttons:[
+      { label:"다음에" },
+      { label:"구독 시작하기", primary:true, onClick:()=>{
+          MK.session.premium = true;
+          MK.toast("프리미엄이 활성화됐어요 🌿 (목업)");
+          gdRefreshMyCnt();
+          afterSubscribe && afterSubscribe();
+      }}
+    ]
+  });
+  document.querySelectorAll(".mk-plan").forEach(p=> p.onclick=()=>{
+    document.querySelectorAll(".mk-plan").forEach(x=>x.classList.remove("sel"));
+    p.classList.add("sel");
+  });
+}
+
+/* ---------- 재렌더 (편집 좌표 유지) ---------- */
+function gdRerenderBed(){
+  if(!lastResult || !lastResult.place) return;
+  renderPlotAll();
+  if(gdEditing) gdAttachDrag();
+}
+
+/* ---------- 드래그 편집 ---------- */
+function gdToSvgPt(svg, e){
+  const pt = svg.createSVGPoint();
+  const t = e.touches ? e.touches[0] : e;
+  pt.x = t.clientX; pt.y = t.clientY;
+  return pt.matrixTransform(svg.getScreenCTM().inverse());
+}
+function gdAttachDrag(){
+  const svg = gdBedSvg(); if(!svg) return;
+  svg.style.touchAction = "none";
+  svg.querySelectorAll("[data-gd-i]").forEach(g=>{
+    g.style.cursor = "grab";
+    g.addEventListener("pointerdown", gdDragDown);
+  });
+}
+function gdDragDown(e){
+  const g = e.currentTarget;
+  const i = +g.dataset.gdI;
+  const svg = gdBedSvg();
+  const start = gdToSvgPt(svg, e);
+  const pl = lastResult.place.find(p=>p._i===i);
+  if(!pl) return;
+  const o = { cx:pl.cx, cy:pl.cy };
+  function mv(ev){
+    const c = gdToSvgPt(svg, ev);
+    g.setAttribute("transform", `translate(${(c.x-start.x).toFixed(1)},${(c.y-start.y).toFixed(1)})`);
+    if(ev.cancelable) ev.preventDefault();
+  }
+  function up(ev){
+    const c = gdToSvgPt(svg, ev);
+    pl.cx = Math.max(24, Math.min(376, o.cx + (c.x-start.x)));
+    pl.cy = Math.max(26, Math.min(274, o.cy + (c.y-start.y)));
+    window.removeEventListener("pointermove", mv);
+    window.removeEventListener("pointerup", up);
+    gdRerenderBed();
+  }
+  window.addEventListener("pointermove", mv, {passive:false});
+  window.addEventListener("pointerup", up);
+  e.preventDefault();
+}
+
+/* ---------- 액션 버튼 ---------- */
+if(gdSaveBtn) gdSaveBtn.onclick = ()=> MK.kakao(gdDoSave);
+function gdDoSave(){
+  if(!lastResult || !lastResult.place){ MK.toast("먼저 배치도를 만들어주세요"); return; }
+  if(!MK.session.premium && MK.session.gardens.length >= 1){
+    gdPaywall(gdDoSave); return;
+  }
+  const d = new Date();
+  const emojis = state.elements.map(e=>TECH_BY_ID[e.tech].emoji).join("") || "🌱";
+  MK.session.gardens.unshift({
+    id: Date.now(),
+    name: `${emojis} ${state.bed.w}×${state.bed.h}m · ${d.getMonth()+1}/${d.getDate()}`,
+    bed: {...state.bed}, sun: state.sun, material: state.material,
+    plantIds: [...state.selected],
+    elements: JSON.parse(JSON.stringify(state.elements)),
+    placeSlim: lastResult.place.map(p=>({pid:p.plant.id, cx:p.cx, cy:p.cy, elUid:p.elUid})),
+  });
+  gdRefreshMyCnt();
+  MK.toast("내 텃밭에 저장했어요 💾");
+}
+
+if(gdEditBtn) gdEditBtn.onclick = ()=>{
+  if(!MK.session.premium){ gdPaywall(()=> gdEditBtn.onclick()); return; }
+  gdEditing = !gdEditing;
+  gdEditBtn.textContent = gdEditing ? "✓ 완료" : "✏️ 편집";
+  gdEditBtn.classList.toggle("on", gdEditing);
+  if(gdEditing){ gdAttachDrag(); MK.toast("작물을 끌어서 자리를 옮겨보세요"); }
+  else { gdRerenderBed(); MK.toast("편집을 저장하려면 💾 저장을 눌러주세요"); }
+};
+
+if(gdExportBtn) gdExportBtn.onclick = ()=>{
+  if(!MK.session.premium){ gdPaywall(()=> gdExportBtn.onclick()); return; }
+  const svg = gdBedSvg();
+  if(!svg){ MK.toast("배치도가 없어요"); return; }
+  try{
+    const s = new XMLSerializer().serializeToString(svg);
+    const img = new Image();
+    img.onload = ()=>{
+      const c = document.createElement("canvas");
+      c.width = 1200; c.height = 900;
+      const g = c.getContext("2d");
+      g.fillStyle = "#f3ecd9"; g.fillRect(0,0,1200,900);
+      g.drawImage(img, 0, 0, 1200, 900);
+      const a = document.createElement("a");
+      a.download = "퍼머컬처ON_배치도.png";
+      a.href = c.toDataURL("image/png");
+      a.click();
+      MK.toast("배치도 이미지를 저장했어요 🖼");
+    };
+    img.onerror = ()=> MK.toast("내보내기에 실패했어요");
+    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(s);
+  }catch(err){ MK.toast("내보내기에 실패했어요"); }
+};
+
+/* ---------- 내 텃밭 목록 ---------- */
+if(gdMyBtn) gdMyBtn.onclick = gdOpenMy;
+function gdOpenMy(){
+  const gs = MK.session.gardens;
+  const wrap = document.createElement("div");
+  wrap.className = "mk-dim bottom";
+  wrap.innerHTML = `<div class="mk-sheet" style="max-height:76vh;overflow-y:auto">
+    <div class="mk-shandle"></div>
+    <div class="mk-stitle">🌾 내 텃밭</div>
+    <div class="mk-ssub">${MK.session.premium ? "프리미엄 🌿 무제한 저장" : "무료 · 1개까지 저장"}</div>
+    ${gs.length ? gs.map(g=>`
+      <div class="gd-mycard">
+        <div>
+          <div class="gd-myname">${g.name}</div>
+          <div class="gd-myinfo">${g.bed.w}×${g.bed.h}m · 작물 ${g.plantIds.length}종</div>
+        </div>
+        <div class="gd-myacts">
+          <button data-load="${g.id}">불러오기</button>
+          <button data-del="${g.id}" class="del">삭제</button>
+        </div>
+      </div>`).join("")
+    : `<div style="text-align:center;color:#a9a390;padding:26px 0;font-size:14px">
+        저장된 텃밭이 없어요<br><span style="font-size:12px">배치도를 만들고 💾 저장을 눌러보세요</span></div>`}
+  </div>`;
+  wrap.addEventListener("click", e=>{
+    if(e.target===wrap){ wrap.remove(); return; }
+    const del = e.target.closest("[data-del]");
+    const load = e.target.closest("[data-load]");
+    if(del){
+      MK.session.gardens = MK.session.gardens.filter(g=>g.id != +del.dataset.del);
+      gdRefreshMyCnt(); wrap.remove(); gdOpenMy();
+    }
+    if(load){
+      const g = MK.session.gardens.find(x=>x.id == +load.dataset.load);
+      wrap.remove(); if(g) gdLoadGarden(g);
+    }
+  });
+  document.body.appendChild(wrap);
+}
+
+function gdLoadGarden(g){
+  state.bed = {...g.bed};
+  state.sun = g.sun;
+  state.material = g.material;
+  state.selected = [...g.plantIds];
+  state.elements = JSON.parse(JSON.stringify(g.elements||[]));
+  elemSeq = state.elements.reduce((m,e)=>Math.max(m,e.uid),0)+1;
+  document.getElementById("gdCw").value = g.bed.w;
+  document.getElementById("gdCh").value = g.bed.h;
+  buildLayout();
+  if(g.placeSlim){
+    const pool = [...lastResult.place];
+    g.placeSlim.forEach(sp=>{
+      const i = pool.findIndex(p=>p && p.plant.id===sp.pid && p.elUid===sp.elUid);
+      if(i>=0){ pool[i].cx=sp.cx; pool[i].cy=sp.cy; pool[i]=null; }
+    });
+  }
+  gdRerenderBed();
+  goto(3);
+  MK.toast(`"${g.name}" 불러왔어요`);
+}
+
+/* ---------- 상태 리셋 훅 (다시 만들기/새 배치 시 편집모드 해제) ---------- */
+const _gdBuild = buildLayout;
+buildLayout = function(){
+  gdEditing = false;
+  if(gdEditBtn){ gdEditBtn.textContent = "✏️ 편집"; gdEditBtn.classList.remove("on"); }
+  _gdBuild();
+};
+gdRefreshMyCnt();
+
+
+})();
+
+(function(){
+  var gv=document.getElementById('view-garden');
+  function tryInit(){ if(gv&&gv.classList.contains('active')&&window.gardenInit) window.gardenInit(); }
+  var btn=document.querySelector('nav.tabs button[data-view="garden"]');
+  if(btn) btn.addEventListener('click', function(){ setTimeout(tryInit,0); });
+  if(gv){ new MutationObserver(tryInit).observe(gv,{attributes:true,attributeFilter:['class']}); }
+}());
+</script>
+<script>
+/* ============================================================
+   퍼머컬처ON — 커뮤니티 게시판 목업 (IIFE)
+   가짜 데이터 · 로그인/좋아요/댓글/글쓰기 흐름 체험용
+   ============================================================ */
+(function(){
+"use strict";
+const ROOT = document.getElementById("view-board");
+if(!ROOT) return;
+const M = window.Mock;
+
+/* ---------- 사진 일러스트 (인라인 SVG) ---------- */
+function photo(type){
+  const sky = `<rect width="400" height="220" fill="#f3ecd9"/><circle cx="345" cy="38" r="22" fill="#F2C14E" opacity=".9"/>`;
+  const soil = `<rect y="160" width="400" height="60" fill="#8a6a44"/><rect y="160" width="400" height="8" fill="#6b4d2e" opacity=".5"/>`;
+  const P = {
+    tomato: sky+soil+`
+      <line x1="120" y1="165" x2="120" y2="70" stroke="#3f8a52" stroke-width="6"/>
+      <line x1="120" y1="100" x2="90" y2="85" stroke="#3f8a52" stroke-width="4"/>
+      <line x1="120" y1="125" x2="152" y2="112" stroke="#3f8a52" stroke-width="4"/>
+      <circle cx="88" cy="96" r="16" fill="#d94f3d"/><circle cx="150" cy="122" r="18" fill="#d94f3d"/>
+      <circle cx="118" cy="78" r="14" fill="#e8734f"/>
+      <ellipse cx="250" cy="150" rx="60" ry="16" fill="#3f8a52" opacity=".35"/>
+      <text x="250" y="120" font-size="44" text-anchor="middle">🌿</text>`,
+    lettuce: sky+soil+`
+      ${[70,160,250,340].map(x=>`<text x="${x}" y="158" font-size="40" text-anchor="middle">🥬</text>`).join("")}
+      <text x="205" y="90" font-size="26" text-anchor="middle" opacity=".8">☀️</text>`,
+    marigold: sky+soil+`
+      ${[60,130,200,270,340].map((x,i)=>`<line x1="${x}" y1="165" x2="${x}" y2="${125-i%2*8}" stroke="#3f8a52" stroke-width="5"/><text x="${x}" y="${122-i%2*8}" font-size="34" text-anchor="middle">🌼</text>`).join("")}`,
+    basil: sky+`
+      <path d="M150,200 L250,200 L238,120 L162,120 Z" fill="#b06a3f"/>
+      <ellipse cx="200" cy="120" rx="40" ry="10" fill="#8a4f2d"/>
+      <text x="200" y="98" font-size="56" text-anchor="middle">🌿</text>
+      <text x="160" y="80" font-size="34" text-anchor="middle">🌿</text>
+      <text x="240" y="82" font-size="38" text-anchor="middle">🌿</text>`+soil.replace('y="160"','y="200"').replace('height="60"','height="20"').replace('y="160"','y="200"'),
+    plot: `<rect width="400" height="220" fill="#efe6d0"/>
+      <rect x="40" y="30" width="320" height="160" rx="14" fill="#8a6a44"/>
+      <rect x="52" y="42" width="140" height="64" rx="8" fill="#a9855e"/>
+      <rect x="208" y="42" width="140" height="64" rx="8" fill="#a9855e"/>
+      <rect x="52" y="118" width="296" height="60" rx="8" fill="#a9855e"/>
+      ${[80,120,160].map(x=>`<text x="${x}" y="85" font-size="24" text-anchor="middle">🥬</text>`).join("")}
+      ${[240,285,330].map(x=>`<text x="${x}" y="85" font-size="24" text-anchor="middle">🌶️</text>`).join("")}
+      ${[90,150,210,270,330].map(x=>`<text x="${x}" y="158" font-size="24" text-anchor="middle">🍅</text>`).join("")}`,
+    hugel: sky+`
+      <path d="M30,190 Q200,70 370,190 Z" fill="#8a6a44"/>
+      <path d="M70,190 Q200,105 330,190 Z" fill="#a9855e"/>
+      <circle cx="150" cy="176" r="13" fill="#6b4a28"/><circle cx="150" cy="176" r="7" fill="#caa46e"/>
+      <circle cx="250" cy="176" r="13" fill="#6b4a28"/><circle cx="250" cy="176" r="7" fill="#caa46e"/>
+      <text x="200" y="105" font-size="30" text-anchor="middle">🌱</text>
+      <text x="140" y="135" font-size="26" text-anchor="middle">🥬</text>
+      <text x="262" y="135" font-size="26" text-anchor="middle">🌿</text>`,
+    sprout: `<rect width="400" height="220" fill="#f3ecd9"/>
+      <rect x="50" y="70" width="300" height="110" rx="10" fill="#3a3327"/>
+      ${Array.from({length:5},(_,r)=>Array.from({length:8},(_,c)=>`<circle cx="${78+c*35}" cy="${95+r*20}" r="9" fill="#5a4a32"/><text x="${78+c*35}" y="${99+r*20}" font-size="13" text-anchor="middle">🌱</text>`).join("")).join("")}`,
+  };
+  return `<svg viewBox="0 0 400 220" xmlns="http://www.w3.org/2000/svg">${P[type]||P.plot}</svg>`;
+}
+
+/* ---------- 예시 데이터 ---------- */
+const CATS = [
+  { id:"all",   name:"전체" },
+  { id:"brag",  name:"🌱 텃밭 자랑" },
+  { id:"qna",   name:"❓ 질문·답변" },
+  { id:"share", name:"🌰 나눔" },
+  { id:"local", name:"📍 우리 동네" },
+];
+const CAT_NAME = Object.fromEntries(CATS.map(c=>[c.id,c.name]));
+
+let seq = 100;
+const posts = [
+  { id:1, cat:"brag", user:"초록엄지", avatar:"👩‍🌾", premium:true, time:"2시간 전",
+    text:"올해 첫 방울토마토 수확! 바질 옆에 심었더니 진짜 벌레가 덜 꼬이는 것 같아요 🍅 앱 궁합표 보고 심은 건데 효과 있네요.",
+    img:"tomato", likes:24, liked:false,
+    comments:[ {user:"텃밭삼촌",avatar:"👨‍🌾",text:"색이 예술이네요! 저희 집 토마토는 아직 파래요 😂"},
+               {user:"고흥댁",avatar:"👩",text:"저도 내년엔 바질이랑 같이 심어볼게요"} ] },
+  { id:2, cat:"qna", user:"텃밭초보", avatar:"🌱", time:"5시간 전",
+    text:"상추 잎끝이 갈색으로 타들어가요. 물은 이틀에 한 번 주는데 뭐가 문제일까요? 베란다 남향입니다.",
+    img:"lettuce", likes:7, liked:false,
+    comments:[ {user:"초록엄지",avatar:"👩‍🌾",premium:true,text:"한여름 남향 직사광이면 잎끝이 탈 수 있어요. 한낮엔 발이나 망으로 살짝 그늘 만들어 주세요!"} ] },
+  { id:3, cat:"share", user:"씨앗할머니", avatar:"👵", time:"어제",
+    text:"메리골드 씨앗을 넉넉히 받았어요. 고흥 읍내에서 나눔합니다. 필요하신 분 댓글 주세요 🌼 텃밭 테두리에 심으면 벌레가 덜 와요.",
+    img:"marigold", likes:31, liked:false,
+    comments:[ {user:"텃밭초보",avatar:"🌱",text:"저요저요! 쪽지 드렸어요"},
+               {user:"염포지기",avatar:"🧑‍🌾",text:"할머니 씨앗은 발아율이 다르죠 👍"} ] },
+  { id:4, cat:"local", user:"염포지기", avatar:"🧑‍🌾", premium:true, time:"어제",
+    text:"염포마을 화합의 정원 상촌 구역, 이번 주말 오전에 두둑 만들기 함께해요. 새참으로 유자차 준비합니다 🍵",
+    img:"plot", likes:18, liked:false,
+    comments:[ {user:"고흥댁",avatar:"👩",text:"토요일이죠? 장갑 들고 갈게요!"} ] },
+  { id:5, cat:"brag", user:"허브부자", avatar:"🌿", time:"2일 전",
+    text:"베란다 바질이 이렇게 컸습니다. 파스타 해먹을 때마다 한 줌씩 뜯는 재미 🤤",
+    img:"basil", likes:15, liked:false, comments:[] },
+  { id:6, cat:"qna", user:"매운맛", avatar:"🌶️", time:"2일 전",
+    text:"고추 옆에 들깨 심어도 괜찮을까요? 자리가 애매하게 남아서요.",
+    img:null, likes:4, liked:false,
+    comments:[ {user:"허브부자",avatar:"🌿",text:"들깨 향이 진해서 오히려 해충 쫓는 데 도움돼요. 간격만 40cm 이상 주세요"} ] },
+  { id:7, cat:"share", user:"도양댁", avatar:"👩‍🦳", time:"3일 전",
+    text:"상추 모종 20포기 남아요. 도양읍 근처 직접 가져가실 분! 다음 주까지요.",
+    img:"sprout", likes:12, liked:false, comments:[] },
+  { id:8, cat:"brag", user:"통나무장인", avatar:"🪵", time:"4일 전",
+    text:"후겔컬처 두둑 드디어 완성! 통나무 묻는 데만 하루 종일 걸렸네요. 앱 3D 보고 따라 만들었는데 뿌듯합니다 💪",
+    img:"hugel", likes:42, liked:false,
+    comments:[ {user:"초록엄지",avatar:"👩‍🌾",premium:true,text:"우와 규모가 상당한데요? 2년 뒤가 기대되네요"},
+               {user:"텃밭삼촌",avatar:"👨‍🌾",text:"저도 도전해보고 싶어요. 통나무는 어디서 구하셨어요?"},
+               {user:"통나무장인",avatar:"🪵",text:"뒷산 간벌목 얻어왔어요! 산림조합에 문의해보세요"} ] },
+];
+
+/* ---------- 상태 ---------- */
+let curCat = "all";
+let curPost = null;
+let writeCat = "brag";
+let writePhoto = null;
+
+/* ---------- 목록 ---------- */
+const catBox = document.getElementById("bdCats");
+const listBox = document.getElementById("bdList");
+
+CATS.forEach(c=>{
+  const b = document.createElement("button");
+  b.className = "bd-cat"+(c.id==="all"?" sel":"");
+  b.textContent = c.name;
+  b.onclick = ()=>{ curCat=c.id;
+    catBox.querySelectorAll(".bd-cat").forEach(x=>x.classList.remove("sel"));
+    b.classList.add("sel"); renderList(); };
+  catBox.appendChild(b);
+});
+
+function badge(p){ return p.premium ? ' <span class="bd-badge">🌿</span>' : ''; }
+
+function renderList(){
+  const list = posts.filter(p=> curCat==="all" || p.cat===curCat);
+  listBox.innerHTML = list.map(p=>`
+    <div class="bd-card" data-id="${p.id}">
+      <div class="bd-top">
+        <div class="bd-ava">${p.avatar}</div>
+        <div><div class="bd-name">${p.user}${badge(p)}</div></div>
+        <span class="bd-cattag">${CAT_NAME[p.cat].replace(/^[^ ]+ /,'')}</span>
+        <span class="bd-time">${p.time}</span>
+      </div>
+      <div class="bd-text">${p.text}</div>
+      ${p.img?`<div class="bd-img">${photo(p.img)}</div>`:""}
+      <div class="bd-meta">
+        <span class="lk ${p.liked?'on':''}" data-like="${p.id}">${p.liked?'❤️':'🤍'} ${p.likes}</span>
+        <span>💬 ${p.comments.length}</span>
+      </div>
+    </div>`).join("") || `<div style="text-align:center;color:#a9a390;padding:40px 0">아직 글이 없어요</div>`;
+}
+renderList();
+
+listBox.addEventListener("click", e=>{
+  const lk = e.target.closest("[data-like]");
+  if(lk){ e.stopPropagation(); toggleLike(+lk.dataset.like); return; }
+  const card = e.target.closest(".bd-card");
+  if(card) openDetail(+card.dataset.id);
+});
+
+function toggleLike(id){
+  M.kakao(()=>{
+    const p = posts.find(x=>x.id===id);
+    p.liked = !p.liked; p.likes += p.liked?1:-1;
+    renderList(); if(curPost && curPost.id===id) renderDetail();
+  });
+}
+
+/* ---------- 상세 ---------- */
+const detail = document.getElementById("bdDetail");
+const dbody = document.getElementById("bdDbody");
+document.getElementById("bdBack").onclick = ()=>{ detail.classList.remove("show"); curPost=null; };
+
+function openDetail(id){
+  curPost = posts.find(p=>p.id===id);
+  renderDetail();
+  detail.classList.add("show");
+  detail.scrollTop = 0;
+}
+function renderDetail(){
+  const p = curPost;
+  dbody.innerHTML = `
+    <div class="bd-top">
+      <div class="bd-ava">${p.avatar}</div>
+      <div><div class="bd-name">${p.user}${badge(p)}</div></div>
+      <span class="bd-cattag">${CAT_NAME[p.cat].replace(/^[^ ]+ /,'')}</span>
+      <span class="bd-time">${p.time}</span>
+    </div>
+    <div class="bd-text" style="font-size:15px">${p.text}</div>
+    ${p.img?`<div class="bd-img">${photo(p.img)}</div>`:""}
+    <div class="bd-meta">
+      <span class="lk ${p.liked?'on':''}" id="bdDlike">${p.liked?'❤️':'🤍'} ${p.likes}</span>
+      <span>💬 ${p.comments.length}</span>
+    </div>
+    <div class="bd-cbox">
+      ${p.comments.map(c=>`
+        <div class="bd-cmt">
+          <div class="bd-ava">${c.avatar||"🙂"}</div>
+          <div><div class="c-name">${c.user}${c.premium?' <span class="bd-badge">🌿</span>':''}</div>
+          <div class="c-text">${c.text}</div></div>
+        </div>`).join("") || `<div style="color:#a9a390;font-size:13px;padding:6px 0">첫 댓글을 남겨보세요</div>`}
+    </div>`;
+  document.getElementById("bdDlike").onclick = ()=> toggleLike(p.id);
+}
+
+/* 댓글 입력 */
+document.getElementById("bdCsend").onclick = ()=>{
+  const f = document.getElementById("bdCfield");
+  const txt = f.value.trim();
+  if(!txt || !curPost) return;
+  M.kakao(()=>{
+    curPost.comments.push({ user:M.session.user.name, avatar:M.session.user.avatar,
+      premium:M.session.premium, text:txt });
+    f.value=""; renderDetail(); renderList();
+    M.toast("댓글을 남겼어요 (목업)");
+  });
+};
+
+/* ---------- 글쓰기 ---------- */
+const write = document.getElementById("bdWrite");
+const wcats = document.getElementById("bdWcats");
+CATS.filter(c=>c.id!=="all").forEach(c=>{
+  const b = document.createElement("button");
+  b.className = "bd-cat"+(c.id==="brag"?" sel":"");
+  b.textContent = c.name;
+  b.onclick = ()=>{ writeCat=c.id;
+    wcats.querySelectorAll(".bd-cat").forEach(x=>x.classList.remove("sel"));
+    b.classList.add("sel"); };
+  wcats.appendChild(b);
+});
+
+document.getElementById("bdFab").onclick = ()=> M.kakao(()=> write.classList.add("show"));
+document.getElementById("bdWback").onclick = ()=> write.classList.remove("show");
+
+const photoTypes = ["tomato","lettuce","marigold","basil","plot","hugel","sprout"];
+let photoIdx = 0;
+document.getElementById("bdWphoto").onclick = ()=>{
+  writePhoto = photoTypes[photoIdx++ % photoTypes.length];
+  document.getElementById("bdWpreview").innerHTML = `<div class="bd-img">${photo(writePhoto)}</div>`;
+};
+
+document.getElementById("bdWsubmit").onclick = ()=>{
+  const txt = document.getElementById("bdWtext").value.trim();
+  if(!txt){ M.toast("내용을 입력해주세요"); return; }
+  posts.unshift({ id:++seq, cat:writeCat, user:M.session.user.name, avatar:M.session.user.avatar,
+    premium:M.session.premium, time:"방금", text:txt, img:writePhoto,
+    likes:0, liked:false, comments:[] });
+  document.getElementById("bdWtext").value="";
+  document.getElementById("bdWpreview").innerHTML=""; writePhoto=null;
+  write.classList.remove("show");
+  curCat="all";
+  catBox.querySelectorAll(".bd-cat").forEach((x,i)=>x.classList.toggle("sel",i===0));
+  renderList();
+  window.scrollTo({top:0,behavior:"smooth"});
+  M.toast("글이 올라갔어요! (목업)");
+};
+
+})();
+
+</script>
 <script>
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js');}
 </script>
