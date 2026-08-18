@@ -528,7 +528,7 @@ nav.tabs button:focus-visible{outline:2px solid var(--sun);outline-offset:-2px}
 #view-garden .gd-btn.primary:disabled{background:#bcc4ba;box-shadow:0 4px 0 #9aa39a;cursor:not-allowed}
 #view-garden .gd-btn.ghost{flex:0 0 auto;background:transparent;color:var(--muted);border:1.5px solid #cdc3aa}
 
-#view-garden.active{padding-bottom:96px}
+#view-garden.active{padding-bottom:150px}
 
 @media (prefers-reduced-motion:reduce){
   #view-garden .three-scene{animation:none !important}
@@ -641,7 +641,10 @@ nav.tabs button:focus-visible{outline:2px solid var(--sun);outline-offset:-2px}
 .mk-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .mk-dim{position:fixed;inset:0;background:rgba(40,34,22,.45);z-index:150;display:flex;align-items:center;justify-content:center;padding:20px}
 .mk-dim.bottom{align-items:flex-end;padding:0}
-.mk-modal{background:#FCFAF1;border-radius:18px;max-width:420px;width:100%;padding:20px 18px 14px;box-shadow:0 20px 50px rgba(0,0,0,.35)}
+.mk-modal{background:#FCFAF1;border-radius:18px;max-width:420px;width:100%;padding:20px 18px 14px;
+  box-shadow:0 20px 50px rgba(0,0,0,.35);max-height:84vh;display:flex;flex-direction:column}
+.mk-mbody{overflow-y:auto;flex:1 1 auto;-webkit-overflow-scrolling:touch;min-height:0}
+.mk-mbtns{flex:0 0 auto}
 .mk-mtitle{font-weight:800;font-size:17px;color:#2f4030;margin-bottom:10px}
 .mk-mbody{font-size:14px;color:#3f4a40;line-height:1.55}
 .mk-mbtns{display:flex;gap:8px;margin-top:16px}
@@ -681,6 +684,21 @@ nav.tabs button:focus-visible{outline:2px solid var(--sun);outline-offset:-2px}
 #view-garden .gd-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
 #view-garden .gd-actions button{flex:none;width:100%;padding:10px 2px;font-size:12.5px}
 #view-garden #gdPrintBtn{background:#3f4a40;border-color:#3f4a40;color:#fff}
+
+
+/* ── 장보기 목록 ── */
+.shop-sec{font-size:12px;font-weight:800;color:#7a6a48;letter-spacing:.04em;margin:12px 0 5px;
+  padding-bottom:3px;border-bottom:1.5px solid #E2DCC4}
+.shop-row{display:flex;gap:9px;align-items:flex-start;padding:6px 0;border-bottom:1px dashed #e6ded0}
+.shop-row .sbox{flex:0 0 auto;width:15px;height:15px;border:1.5px solid #9aa39a;border-radius:4px;margin-top:2px}
+.shop-row .sname{font-size:13.5px;color:#2f4030}
+.shop-row .sname b{color:var(--moss)}
+.shop-row .swhy{font-size:11.5px;color:#8a8a78;margin-top:1px}
+.shop-row .stip{font-size:11.5px;color:#a9855e;margin-top:1px}
+.shop-note{background:#f1f7ef;border:1.5px solid #cfe0cf;border-radius:10px;padding:10px 12px;
+  margin-top:12px;font-size:12.5px;color:#3f4a40;line-height:1.55}
+.shop-fine{font-size:11px;color:#a9a390;margin-top:10px}
+/* 액션바 6개 → 3열 2줄 유지 */
 
 </style>
 </head>
@@ -832,6 +850,7 @@ nav.tabs button:focus-visible{outline:2px solid var(--sun);outline-offset:-2px}
         <button id="gdExportBtn">🖼 내보내기</button>
         <button id="gdShareBtn">🔗 공유</button>
         <button id="gdPrintBtn">🖨 인쇄</button>
+        <button id="gdShopBtn">🧺 장보기</button>
       </div>
       <div class="three-wrap" id="gdThreeWrap">
         <div class="three-stage" id="gdThreeStage"><div class="three-scene" id="gdThreeScene"></div></div>
@@ -2311,8 +2330,15 @@ SUNS.forEach(s=>{
 });
 
 function readBed(){
-  state.bed.w = Math.max(0.3, parseFloat(document.getElementById("gdCw").value)||2);
-  state.bed.h = Math.max(0.3, parseFloat(document.getElementById("gdCh").value)||1.5);
+  const MIN = 0.8, MAX = 30;   // 0.8m 아래면 어떤 두둑도 못 들어감
+  const cw = document.getElementById("gdCw"), ch = document.getElementById("gdCh");
+  const rawW = parseFloat(cw.value), rawH = parseFloat(ch.value);
+  const w = Math.min(MAX, Math.max(MIN, isFinite(rawW) && rawW>0 ? rawW : 2));
+  const hh = Math.min(MAX, Math.max(MIN, isFinite(rawH) && rawH>0 ? rawH : 1.5));
+  const fixed = (isFinite(rawW) && Math.abs(rawW-w)>0.001) || (isFinite(rawH) && Math.abs(rawH-hh)>0.001);
+  state.bed.w = +w.toFixed(1); state.bed.h = +hh.toFixed(1);
+  cw.value = state.bed.w; ch.value = state.bed.h;
+  if(fixed && window.Mock) Mock.toast(`밭 크기를 ${state.bed.w}×${state.bed.h}m로 맞췄어요 (0.8~30m)`);
 }
 
 /* ---------- STEP2: 작물 선택 ---------- */
@@ -3435,6 +3461,190 @@ window.gardenOpenShare = function(code){
    흑백 인쇄 대비: 색 대신 번호·굵기·패턴으로 구분
    ============================================================ */
 
+/* ============================================================
+   씨앗·모종 장보기 목록 — 설계에서 자동 산출
+   모종/씨앗 구분은 우리나라 텃밭 관행 기준
+   ============================================================ */
+
+/* 사는 형태: 모종으로 사는 게 일반적인지, 씨앗을 뿌리는지 */
+const BUY_FORM = {
+  tomato:"모종", pepper:"모종", eggplant:"모종", cucumber:"모종", zucchini:"모종",
+  pumpkin:"모종", cabbage:"모종", napa:"모종", kale:"모종", chard:"모종",
+  perilla:"모종", lettuce:"모종", basil:"모종", rosemary:"모종", mint:"모종",
+  marigold:"모종", scallion:"모종", onion:"모종",
+  spinach:"씨앗", radish:"씨앗", carrot:"씨앗", bean:"씨앗", pea:"씨앗",
+  dill:"씨앗", nasturt:"씨앗", borage:"씨앗",
+  garlic:"종구", potato:"씨감자",
+};
+
+/* 퍼머컬처ON 시드스틱 조합 (설계에 이 짝이 있으면 안내) */
+const STICK_COMBOS = [
+  { a:"basil",  b:"tomato",   name:"바질·토마토" },
+  { a:"marigold", b:"lettuce", name:"메리골드·상추" },
+  { a:"carrot", b:"scallion", name:"당근·쪽파" },
+];
+
+function shoppingData(){
+  const R = lastResult;
+  if(!R || !R.place || !R.place.length) return null;
+
+  /* 작물별 합계 */
+  const agg = new Map();
+  R.place.forEach(p=>{
+    const k = p.plant.id;
+    if(!agg.has(k)) agg.set(k, { plant:p.plant, count:0 });
+    agg.get(k).count += p.count;
+  });
+
+  const plants = [...agg.values()].map(e=>{
+    const form = BUY_FORM[e.plant.id] || "모종";
+    let qty, tip = "";
+    const SEEDABLE = ["lettuce","marigold","spinach","chard","kale","perilla","scallion","basil","nasturt","dill"];
+    if(form==="모종"){
+      qty = `${e.count}포기`;
+      if(e.count>=12 && SEEDABLE.includes(e.plant.id))
+        tip = "포기 수가 많아요 — 씨앗으로 사면 훨씬 저렴합니다";
+    }
+    else if(form==="씨앗") { qty = "1봉";  tip = `한 봉이면 ${e.count}포기 이상 충분해요`; }
+    else if(form==="종구") { qty = `${e.count}쪽`; }
+    else                   { qty = `${Math.ceil(e.count/3)}kg`; tip = "한 알을 2~3조각으로 잘라 심어요"; }
+    const [a,b] = e.plant.sow;
+    const when = a===b ? MONTHS[a-1] : `${MONTHS[a-1]}~${MONTHS[b-1]}`;
+    return { name:e.plant.name, emoji:e.plant.emoji, form, qty, tip, when, count:e.count };
+  }).sort((x,y)=> (x.form===y.form ? 0 : x.form==="모종" ? -1 : 1));
+
+  /* 두둑별 자재 */
+  const mats = [];
+  const seen = new Set();
+  R.elements.forEach(rt=>{
+    const t = rt.el.tech, w = rt.el.w, h = rt.el.h;
+    if(t==="trellis" && !seen.has("trellis")){
+      seen.add("trellis");
+      const n = R.elements.filter(x=>x.el.tech==="trellis").length;
+      mats.push({ item:"지지대 (1.8m 안팎)", qty:`${n*2}개`, why:"양 끝 기둥" });
+      mats.push({ item:"오이망 또는 노끈", qty:`폭 ${w}m × 높이 1.8m ${n}장`, why:"덩굴이 타고 오를 그물" });
+      mats.push({ item:"케이블타이·끈", qty:"1묶음", why:"기둥과 그물 고정" });
+    }
+    if(t==="spiral" && !seen.has("spiral")){
+      seen.add("spiral");
+      const m = state.material ? MAT_BY_ID[state.material] : null;
+      const area = w*h;
+      const est = {
+        brick:  ()=>`약 ${Math.round(area*55)}장`,
+        stone:  ()=>`약 ${Math.round(area*90)}kg`,
+        wood:   ()=>`통나무 약 ${Math.round(area*7)}개`,
+        block:  ()=>`약 ${Math.round(area*18)}장`,
+        bottle: ()=>`약 ${Math.round(area*70)}병`,
+      };
+      mats.push({ item:`나선 벽 재료 — ${m?m.name:"벽돌"}`,
+                  qty: m && est[m.id] ? est[m.id]() : `약 ${Math.round(area*55)}장`,
+                  why:"높이 1m 나선 벽 (넉넉히 잡은 값)" });
+      mats.push({ item:"굵은 모래", qty:"20kg 1포", why:"꼭대기 배수용 — 건조 허브 자리" });
+    }
+    if(t==="keyhole" && !seen.has("keyhole")){
+      seen.add("keyhole");
+      mats.push({ item:"테두리용 돌 또는 블록", qty:`둘레 약 ${(Math.PI*w).toFixed(1)}m × 높이 0.6m`, why:"두둑 벽" });
+      mats.push({ item:"철망 (지름 30cm 통 제작용)", qty:"1m × 1m", why:"중앙 퇴비 바구니" });
+    }
+    if(t==="hugel" && !seen.has("hugel")){
+      seen.add("hugel");
+      mats.push({ item:"굵은 통나무", qty:`길이 ${w}m 기준 6~10개`, why:"두둑 속 심 — 물을 머금는 스펀지" });
+      mats.push({ item:"잔가지·낙엽", qty:"넉넉히", why:"통나무 위 채움" });
+      mats.push({ item:"질소질 거름 (깻묵·계분 등)", qty:"20kg 1포", why:"첫해 질소 기근 방지" });
+    }
+  });
+
+  /* 흙·거름 (밭 넓이 기준) */
+  const area = R.bed.w * R.bed.h;
+  const soil = [
+    { item:"완숙 퇴비", qty:`약 ${Math.ceil(area*3/20)}포 (20kg)`, why:`밑거름 — ${area.toFixed(1)}㎡ 기준 ㎡당 3kg` },
+    { item:"상토 또는 부엽토", qty:`약 ${Math.ceil(area*0.5/20)}포`, why:"두둑 흙 보충·모종 심을 때" },
+  ];
+
+  /* 시드스틱 안내 */
+  const ids = new Set([...agg.keys()]);
+  const sticks = STICK_COMBOS.filter(c=> ids.has(c.a) && ids.has(c.b)).map(c=>c.name);
+
+  return { plants, mats, soil, sticks, area, date:new Date() };
+}
+
+/* ── 텍스트로 복사할 형태 ── */
+function shoppingText(d){
+  let s = `🧺 텃밭 장보기 목록 (${lastResult.bed.w}×${lastResult.bed.h}m)\n\n[모종·씨앗]\n`;
+  d.plants.forEach(p=> s += `☐ ${p.name} ${p.qty} (${p.form}) — ${p.when}\n`);
+  if(d.mats.length){ s += `\n[자재]\n`; d.mats.forEach(m=> s += `☐ ${m.item} ${m.qty}\n`); }
+  s += `\n[흙·거름]\n`; d.soil.forEach(m=> s += `☐ ${m.item} ${m.qty}\n`);
+  s += `\n— 퍼머컬처ON`;
+  return s;
+}
+
+/* ── 앱 안에서 보기 ── */
+const gdShopBtn = document.getElementById("gdShopBtn");
+if(gdShopBtn) gdShopBtn.onclick = ()=>{
+  const d = shoppingData();
+  if(!d){ MK.toast("먼저 배치도를 만들어주세요"); return; }
+  const li = (item, qty, why, tip) =>
+    `<div class="shop-row"><i class="sbox"></i>
+      <div><div class="sname">${item} <b>${qty}</b></div>
+      ${why?`<div class="swhy">${why}</div>`:""}${tip?`<div class="stip">${tip}</div>`:""}</div></div>`;
+
+  const body = `
+    <div class="shop-sec">모종·씨앗</div>
+    ${d.plants.map(p=> li(`${p.emoji} ${p.name}`, p.qty, `${p.form} · ${p.when} 심기`, p.tip)).join("")}
+    ${d.mats.length ? `<div class="shop-sec">자재</div>` + d.mats.map(m=> li(m.item, m.qty, m.why)).join("") : ""}
+    <div class="shop-sec">흙·거름</div>
+    ${d.soil.map(m=> li(m.item, m.qty, m.why)).join("")}
+    ${d.sticks.length ? `<div class="shop-note">🌱 <b>${d.sticks.join(", ")}</b> 조합이 들어 있어요 —
+      퍼머컬처ON 시드스틱으로도 있는 짝입니다. 따로 사서 간격 맞춰 심어도 됩니다.</div>` : ""}
+    <div class="shop-fine">수량은 넉넉하게 잡은 값이에요. 씨앗은 한 봉이면 대개 충분합니다.</div>`;
+
+  MK.modal({
+    title:"🧺 장보기 목록",
+    body,
+    buttons:[
+      { label:"닫기" },
+      { label:"복사하기", primary:true, onClick:()=>{
+          const txt = shoppingText(d);
+          const done = ()=> MK.toast("목록을 복사했어요 🧺");
+          if(navigator.clipboard && location.protocol!=="file:"){
+            navigator.clipboard.writeText(txt).then(done).catch(()=>MK.toast("복사에 실패했어요"));
+          } else {
+            const ta=document.createElement("textarea"); ta.value=txt;
+            ta.style.position="fixed"; ta.style.opacity="0";
+            document.body.appendChild(ta); ta.select();
+            try{ document.execCommand("copy"); done(); }catch(e){ MK.toast("복사에 실패했어요"); }
+            ta.remove();
+          }
+      }},
+    ],
+  });
+};
+
+/* ── 인쇄물에 붙일 조각 ── */
+function shoppingPrintHTML(){
+  const d = shoppingData();
+  if(!d) return "";
+  const row = (item, qty, why) =>
+    `<tr><td class="ck"><span class="pbox"></span></td><td class="it">${item}</td>
+     <td class="qt">${qty}</td><td class="wy">${why||""}</td></tr>`;
+  return `
+  <div class="page2">
+    <h2>🧺 장보기 목록</h2>
+    <table class="shop">
+      <thead><tr><th></th><th>품목</th><th>수량</th><th>메모</th></tr></thead>
+      <tbody>
+        <tr class="grp"><td colspan="4">모종 · 씨앗</td></tr>
+        ${d.plants.map(p=> row(`${p.name} <span class="fm">(${p.form})</span>`, p.qty, p.tip || `${p.when} 심기`)).join("")}
+        ${d.mats.length ? `<tr class="grp"><td colspan="4">자재</td></tr>` + d.mats.map(m=> row(m.item, m.qty, m.why)).join("") : ""}
+        <tr class="grp"><td colspan="4">흙 · 거름</td></tr>
+        ${d.soil.map(m=> row(m.item, m.qty, m.why)).join("")}
+      </tbody>
+    </table>
+    <p class="fine">수량은 넉넉하게 잡은 값입니다. 씨앗은 한 봉이면 대개 충분합니다.</p>
+  </div>`;
+}
+
+
 function printSheetHTML(){
   const R = lastResult;
   if(!R || !R.place || !R.place.length) return null;
@@ -3566,6 +3776,18 @@ function printSheetHTML(){
   footer{border-top:1px solid #999;padding-top:6px;margin-top:6px;
     font-size:9.5px;color:#555;display:flex;justify-content:space-between}
   .memo{border:1px dashed #999;border-radius:4px;height:24mm;padding:5px 7px;font-size:10px;color:#777}
+  .page2{page-break-before:always;padding-top:4mm}
+  table.shop{width:100%;border-collapse:collapse;font-size:11.5px}
+  table.shop th{background:#eee;border:1px solid #111;padding:5px 6px;text-align:left;font-size:11px}
+  table.shop td{border:1px solid #999;padding:5px 6px}
+  table.shop tr.grp td{background:#f0f0f0;font-weight:800;font-size:11px;border-color:#111}
+  table.shop td.ck{width:22px;text-align:center}
+  table.shop td.it{font-weight:700}
+  table.shop td.qt{white-space:nowrap;width:78px}
+  table.shop td.wy{font-size:10px;color:#555}
+  .fm{font-weight:400;font-size:10px;color:#555}
+  .pbox{display:inline-block;width:11px;height:11px;border:1.5px solid #111;vertical-align:-1px}
+  p.fine{font-size:10px;color:#666;margin-top:6px}
   @media print{ .noprint{display:none!important} body{-webkit-print-color-adjust:exact;print-color-adjust:exact} }
   .noprint{position:fixed;top:10px;right:10px;display:flex;gap:8px}
   .noprint button{border:none;border-radius:8px;padding:10px 16px;font-size:14px;font-weight:800;
@@ -3609,6 +3831,8 @@ function printSheetHTML(){
 
   <h2>메모</h2>
   <div class="memo">심은 날짜, 날씨, 바꾼 자리 등을 적어두세요</div>
+
+  ${shoppingPrintHTML()}
 
   <footer>
     <span>퍼머컬처ON — 자연과 함께 설계하는 텃밭</span>
