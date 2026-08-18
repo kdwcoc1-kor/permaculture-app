@@ -664,6 +664,18 @@ nav.tabs button:focus-visible{outline:2px solid var(--sun);outline-offset:-2px}
 .mk-bene{margin:8px 0 0;padding:0;list-style:none}
 .mk-bene li{font-size:13px;color:#3f4a40;padding:4px 0;display:flex;gap:7px}
 
+
+/* ── 공유 링크 ── */
+#view-garden .gd-actions{flex-wrap:wrap}
+#view-garden .gd-actions button{flex:1 1 calc(50% - 4px);min-width:0}
+#view-garden #gdShareBtn{background:var(--gd-gold);border-color:var(--gd-gold);color:#3a2c12}
+#view-garden .gd-guest{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  background:#f1f7ef;border:1.5px solid #cfe0cf;border-left:5px solid var(--gd-green);
+  border-radius:12px;padding:11px 13px;margin-bottom:12px;font-size:13px;color:#3f4a40}
+#view-garden .gd-guest b{color:var(--moss)}
+#view-garden .gd-guest button{margin-left:auto;border:none;background:var(--moss);color:#fff;
+  border-radius:9px;padding:8px 12px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit}
+
 </style>
 </head>
 <body>
@@ -812,6 +824,7 @@ nav.tabs button:focus-visible{outline:2px solid var(--sun);outline-offset:-2px}
         <button id="gdSaveBtn">💾 저장</button>
         <button id="gdEditBtn">✏️ 편집</button>
         <button id="gdExportBtn">🖼 내보내기</button>
+        <button id="gdShareBtn">🔗 공유</button>
       </div>
       <div class="three-wrap" id="gdThreeWrap">
         <div class="three-stage" id="gdThreeStage"><div class="three-scene" id="gdThreeScene"></div></div>
@@ -2670,15 +2683,69 @@ function packOrder(list){
   if(state.sun==="N") arr.reverse();   // 해가 북쪽이면 키 큰 요소를 남쪽(아래)로
   return arr;
 }
-function tryPack(list){
+function overlaps(a,b,G){
+  return !(a.x+a.w+G<=b.x+1e-9 || b.x+b.w+G<=a.x+1e-9 ||
+           a.y+a.h+G<=b.y+1e-9 || b.y+b.h+G<=a.y+1e-9);
+}
+/* 왼쪽-위부터 빈틈에 채우는 배치 (shelf보다 공간 활용이 좋음) */
+function packOrdered(order){
   const M=0.2, G=0.3, BW=state.bed.w, BH=state.bed.h;
-  let x=M, y=M, rowH=0; const pos=new Map();
-  for(const el of packOrder(list)){
-    if(x>M && x+el.w > BW-M+1e-9){ y+=rowH+G; x=M; rowH=0; }
-    if(x+el.w > BW-M+1e-9 || y+el.h > BH-M+1e-9) return null;
-    pos.set(el.uid, {x:+x.toFixed(2), y:+y.toFixed(2)});
-    x += el.w+G; rowH = Math.max(rowH, el.h);
+  const put=[];
+  for(const el of order){
+    const xs=[M], ys=[M];
+    put.forEach(q=>{ xs.push(q.x+q.w+G); ys.push(q.y+q.h+G); });
+    xs.sort((a,b)=>a-b); ys.sort((a,b)=>a-b);
+    let best=null;
+    for(const y of ys){
+      if(y+el.h > BH-M+1e-9) continue;
+      for(const x of xs){
+        if(x+el.w > BW-M+1e-9) continue;
+        const cand={x,y,w:el.w,h:el.h};
+        if(put.some(q=>overlaps(cand,q,G))) continue;
+        if(!best || y<best.y-1e-9 || (Math.abs(y-best.y)<1e-9 && x<best.x-1e-9)) best={x,y};
+        break;
+      }
+    }
+    if(!best) return null;
+    put.push({uid:el.uid, x:best.x, y:best.y, w:el.w, h:el.h});
   }
+  return put;
+}
+/* 해 반대편에 키 큰 두둑이 가도록 채점 (낮을수록 좋음) */
+function sunScore(put, list){
+  const rank = new Map(list.map(e=>[e.uid, TALL_RANK[e.tech]||0]));
+  const BH = state.bed.h, BW = state.bed.w;
+  return put.reduce((s,q)=>{
+    const r = rank.get(q.uid)||0;
+    const cy = q.y+q.h/2, cx = q.x+q.w/2;
+    if(state.sun==="S") return s + r*cy;
+    if(state.sun==="N") return s + r*(BH-cy);
+    if(state.sun==="E") return s + r*(BW-cx);
+    return s + r*cx;
+  }, 0);
+}
+function tryPack(list){
+  if(!list.length) return new Map();
+  const orders=[];
+  orders.push(packOrder(list));
+  orders.push([...list].sort((a,b)=>b.h-a.h || b.w-a.w));
+  orders.push([...list].sort((a,b)=>(b.w*b.h)-(a.w*a.h)));
+  orders.push([...list].sort((a,b)=>b.w-a.w || b.h-a.h));
+  for(let i=0;i<60;i++){
+    const s=[...list];
+    for(let j=s.length-1;j>0;j--){ const k=(Math.random()*(j+1))|0; [s[j],s[k]]=[s[k],s[j]]; }
+    orders.push(s);
+  }
+  let best=null, bestScore=Infinity;
+  for(const o of orders){
+    const put = packOrdered(o);
+    if(!put) continue;
+    const sc = sunScore(put, list);
+    if(sc < bestScore){ bestScore=sc; best=put; }
+  }
+  if(!best) return null;
+  const pos=new Map();
+  best.forEach(q=>pos.set(q.uid, {x:+q.x.toFixed(2), y:+q.y.toFixed(2)}));
   return pos;
 }
 function repackAll(dropOverflow){
@@ -2695,7 +2762,7 @@ function repackAll(dropOverflow){
 function canAdd(tech){
   const s = specSize(tech);
   if(!s) return {ok:false, why:`밭이 좁아요 · 최소 ${ELEM_SPEC[tech].min[0]}×${ELEM_SPEC[tech].min[1]}m`};
-  if(!tryPack([...state.elements, {uid:-1, tech, w:s.w, h:s.h}]))
+  if(!tryPack([...state.elements, {uid:Number.MAX_SAFE_INTEGER, tech, w:s.w, h:s.h}]))
     return {ok:false, why:"남은 자리가 부족해요 — 두둑을 빼거나 밭을 키워보세요"};
   return {ok:true, size:s};
 }
@@ -3194,6 +3261,149 @@ buildLayout = function(){
 };
 gdRefreshMyCnt();
 
+/* ============================================================
+   텃밭 설계 공유 링크 (서버 없음 · URL에 설계를 담음)
+   #g=<base64url(JSON)>  → 열면 그 배치도가 그대로 재현
+   ⚠️ SHARE_* 목록은 "뒤에 추가만" — 순서를 바꾸면 옛 링크가 깨집니다.
+   ============================================================ */
+
+const SHARE_TECHS = ["keyhole","spiral","trellis","mandala","hugel","custom"];
+const SHARE_MATS  = ["brick","stone","wood","block","bottle"];
+const SHARE_SUNS  = ["N","E","S","W"];
+const SHARE_PLANTS = ["tomato","pepper","eggplant","cucumber","zucchini","pumpkin",
+  "lettuce","cabbage","napa","spinach","chard","kale","perilla","radish","carrot",
+  "onion","garlic","potato","scallion","bean","pea","basil","dill","mint","rosemary",
+  "marigold","nasturt","borage"];
+
+const b64u = {
+  enc(s){ return btoa(unescape(encodeURIComponent(s))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""); },
+  dec(s){ s = s.replace(/-/g,"+").replace(/_/g,"/"); while(s.length%4) s+="="; return decodeURIComponent(escape(atob(s))); },
+};
+const r1 = n => Math.round(n*10)/10;
+
+/* 현재 설계 → 문자열 */
+function encodeShare(){
+  if(!state.elements.length || !state.selected.length) return null;
+  const uids = state.elements.map(e=>e.uid);
+  const o = {
+    v:1,
+    b:[r1(state.bed.w), r1(state.bed.h)],
+    s:SHARE_SUNS.indexOf(state.sun),
+    e:state.elements.map(e=>[SHARE_TECHS.indexOf(e.tech), r1(e.w), r1(e.h)]),
+    p:state.selected.map(id=>SHARE_PLANTS.indexOf(id)).filter(i=>i>=0),
+  };
+  if(state.material) o.m = SHARE_MATS.indexOf(state.material);
+  // 손으로 옮긴 자리가 있으면 함께 담기
+  if(lastResult && lastResult.place){
+    o.q = lastResult.place.map(p=>[
+      uids.indexOf(p.elUid),
+      SHARE_PLANTS.indexOf(p.plant.id),
+      r1(p.cx), r1(p.cy),
+    ]).filter(a=>a[0]>=0 && a[1]>=0);
+  }
+  return b64u.enc(JSON.stringify(o));
+}
+
+/* 문자열 → 설계 복원용 객체 (gdLoadGarden 형식) */
+function decodeShare(str){
+  const o = JSON.parse(b64u.dec(str));
+  if(!o || o.v!==1 || !Array.isArray(o.e) || !Array.isArray(o.p)) throw new Error("형식");
+  const bw = Math.min(20, Math.max(0.5, +o.b[0])), bh = Math.min(20, Math.max(0.5, +o.b[1]));
+  let uid = 1;
+  const elements = o.e.map(a=>{
+    const tech = SHARE_TECHS[a[0]];
+    if(!tech) throw new Error("두둑");
+    return { uid:uid++, tech, w:+a[1], h:+a[2], x:0, y:0 };
+  });
+  const plantIds = o.p.map(i=>SHARE_PLANTS[i]).filter(Boolean);
+  if(!elements.length || !plantIds.length) throw new Error("내용");
+  const g = {
+    bed:{ w:bw, h:bh },
+    sun: SHARE_SUNS[o.s] || "S",
+    material: o.m!=null ? SHARE_MATS[o.m] : null,
+    plantIds, elements,
+  };
+  if(Array.isArray(o.q)){
+    g.placeSlim = o.q.map(a=>({
+      elUid: elements[a[0]] ? elements[a[0]].uid : null,
+      pid: SHARE_PLANTS[a[1]],
+      cx:+a[2], cy:+a[3],
+    })).filter(x=>x.elUid && x.pid);
+  }
+  return g;
+}
+
+function shareUrl(code){
+  const base = location.origin + location.pathname;
+  return base + "#g=" + code;
+}
+
+/* ── 공유 버튼 ── */
+const gdShareBtn = document.getElementById("gdShareBtn");
+if(gdShareBtn) gdShareBtn.onclick = ()=>{
+  const code = encodeShare();
+  if(!code){ MK.toast("먼저 배치도를 만들어주세요"); return; }
+  const url = shareUrl(code);
+  const title = "퍼머컬처ON에서 만든 텃밭 설계";
+  if(navigator.share){
+    navigator.share({ title, text:"제 텃밭 설계를 봐주세요 🌿", url })
+      .then(()=>MK.toast("공유했어요 🔗")).catch(()=>{});
+    return;
+  }
+  MK.modal({
+    title:"🔗 이 링크로 설계를 보낼 수 있어요",
+    body:`<div style="font-size:13px;color:#5a6357;margin-bottom:8px">
+        받는 사람이 링크를 열면 <b>이 배치도가 그대로</b> 나타납니다. 로그인 없이 누구나 볼 수 있어요.</div>
+      <textarea id="gdShareUrl" readonly
+        style="width:100%;height:74px;border:1.5px solid #d8cdb3;border-radius:10px;padding:9px;
+        font-size:11.5px;font-family:monospace;background:#fff;box-sizing:border-box;
+        color:#3a3327;resize:none">${url}</textarea>`,
+    buttons:[
+      { label:"닫기" },
+      { label:"복사하기", primary:true, onClick:()=>{
+          const done = ()=> MK.toast("링크를 복사했어요 🔗");
+          if(navigator.clipboard && location.protocol!=="file:"){
+            navigator.clipboard.writeText(url).then(done).catch(()=>MK.toast("길게 눌러 복사해주세요"));
+          } else {
+            const ta = document.createElement("textarea");
+            ta.value = url; ta.style.position="fixed"; ta.style.opacity="0";
+            document.body.appendChild(ta); ta.select();
+            try{ document.execCommand("copy"); done(); }
+            catch(e){ MK.toast("길게 눌러 복사해주세요"); }
+            ta.remove();
+          }
+      }},
+    ],
+  });
+  setTimeout(()=>{ const t=document.getElementById("gdShareUrl"); if(t){ t.focus(); t.select(); } }, 60);
+};
+
+/* ── 링크로 들어왔을 때 ── */
+function gdShowGuestBanner(){
+  if(document.getElementById("gdGuest")) return;
+  const p2 = document.getElementById("gdP2");
+  const bar = document.createElement("div");
+  bar.id = "gdGuest";
+  bar.className = "gd-guest";
+  bar.innerHTML = `<span>🔗 <b>공유받은 텃밭 설계</b>예요 — 아래에서 배치 이유까지 볼 수 있어요</span>
+    <button id="gdGuestNew">내 텃밭도 만들기 →</button>`;
+  p2.insertBefore(bar, p2.firstChild);
+  document.getElementById("gdGuestNew").onclick = ()=>{
+    history.replaceState(null,"",location.pathname);
+    bar.remove(); resetAll(); goto(0);
+  };
+}
+
+window.gardenOpenShare = function(code){
+  try{
+    const g = decodeShare(code);
+    gdLoadGarden(g);
+    gdShowGuestBanner();
+  }catch(e){
+    MK.toast("링크를 읽을 수 없어요 — 새로 만들어보세요");
+    history.replaceState(null,"",location.pathname);
+  }
+};
 
 })();
 
@@ -3203,6 +3413,19 @@ gdRefreshMyCnt();
   var btn=document.querySelector('nav.tabs button[data-view="garden"]');
   if(btn) btn.addEventListener('click', function(){ setTimeout(tryInit,0); });
   if(gv){ new MutationObserver(tryInit).observe(gv,{attributes:true,attributeFilter:['class']}); }
+
+  /* 공유 링크(#g=)로 들어오면 텃밭 탭을 열고 설계를 복원 */
+  function openShared(){
+    var m = (location.hash||'').match(/[#&]g=([A-Za-z0-9\-_]+)/);
+    if(!m) return;
+    if(btn) btn.click();
+    setTimeout(function(){
+      tryInit();
+      if(window.gardenOpenShare) window.gardenOpenShare(m[1]);
+    }, 60);
+  }
+  openShared();
+  window.addEventListener('hashchange', openShared);
 }());
 </script>
 <script>
