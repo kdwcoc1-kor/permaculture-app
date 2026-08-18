@@ -676,6 +676,12 @@ nav.tabs button:focus-visible{outline:2px solid var(--sun);outline-offset:-2px}
 #view-garden .gd-guest button{margin-left:auto;border:none;background:var(--moss);color:#fff;
   border-radius:9px;padding:8px 12px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit}
 
+
+/* ── 액션바(저장·편집·내보내기·공유·인쇄) ── */
+#view-garden .gd-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+#view-garden .gd-actions button{flex:none;width:100%;padding:10px 2px;font-size:12.5px}
+#view-garden #gdPrintBtn{background:#3f4a40;border-color:#3f4a40;color:#fff}
+
 </style>
 </head>
 <body>
@@ -825,6 +831,7 @@ nav.tabs button:focus-visible{outline:2px solid var(--sun);outline-offset:-2px}
         <button id="gdEditBtn">✏️ 편집</button>
         <button id="gdExportBtn">🖼 내보내기</button>
         <button id="gdShareBtn">🔗 공유</button>
+        <button id="gdPrintBtn">🖨 인쇄</button>
       </div>
       <div class="three-wrap" id="gdThreeWrap">
         <div class="three-stage" id="gdThreeStage"><div class="three-scene" id="gdThreeScene"></div></div>
@@ -2907,17 +2914,35 @@ function scoreCropEl(p, el){
   return s;
 }
 function assignCrops(plants){
-  const caps = new Map(state.elements.map(el=>[el.uid, Math.max(1, Math.round(el.w*el.h/0.4))]));
-  const buckets = new Map(state.elements.map(el=>[el.uid, []]));
-  const order = [...plants].sort((a,b)=>{
-    const ma = Math.max(...state.elements.map(el=>scoreCropEl(a,el)));
-    const mb = Math.max(...state.elements.map(el=>scoreCropEl(b,el)));
-    return mb-ma;
-  });
-  for(const p of order){
-    const ranked = [...state.elements].sort((x,y)=>scoreCropEl(p,y)-scoreCropEl(p,x));
-    const target = ranked.find(el=>buckets.get(el.uid).length < caps.get(el.uid)) || ranked[0];
-    buckets.get(target.uid).push(p);
+  const els = state.elements;
+  const caps = new Map(els.map(el=>[el.uid, Math.max(1, Math.round(el.w*el.h/0.4))]));
+  const buckets = new Map(els.map(el=>[el.uid, []]));
+  const left = new Set(plants);
+
+  /* 1단계 — 담은 두둑은 하나도 비지 않게: 궁합 높은 짝부터 1종씩 */
+  if(plants.length >= els.length){
+    const pairs = [];
+    els.forEach(el=> plants.forEach(p=> pairs.push({el, p, s:scoreCropEl(p, el)})));
+    pairs.sort((a,b)=>b.s-a.s);
+    const filled = new Set();
+    for(const {el,p} of pairs){
+      if(filled.size===els.length) break;
+      if(filled.has(el.uid) || !left.has(p)) continue;
+      buckets.get(el.uid).push(p); left.delete(p); filled.add(el.uid);
+    }
+  }
+
+  /* 2단계 — 나머지는 궁합 우선, 다만 한 두둑에 몰리지 않게 */
+  const rest = [...left].sort((a,b)=>
+    Math.max(...els.map(el=>scoreCropEl(b,el))) - Math.max(...els.map(el=>scoreCropEl(a,el))));
+  for(const p of rest){
+    let best=null, bestV=-Infinity;
+    for(const el of els){
+      const load = buckets.get(el.uid).length / caps.get(el.uid);
+      const v = scoreCropEl(p, el) - 2.2*load - (buckets.get(el.uid).length>=caps.get(el.uid) ? 6 : 0);
+      if(v>bestV){ bestV=v; best=el; }
+    }
+    buckets.get(best.uid).push(p);
   }
   return buckets;
 }
@@ -3404,6 +3429,205 @@ window.gardenOpenShare = function(code){
     history.replaceState(null,"",location.pathname);
   }
 };
+
+/* ============================================================
+   A4 인쇄용 배치도 — 밭에 들고 나가는 도면 한 장
+   흑백 인쇄 대비: 색 대신 번호·굵기·패턴으로 구분
+   ============================================================ */
+
+function printSheetHTML(){
+  const R = lastResult;
+  if(!R || !R.place || !R.place.length) return null;
+
+  /* 작물별 집계 (같은 작물이 여러 두둑에 있을 수 있음) */
+  const byPlant = new Map();
+  R.place.forEach(p=>{
+    const k = p.plant.id;
+    if(!byPlant.has(k)) byPlant.set(k, { plant:p.plant, count:0, spots:[] });
+    const e = byPlant.get(k);
+    e.count += p.count;
+    e.spots.push(p);
+  });
+  const rows = [...byPlant.values()];
+  /* 번호 부여: 도면과 표를 잇는 열쇠 */
+  rows.forEach((r,i)=>{ r.no = i+1; r.spots.forEach(s=> s._no = i+1); });
+
+  const techNameOf = uid => {
+    const rt = R.elements.find(x=>x.el.uid===uid);
+    return rt ? TECH_BY_ID[rt.el.tech].name : "";
+  };
+
+  /* ── 도면 SVG (흑백 최적화) ── */
+  const W = R.bed.w*R.S, H = R.bed.h*R.S;
+  let svg = `<svg viewBox="0 0 400 320" xmlns="http://www.w3.org/2000/svg" class="pr-plan">`;
+  svg += `<rect x="${R.ox-5}" y="${R.oy-5}" width="${W+10}" height="${H+10}" rx="6"
+           fill="none" stroke="#111" stroke-width="2.5"/>`;
+  /* 두둑 윤곽 + 이름 */
+  R.elements.forEach((rt,i)=>{
+    const x=rt.exPx, y=rt.eyPx, w=rt.el.w*R.S, h=rt.el.h*R.S;
+    svg += `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="5"
+             fill="#f2f2f2" stroke="#111" stroke-width="1.4" stroke-dasharray="${i%2?"6 3":"0"}"/>`;
+    svg += `<text x="${x+4}" y="${y+11}" font-size="8.5" font-weight="700" fill="#111">${TECH_BY_ID[rt.el.tech].name}</text>`;
+  });
+  /* 작물: 번호 원 — 겹치면 살짝 밀어내 번호가 가려지지 않게 */
+  const marks = R.place.map(p=>({ no:p._no, x:p.cx, y:p.cy, r:Math.max(8, Math.min(12, p.r)) }));
+  for(let pass=0; pass<70; pass++){
+    let moved = false;
+    for(let i=0;i<marks.length;i++) for(let j=i+1;j<marks.length;j++){
+      const a=marks[i], b=marks[j];
+      let dx=b.x-a.x, dy=b.y-a.y;
+      let d=Math.hypot(dx,dy);
+      const need=a.r+b.r+2.5;
+      if(d>=need) continue;
+      if(d<0.01){ dx=(Math.random()-0.5); dy=(Math.random()-0.5); d=Math.hypot(dx,dy)||1; }
+      const push=(need-d)/2/d;
+      a.x-=dx*push; a.y-=dy*push; b.x+=dx*push; b.y+=dy*push;
+      moved = true;
+    }
+    if(!moved) break;
+  }
+  marks.forEach(m=>{
+    m.x = Math.max(R.ox+m.r+1, Math.min(R.ox+W-m.r-1, m.x));
+    m.y = Math.max(R.oy+m.r+1, Math.min(R.oy+H-m.r-1, m.y));
+  });
+  marks.sort((a,b)=>a.y-b.y).forEach(m=>{
+    const p = { cx:m.x, cy:m.y, _no:m.no };
+    const r = m.r;
+    svg += `<circle cx="${p.cx}" cy="${p.cy}" r="${r}" fill="#fff" stroke="#111" stroke-width="1.6"/>`;
+    svg += `<text x="${p.cx}" y="${p.cy+3.6}" font-size="${r*0.95}" font-weight="800"
+             text-anchor="middle" fill="#111">${p._no}</text>`;
+  });
+  /* 축척자 + 방위 */
+  svg += `<line x1="${R.ox}" y1="${R.oy+H+16}" x2="${R.ox+R.S}" y2="${R.oy+H+16}" stroke="#111" stroke-width="2"/>
+    <line x1="${R.ox}" y1="${R.oy+H+12}" x2="${R.ox}" y2="${R.oy+H+20}" stroke="#111" stroke-width="2"/>
+    <line x1="${R.ox+R.S}" y1="${R.oy+H+12}" x2="${R.ox+R.S}" y2="${R.oy+H+20}" stroke="#111" stroke-width="2"/>
+    <text x="${R.ox+R.S/2}" y="${R.oy+H+29}" font-size="9" text-anchor="middle" fill="#111" font-weight="700">1 m</text>`;
+  const sunLabel = { N:"북", E:"동", S:"남", W:"서" }[R.sun] || "남";
+  const arrow = { N:[200, R.oy-14, "▲"], S:[200, R.oy+H+14, "▼"], E:[R.ox+W+16, R.oy+H/2, "▶"], W:[R.ox-16, R.oy+H/2, "◀"] }[R.sun] || [200, R.oy+H+14, "▼"];
+  svg += `<text x="${arrow[0]}" y="${arrow[1]}" font-size="11" text-anchor="middle" fill="#111" font-weight="800">${arrow[2]} 해 (${sunLabel}쪽)</text>`;
+  svg += `</svg>`;
+
+  /* ── 표 ── */
+  const tableRows = rows.map(r=>{
+    const p = r.plant;
+    const [a,b] = p.sow;
+    const when = a===b ? MONTHS[a-1] : `${MONTHS[a-1]}~${MONTHS[b-1]}`;
+    const where = [...new Set(r.spots.map(s=>techNameOf(s.elUid)))].join(", ");
+    const zone = [...new Set(r.spots.map(s=>s.zone))].join(" / ");
+    return `<tr>
+      <td class="no">${r.no}</td>
+      <td class="nm">${p.name}</td>
+      <td>${r.count}포기</td>
+      <td>${p.spacing}cm</td>
+      <td>${when}</td>
+      <td class="wh">${where}<br><span class="zn">${zone}</span></td>
+    </tr>`;
+  }).join("");
+
+  /* ── 주의 사항(상극 조합) ── */
+  const warns = [];
+  for(let i=0;i<R.plants.length;i++) for(let j=i+1;j<R.plants.length;j++){
+    const rel = COMP_LOOKUP[R.plants[i].id]?.[R.plants[j].id];
+    if(rel?.type==="bad") warns.push(`${R.plants[i].name} ✕ ${R.plants[j].name} — ${rel.why}`);
+    if(rel?.type==="good") warns.push(`${R.plants[i].name} + ${R.plants[j].name} — ${rel.why}`);
+  }
+
+  const today = new Date();
+  const dateStr = `${today.getFullYear()}. ${today.getMonth()+1}. ${today.getDate()}`;
+  const techList = [...new Set(R.elements.map(e=>TECH_BY_ID[e.el.tech].name))].join(" · ");
+
+  return `<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8">
+<title>텃밭 배치도 — 퍼머컬처ON</title>
+<style>
+  @page { size:A4 portrait; margin:14mm; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Pretendard","Malgun Gothic",-apple-system,sans-serif;color:#111;background:#fff}
+  .wrap{max-width:182mm;margin:0 auto;padding:8mm 0}
+  header{display:flex;align-items:flex-end;justify-content:space-between;
+    border-bottom:2.5px solid #111;padding-bottom:6px;margin-bottom:12px}
+  h1{font-size:19px;margin:0;letter-spacing:-.4px}
+  .meta{font-size:11px;text-align:right;line-height:1.6}
+  .meta b{font-size:12px}
+  .plan-box{border:1.5px solid #111;border-radius:4px;padding:8px;margin-bottom:14px}
+  .pr-plan{width:100%;height:auto;display:block}
+  h2{font-size:13px;margin:0 0 6px;padding-bottom:3px;border-bottom:1.5px solid #111;letter-spacing:-.2px}
+  table{width:100%;border-collapse:collapse;font-size:11.5px;margin-bottom:14px}
+  th{background:#eee;border:1px solid #111;padding:5px 6px;text-align:left;font-size:11px}
+  td{border:1px solid #999;padding:5px 6px;vertical-align:top}
+  td.no{text-align:center;font-weight:800;width:26px;background:#f6f6f6}
+  td.nm{font-weight:700;white-space:nowrap}
+  td.wh{font-size:10.5px}
+  .zn{color:#555;font-size:9.5px}
+  ul.notes{margin:0 0 14px;padding-left:16px;font-size:11px;line-height:1.7}
+  ul.notes li{margin:2px 0}
+  .check{display:flex;flex-wrap:wrap;gap:5px 14px;font-size:11px;margin-bottom:12px}
+  .check span{display:flex;align-items:center;gap:5px}
+  .box{display:inline-block;width:11px;height:11px;border:1.5px solid #111}
+  footer{border-top:1px solid #999;padding-top:6px;margin-top:6px;
+    font-size:9.5px;color:#555;display:flex;justify-content:space-between}
+  .memo{border:1px dashed #999;border-radius:4px;height:24mm;padding:5px 7px;font-size:10px;color:#777}
+  @media print{ .noprint{display:none!important} body{-webkit-print-color-adjust:exact;print-color-adjust:exact} }
+  .noprint{position:fixed;top:10px;right:10px;display:flex;gap:8px}
+  .noprint button{border:none;border-radius:8px;padding:10px 16px;font-size:14px;font-weight:800;
+    cursor:pointer;font-family:inherit;background:#2E5339;color:#fff;box-shadow:0 3px 10px rgba(0,0,0,.25)}
+  .noprint button.gh{background:#fff;color:#555;border:1.5px solid #bbb}
+</style></head><body>
+<div class="noprint">
+  <button onclick="window.print()">🖨 인쇄 / PDF 저장</button>
+  <button class="gh" onclick="window.close()">닫기</button>
+</div>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>내 텃밭 배치도</h1>
+      <div style="font-size:11px;margin-top:3px">${techList}</div>
+    </div>
+    <div class="meta">
+      <b>${R.bed.w} × ${R.bed.h} m</b> · 두둑 ${R.elements.length}개<br>
+      작물 ${rows.length}종 · 해 ${sunLabel}쪽<br>
+      ${dateStr} · 퍼머컬처ON
+    </div>
+  </header>
+
+  <div class="plan-box">${svg}</div>
+
+  <h2>심을 작물 — 도면의 번호와 같습니다</h2>
+  <table>
+    <thead><tr><th>번호</th><th>작물</th><th>포기 수</th><th>간격</th><th>심는 때</th><th>위치</th></tr></thead>
+    <tbody>${tableRows}</tbody>
+  </table>
+
+  ${warns.length ? `<h2>함께 심을 때 주의</h2><ul class="notes">${warns.map(w=>`<li>${w}</li>`).join("")}</ul>` : ""}
+
+  <h2>나가기 전 챙길 것</h2>
+  <div class="check">
+    <span><i class="box"></i>모종·씨앗</span><span><i class="box"></i>모종삽</span>
+    <span><i class="box"></i>물뿌리개</span><span><i class="box"></i>장갑</span>
+    <span><i class="box"></i>줄자</span><span><i class="box"></i>지지대·끈</span>
+    <span><i class="box"></i>퇴비</span><span><i class="box"></i>이름표</span>
+  </div>
+
+  <h2>메모</h2>
+  <div class="memo">심은 날짜, 날씨, 바꾼 자리 등을 적어두세요</div>
+
+  <footer>
+    <span>퍼머컬처ON — 자연과 함께 설계하는 텃밭</span>
+    <span>${dateStr}</span>
+  </footer>
+</div>
+</body></html>`;
+}
+
+const gdPrintBtn = document.getElementById("gdPrintBtn");
+if(gdPrintBtn) gdPrintBtn.onclick = ()=>{
+  const html = printSheetHTML();
+  if(!html){ MK.toast("먼저 배치도를 만들어주세요"); return; }
+  const w = window.open("", "_blank");
+  if(!w){ MK.toast("팝업이 차단됐어요 — 허용 후 다시 눌러주세요"); return; }
+  w.document.open(); w.document.write(html); w.document.close();
+  MK.toast("인쇄 창에서 A4로 뽑거나 PDF로 저장하세요 🖨");
+};
+
 
 })();
 
