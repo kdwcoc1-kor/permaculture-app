@@ -761,6 +761,17 @@ main .view.active{animation:vw-in .22s ease both}
 @keyframes vw-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){ main .view.active{animation:none} }
 
+
+/* ── 배치도 범례 (밀집 시) ── */
+#view-garden .gd-legend{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:10px;
+  padding-top:9px;border-top:1.5px dashed #d8cdb3}
+#view-garden .gd-legend span{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#3f4a40}
+#view-garden .gd-legend i{display:inline-flex;align-items:center;justify-content:center;
+  width:17px;height:17px;border-radius:50%;background:#fffdf6;border:1.6px solid #5d6b57;
+  font-style:normal;font-size:10px;font-weight:800;color:#2f4030;flex:0 0 auto}
+#view-garden .gd-legend i.em{border-color:#cdbf9a;font-size:11px}
+#view-garden .gd-legend b{color:var(--moss)}
+
 </style>
 </head>
 <body>
@@ -1692,16 +1703,69 @@ LAYOUT_BY_TECH.custom = layoutCustom;
    ============================================================ */
 
 function svgEl(s){ return s; }
-function plantMarker(pl){
-  // 작물 하나: 옅은 원 + 이모지 + 이름 + 포기수
+function plantMarker(pl, opt){
+  opt = opt || {};
   const {plant:p, cx, cy, r, count} = pl;
-  return `
-    <g data-gd-i="${pl._i}">
-      <circle cx="${cx}" cy="${cy}" r="${r}" fill="#fffdf6" stroke="#cdbf9a" stroke-width="1.2" opacity="0.95"/>
-      <text x="${cx}" y="${cy+1}" font-size="${r*1.1}" text-anchor="middle" dominant-baseline="central">${p.emoji}</text>
-      <text x="${cx}" y="${cy+r+9}" font-size="9" font-weight="800" text-anchor="middle" fill="#2f4030">${p.name}</text>
-      <text x="${cx}" y="${cy+r+18}" font-size="7.5" text-anchor="middle" fill="#7a8378">${count}포기</text>
+  const mode = opt.mode || "full";          // full | compact | tiny
+  const no   = opt.no;                      // tiny일 때 번호
+  const rr   = Math.max(r, 11);             // 최소 크기 보장
+
+  if(mode === "tiny"){
+    return `<g data-gd-i="${pl._i}">
+      <circle cx="${cx}" cy="${cy}" r="${rr}" fill="#fffdf6" stroke="#5d6b57" stroke-width="1.8"/>
+      <text x="${cx}" y="${cy+0.5}" font-size="${rr*1.05}" text-anchor="middle" dominant-baseline="central"
+        font-weight="800" fill="#2f4030">${no}</text>
     </g>`;
+  }
+  if(mode === "compact"){
+    return `<g data-gd-i="${pl._i}">
+      <circle cx="${cx}" cy="${cy}" r="${rr}" fill="#fffdf6" stroke="#cdbf9a" stroke-width="1.4"/>
+      <text x="${cx}" y="${cy+0.5}" font-size="${rr*1.15}" text-anchor="middle" dominant-baseline="central">${p.emoji}</text>
+      <text x="${cx}" y="${cy-rr-3}" font-size="8.5" font-weight="800" text-anchor="middle" fill="#2f4030"
+        stroke="#fffdf6" stroke-width="2.6" paint-order="stroke">${count}</text>
+    </g>`;
+  }
+  /* full — 이름표를 흰 알약 배경 위에 (흙 위에서도 또렷하게) */
+  const label = `${p.name} ×${count}`;
+  const lw = Math.max(34, label.length*7.2 + 12);
+  const ly = cy + rr + 4;
+  return `<g data-gd-i="${pl._i}">
+    <circle cx="${cx}" cy="${cy}" r="${rr}" fill="#fffdf6" stroke="#cdbf9a" stroke-width="1.4"/>
+    <text x="${cx}" y="${cy+0.5}" font-size="${rr*1.15}" text-anchor="middle" dominant-baseline="central">${p.emoji}</text>
+    <g class="gd-lab">
+      <rect x="${cx-lw/2}" y="${ly}" width="${lw}" height="14" rx="7"
+        fill="#fffdf6" stroke="#cdbf9a" stroke-width="1"/>
+      <text x="${cx}" y="${ly+9.8}" font-size="9" font-weight="800" text-anchor="middle" fill="#2f4030">${label}</text>
+    </g>
+  </g>`;
+}
+
+/* 마커가 겹치지 않게 밀어냄 (인쇄 도면과 같은 방식) */
+function spreadMarkers(list, bounds, gap){
+  const m = list.map(p=>({ src:p, x:p.cx, y:p.cy, r:Math.max(p.r,11) }));
+  const G = gap==null ? 3 : gap;
+  for(let pass=0; pass<70; pass++){
+    let moved=false;
+    for(let i=0;i<m.length;i++) for(let j=i+1;j<m.length;j++){
+      const a=m[i], b=m[j];
+      let dx=b.x-a.x, dy=b.y-a.y, d=Math.hypot(dx,dy);
+      const need=a.r+b.r+G;
+      if(d>=need) continue;
+      if(d<0.01){ dx=Math.random()-0.5; dy=Math.random()-0.5; d=Math.hypot(dx,dy)||1; }
+      const push=(need-d)/2/d;
+      a.x-=dx*push; a.y-=dy*push; b.x+=dx*push; b.y+=dy*push;
+      moved=true;
+    }
+    if(!moved) break;
+  }
+  if(bounds){
+    m.forEach(q=>{
+      q.x = Math.max(bounds.x0+q.r, Math.min(bounds.x1-q.r, q.x));
+      q.y = Math.max(bounds.y0+q.r, Math.min(bounds.y1-q.r-2, q.y));
+    });
+  }
+  m.forEach(q=>{ q.src.cx=+q.x.toFixed(1); q.src.cy=+q.y.toFixed(1); });
+  return list;
 }
 
 /* 흙 텍스처 defs (모든 기법 공용) */
@@ -1843,9 +1907,10 @@ BED_SHAPE.custom = function(){
 };
 /* 요소 이름 칩 (플롯 좌표) */
 function elemChip(x, y, label){
-  const w = 12 + label.length*10;
-  return `<g><rect x="${x}" y="${y}" width="${w}" height="15" rx="7" fill="#fffdf6" stroke="#cdbf9a" opacity="0.92"/>
-    <text x="${x+w/2}" y="${y+10.5}" font-size="9" font-weight="800" text-anchor="middle" fill="#2f4030">${label}</text></g>`;
+  const w = 12 + label.length*9.5;
+  return `<g class="gd-echiplbl"><rect x="${x}" y="${y}" width="${w}" height="15" rx="7.5"
+      fill="#3f4a40" opacity="0.92"/>
+    <text x="${x+w/2}" y="${y+10.6}" font-size="9" font-weight="800" text-anchor="middle" fill="#fdf6e3">${label}</text></g>`;
 }
 
 
@@ -3073,12 +3138,52 @@ function renderPlotAll(){
     const shape = (BED_SHAPE[rt.el.tech]||BED_SHAPE.custom)(rt.meta);
     s += `<g transform="translate(${rt.exPx},${rt.eyPx}) scale(${rt.sx.toFixed(4)},${rt.sy.toFixed(4)})">${shape}</g>`;
   });
-  [...R.place].sort((a,b)=>a.cy-b.cy).forEach(pl=> s += plantMarker(pl));
-  R.elements.forEach(rt=> s += elemChip(rt.exPx+3, rt.eyPx+2, TECH_BY_ID[rt.el.tech].name));
+  /* 밀집도에 따라 표시 방식 자동 선택 */
+  const bedArea = (R.bed.w*R.S) * (R.bed.h*R.S);
+  const per = bedArea / Math.max(1, R.place.length);
+  const mode = (per > 6500 && R.place.length <= 6) ? "full"
+             : (per > 1500 || R.place.length <= 10) ? "compact" : "tiny";
+  R.viewMode = mode;
+
+  /* 겹침 분리 — 표시 좌표를 그대로 저장해 드래그·공유·인쇄와 일치시킴 */
+  const shown = R.place;
+  spreadMarkers(shown,
+    { x0:R.ox+4, y0:R.oy+16, x1:R.ox+R.bed.w*R.S-4, y1:R.oy+R.bed.h*R.S-4 },
+    mode==="full" ? 26 : mode==="compact" ? 6 : 4);
+
+  /* 번호 부여(tiny일 때 범례와 연결) */
+  const legend = [];
+  const noOf = new Map();
+  if(mode!=="full"){
+    shown.forEach(p=>{
+      if(!noOf.has(p.plant.id)){ noOf.set(p.plant.id, noOf.size+1); legend.push({no:noOf.size, p}); }
+    });
+  }
+  [...shown].sort((a,b)=>a.cy-b.cy).forEach(pl=>
+    s += plantMarker(pl, { mode, no: noOf.get(pl.plant.id) }));
+  R.legendMode = mode;
+
+  /* 두둑 이름칩 — 두둑 위쪽 바깥에 (작물과 겹치지 않게) */
+  R.elements.forEach(rt=>{
+    const label = TECH_BY_ID[rt.el.tech].name;
+    const chipY = rt.eyPx - 17 < R.oy ? rt.eyPx + 2 : rt.eyPx - 17;
+    s += elemChip(rt.exPx + 2, chipY, label);
+  });
   s += `<line x1="${R.ox}" y1="293" x2="${R.ox+R.S}" y2="293" stroke="#7a6a48" stroke-width="2.5"/>
         <text x="${R.ox+R.S/2}" y="288" font-size="8.5" text-anchor="middle" fill="#7a6a48" font-weight="800">1 m</text>`;
   s += sunArrow(R.sun) + `</svg>`;
-  document.getElementById("gdBedHost").innerHTML = s;
+  if(mode!=="full" && legend.length){
+    s += `</svg>`;
+    const total = new Map();
+    R.place.forEach(p=> total.set(p.plant.id, (total.get(p.plant.id)||0) + p.count));
+    s = s.replace("</svg></svg>","</svg>");
+    document.getElementById("gdBedHost").innerHTML = s +
+      `<div class="gd-legend">` + legend.map(L=>
+        `<span>${mode==="tiny" ? `<i>${L.no}</i>` : `<i class="em">${L.p.plant.emoji}</i>`}${L.p.plant.name} <b>${total.get(L.p.plant.id)}포기</b></span>`
+      ).join("") + `</div>`;
+  } else {
+    document.getElementById("gdBedHost").innerHTML = s;
+  }
   document.getElementById("gdBedDim").textContent = `${R.bed.w} × ${R.bed.h} m 밭 · 두둑 ${R.elements.length}개`;
   const sl = SUNS.find(x=>x.id===R.sun);
   document.getElementById("gdBedSun").textContent = "☀ " + (sl?sl.label:"남쪽") + " 햇빛";
@@ -4381,9 +4486,9 @@ if(!isShared) splash();             // 공유 링크로 오면 시작화면 자�
 
 <button id="obReplay" title="온보딩 다시 보기">소개 다시 보기</button>
 <style>
-#obReplay{position:fixed;left:10px;bottom:calc(80px + env(safe-area-inset-bottom));z-index:120;
+#obReplay{position:fixed;left:8px;top:calc(8px + env(safe-area-inset-top));z-index:120;
   border:1.5px solid #cdc3aa;background:#FCFAF1cc;backdrop-filter:blur(4px);color:#7a8378;
-  border-radius:999px;padding:6px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;opacity:.75}
+  border-radius:999px;padding:5px 10px;font-size:10.5px;font-weight:700;cursor:pointer;font-family:inherit;opacity:.6}
 #obReplay:active{opacity:1}
 </style>
 <script>document.getElementById('obReplay').onclick=function(){ window.pconShowOnboarding && window.pconShowOnboarding(); };</script>
