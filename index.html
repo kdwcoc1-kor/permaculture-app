@@ -815,6 +815,9 @@ main .view.active{animation:vw-in .22s ease both}
       <span class="tag">자연과 함께 설계하는 텃밭</span>
     </div>
   </div>
+  <button class="set-btn" id="setOpenBtn" aria-label="설정 열기">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 008 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 8a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 3.66 1.65 1.65 0 0010 2.15V2a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 8.6c.14.35.4.64.75.8H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+  </button>
 </header>
 
 <main>
@@ -4171,8 +4174,185 @@ CATS.forEach(c=>{
 
 function badge(p){ return p.premium ? ' <span class="bd-badge">🌿</span>' : ''; }
 
+/* ══════════════ PCON_REPORT_START ══════════════
+   신고 · 차단 (App Store 1.2 / Google Play UGC 정책 대응)
+   ══════════════════════════════════════════════ */
+M.session.blocked = M.session.blocked || [];
+M.session.reports = M.session.reports || [];
+
+const REPORT_REASONS = [
+  { id:"abuse",   label:"비방 · 모욕 · 협박" },
+  { id:"sexual",  label:"음란물 · 청소년 유해" },
+  { id:"hate",    label:"차별 · 혐오 표현" },
+  { id:"privacy", label:"개인정보 무단 게시" },
+  { id:"spam",    label:"스팸 · 광고" },
+  { id:"fake",    label:"사칭 · 허위 사실" },
+  { id:"etc",     label:"기타" }
+];
+
+/* 금지어 사전 필터 — 약관 제9조 ④ */
+const BANNED = ["씨발","시발","씹할","좆","병신","지랄","개새끼","니미","엠창","fuck","shit","asshole"];
+function hasBanned(t){
+  const s = String(t).toLowerCase().replace(/\s+/g, "");
+  return BANNED.find(w => s.includes(w));
+}
+
+function isBlocked(name){ return M.session.blocked.some(b => b.name === name); }
+
+function moreBtn(kind, id, ci){
+  return `<button class="bd-more" data-more="${kind}" data-mid="${id}"` +
+         (ci != null ? ` data-ci="${ci}"` : "") + ` aria-label="더보기">⋯</button>`;
+}
+
+function targetOf(kind, id, ci){
+  const p = posts.find(x => x.id === id);
+  if(!p) return null;
+  if(kind === "post") return { name:p.user, avatar:p.avatar, text:p.text, post:p, ci:null };
+  const c = p.comments[ci];
+  if(!c) return null;
+  return { name:c.user, avatar:c.avatar || "🙂", text:c.text, post:p, ci:ci };
+}
+
+/* ⋯ 액션 시트 */
+function openMore(kind, id, ci){
+  const t = targetOf(kind, id, ci);
+  if(!t) return;
+  const mine = M.session.user && M.session.user.name === t.name;
+  const what = kind === "post" ? "글" : "댓글";
+  const wrap = document.createElement("div");
+  wrap.className = "mk-dim bottom";
+  wrap.innerHTML = `<div class="mk-sheet">
+    <div class="mk-shandle"></div>
+    <div class="bd-mtarget">${t.avatar} <b>${t.name}</b>님의 ${what}</div>
+    ${mine
+      ? `<button class="bd-msheet danger" data-do="delete">🗑 삭제하기</button>`
+      : `<button class="bd-msheet" data-do="report">🚩 신고하기</button>
+         <button class="bd-msheet danger" data-do="block">🚫 ${t.name}님 차단하기</button>`}
+    <button class="mk-later" data-do="cancel">닫기</button>
+  </div>`;
+  wrap.addEventListener("click", e => { if(e.target === wrap) wrap.remove(); });
+  wrap.querySelectorAll("[data-do]").forEach(b => {
+    b.onclick = () => {
+      const a = b.dataset.do; wrap.remove();
+      if(a === "report")      openReport(kind, id, ci);
+      else if(a === "block")  confirmBlock(t.name, t.avatar);
+      else if(a === "delete") removeOwn(kind, id, ci);
+    };
+  });
+  document.body.appendChild(wrap);
+}
+
+/* 신고 사유 선택 */
+function openReport(kind, id, ci){
+  M.kakao(() => {
+    const t = targetOf(kind, id, ci);
+    if(!t) return;
+    let picked = null;
+    const quote = t.text.length > 44 ? t.text.slice(0, 44) + "…" : t.text;
+    M.modal({
+      title:"신고하기",
+      body:`<div class="bd-rp">
+        <div class="bd-rq">${quote}</div>
+        <div class="bd-rl">신고 사유를 선택해 주세요</div>
+        <div class="bd-rr">${REPORT_REASONS.map(r =>
+          `<button class="bd-rbtn" data-r="${r.id}">${r.label}</button>`).join("")}</div>
+        <div class="bd-rn">접수 후 <b>24시간 이내</b>에 검토하여 조치하고 결과를 알려드립니다.
+          신고자 정보는 상대방에게 공개되지 않습니다.</div>
+      </div>`,
+      buttons:[
+        { label:"취소" },
+        { label:"신고 접수", primary:true, onClick:() => { if(picked) submitReport(kind, id, ci, picked); } }
+      ]
+    });
+    const send = document.querySelector(".mk-modal .mk-btn.primary");
+    if(send) send.disabled = true;
+    document.querySelectorAll(".bd-rbtn").forEach(b => {
+      b.onclick = () => {
+        picked = b.dataset.r;
+        document.querySelectorAll(".bd-rbtn").forEach(x => x.classList.remove("on"));
+        b.classList.add("on");
+        if(send) send.disabled = false;
+      };
+    });
+  });
+}
+
+/* 신고 접수 */
+function submitReport(kind, id, ci, reason){
+  const t = targetOf(kind, id, ci);
+  if(!t) return;
+  M.session.reports.push({
+    at: Date.now(), kind: kind, reason: reason,
+    target: t.name, text: t.text,
+    reporter: M.session.user ? M.session.user.name : "익명",
+    status: "접수"
+  });
+  /* TODO(Phase 1) — Supabase reports 테이블 insert + 운영자 알림.
+     운영자가 24시간 내에 처리하지 않으면 자동 에스컬레이션되도록 구성할 것. */
+  if(kind === "post"){
+    t.post.hidden = true;
+    if(curPost && curPost.id === id){ detail.classList.remove("show"); curPost = null; }
+  } else {
+    t.post.comments[ci].hidden = true;
+  }
+  renderList();
+  if(curPost) renderDetail();
+  M.modal({
+    title:"신고가 접수되었습니다",
+    body:"24시간 이내에 검토하여 조치하고 결과를 알려드립니다.<br>" +
+         "검토가 끝날 때까지 이 게시물은 회원님께 보이지 않습니다.",
+    buttons:[{ label:"확인", primary:true }]
+  });
+}
+
+/* 차단 */
+function confirmBlock(name, avatar){
+  M.kakao(() => {
+    M.modal({
+      title:`${name}님을 차단할까요?`,
+      body:"차단하면 이 사용자의 글과 댓글이 보이지 않고, 회원님의 글에 댓글을 남길 수 없습니다.<br><br>" +
+           "차단은 <b>설정 → 차단한 사용자</b>에서 언제든 해제할 수 있습니다.",
+      buttons:[
+        { label:"취소" },
+        { label:"차단하기", primary:true, onClick:() => {
+            if(!isBlocked(name)) M.session.blocked.push({ name: name, avatar: avatar });
+            if(curPost && curPost.user === name){ detail.classList.remove("show"); curPost = null; }
+            renderList();
+            if(curPost) renderDetail();
+            M.toast(`${name}님을 차단했어요`);
+        }}
+      ]
+    });
+  });
+}
+
+/* 내 글·댓글 삭제 */
+function removeOwn(kind, id, ci){
+  M.modal({
+    title:"삭제할까요?",
+    body:"삭제한 내용은 복구할 수 없습니다.",
+    buttons:[
+      { label:"취소" },
+      { label:"삭제", primary:true, onClick:() => {
+          const p = posts.find(x => x.id === id);
+          if(!p) return;
+          if(kind === "post"){
+            posts.splice(posts.indexOf(p), 1);
+            if(curPost && curPost.id === id){ detail.classList.remove("show"); curPost = null; }
+          } else {
+            p.comments.splice(ci, 1);
+          }
+          renderList();
+          if(curPost) renderDetail();
+          M.toast("삭제했어요");
+      }}
+    ]
+  });
+}
+/* ══════════════ PCON_REPORT_END ══════════════ */
+
 function renderList(){
-  const list = posts.filter(p=> curCat==="all" || p.cat===curCat);
+  const list = posts.filter(p=> (curCat==="all" || p.cat===curCat) && !p.hidden && !isBlocked(p.user));
   listBox.innerHTML = list.map(p=>`
     <div class="bd-card" data-id="${p.id}">
       <div class="bd-top">
@@ -4180,6 +4360,7 @@ function renderList(){
         <div><div class="bd-name">${p.user}${badge(p)}</div></div>
         <span class="bd-cattag">${CAT_NAME[p.cat].replace(/^[^ ]+ /,'')}</span>
         <span class="bd-time">${p.time}</span>
+        ${moreBtn("post", p.id)}
       </div>
       <div class="bd-text">${p.text}</div>
       ${p.img?`<div class="bd-img">${photo(p.img)}</div>`:""}
@@ -4192,6 +4373,10 @@ function renderList(){
 renderList();
 
 listBox.addEventListener("click", e=>{
+  const mo = e.target.closest("[data-more]");
+  if(mo){ e.stopPropagation();
+    openMore(mo.dataset.more, +mo.dataset.mid, mo.dataset.ci != null ? +mo.dataset.ci : null);
+    return; }
   const lk = e.target.closest("[data-like]");
   if(lk){ e.stopPropagation(); toggleLike(+lk.dataset.like); return; }
   const card = e.target.closest(".bd-card");
@@ -4225,6 +4410,7 @@ function renderDetail(){
       <div><div class="bd-name">${p.user}${badge(p)}</div></div>
       <span class="bd-cattag">${CAT_NAME[p.cat].replace(/^[^ ]+ /,'')}</span>
       <span class="bd-time">${p.time}</span>
+      ${moreBtn("post", p.id)}
     </div>
     <div class="bd-text" style="font-size:15px">${p.text}</div>
     ${p.img?`<div class="bd-img">${photo(p.img)}</div>`:""}
@@ -4233,14 +4419,18 @@ function renderDetail(){
       <span>💬 ${p.comments.length}</span>
     </div>
     <div class="bd-cbox">
-      ${p.comments.map(c=>`
+      ${p.comments.map((c,ci)=> (c.hidden || isBlocked(c.user)) ? "" : `
         <div class="bd-cmt">
           <div class="bd-ava">${c.avatar||"🙂"}</div>
-          <div><div class="c-name">${c.user}${c.premium?' <span class="bd-badge">🌿</span>':''}</div>
+          <div style="flex:1"><div class="c-name">${c.user}${c.premium?' <span class="bd-badge">🌿</span>':''}</div>
           <div class="c-text">${c.text}</div></div>
+          ${moreBtn("comment", p.id, ci)}
         </div>`).join("") || `<div style="color:#a9a390;font-size:13px;padding:6px 0">첫 댓글을 남겨보세요</div>`}
     </div>`;
   document.getElementById("bdDlike").onclick = ()=> toggleLike(p.id);
+  dbody.querySelectorAll("[data-more]").forEach(b=>{
+    b.onclick = ()=> openMore(b.dataset.more, +b.dataset.mid, b.dataset.ci != null ? +b.dataset.ci : null);
+  });
 }
 
 /* 댓글 입력 */
@@ -4248,6 +4438,7 @@ document.getElementById("bdCsend").onclick = ()=>{
   const f = document.getElementById("bdCfield");
   const txt = f.value.trim();
   if(!txt || !curPost) return;
+  if(hasBanned(txt)){ M.toast("부적절한 표현이 포함되어 있어 등록할 수 없습니다"); return; }
   M.kakao(()=>{
     curPost.comments.push({ user:M.session.user.name, avatar:M.session.user.avatar,
       premium:M.session.premium, text:txt });
@@ -4282,6 +4473,7 @@ document.getElementById("bdWphoto").onclick = ()=>{
 document.getElementById("bdWsubmit").onclick = ()=>{
   const txt = document.getElementById("bdWtext").value.trim();
   if(!txt){ M.toast("내용을 입력해주세요"); return; }
+  if(hasBanned(txt)){ M.toast("부적절한 표현이 포함되어 있어 등록할 수 없습니다"); return; }
   posts.unshift({ id:++seq, cat:writeCat, user:M.session.user.name, avatar:M.session.user.avatar,
     premium:M.session.premium, time:"방금", text:txt, img:writePhoto,
     likes:0, liked:false, comments:[] });
@@ -4492,5 +4684,533 @@ if(!isShared) splash();             // 공유 링크로 오면 시작화면 자�
 #obReplay:active{opacity:1}
 </style>
 <script>document.getElementById('obReplay').onclick=function(){ window.pconShowOnboarding && window.pconShowOnboarding(); };</script>
+
+<!-- ══════════════════ PCON_SETTINGS_START ══════════════════
+     설정 화면 + 계정 삭제 (App Store 5.1.1(v) / 1.2 대응)
+     ─ 진입: 헤더 우측 ⚙ 버튼
+═══════════════════════════════════════════════════════════ -->
+<style>
+#obReplay{display:none!important}
+
+/* ── 신고 · 차단 UI ── */
+#view-board .bd-more{margin-left:2px;border:none;background:none;color:#a9a390;font-size:17px;
+  line-height:1;padding:2px 6px;border-radius:8px;cursor:pointer;font-family:inherit;flex:none}
+#view-board .bd-more:active{background:#EFEADA;color:#6b7468}
+#view-board .bd-cmt .bd-more{align-self:flex-start}
+.bd-mtarget{text-align:center;font-size:13.5px;color:#7a8378;margin:2px 0 14px}
+.bd-mtarget b{color:#2f4030}
+.bd-msheet{width:100%;border:1.5px solid #ddd6bd;background:#fff;color:#3A3327;font-weight:700;
+  font-size:14.5px;padding:13px;border-radius:12px;cursor:pointer;font-family:inherit;
+  margin-bottom:8px;text-align:center}
+.bd-msheet.danger{color:#B4513E;border-color:#e5c6bd}
+.bd-msheet:active{background:#F6F2E4}
+.bd-rp{text-align:left}
+.bd-rq{background:#F1EEDF;border-radius:9px;padding:9px 11px;font-size:13px;color:#6b6852;margin-bottom:12px}
+.bd-rl{font-size:13px;font-weight:700;color:#5f5c48;margin-bottom:8px}
+.bd-rr{display:flex;flex-wrap:wrap;gap:7px}
+.bd-rbtn{border:1.5px solid #ddd6bd;background:#fff;color:#5f5c48;font-family:inherit;font-size:13px;
+  font-weight:600;padding:7px 11px;border-radius:99px;cursor:pointer}
+.bd-rbtn.on{background:#2E5339;border-color:#2E5339;color:#fff}
+.bd-rn{margin-top:13px;font-size:12px;color:#8a8a72;line-height:1.65}
+.bd-rn b{color:#5f5c48}
+
+.set-btn{
+  position:absolute;right:16px;top:18px;z-index:4;
+  width:38px;height:38px;border-radius:50%;
+  border:1.5px solid rgba(46,83,57,.28);
+  background:rgba(252,250,241,.82);backdrop-filter:blur(6px);
+  display:grid;place-items:center;cursor:pointer;padding:0;
+  box-shadow:0 2px 6px rgba(58,51,39,.14);
+}
+.set-btn svg{width:20px;height:20px;stroke:#2E5339;stroke-width:1.7;fill:none;
+  stroke-linecap:round;stroke-linejoin:round}
+.set-btn:active{transform:scale(.94)}
+
+#setView{
+  position:fixed;inset:0;z-index:130;background:#F1EEDF;
+  display:flex;flex-direction:column;
+  transform:translateY(100%);visibility:hidden;
+  transition:transform .28s cubic-bezier(.32,.72,0,1),visibility .28s;
+}
+#setView.open{transform:none;visibility:visible}
+@media (prefers-reduced-motion:reduce){#setView{transition:none}}
+
+.st-bar{
+  flex:none;display:flex;align-items:center;gap:10px;
+  padding:calc(10px + env(safe-area-inset-top)) 14px 10px;
+  background:#FCFAF1;border-bottom:1px solid #E2DBC4;
+}
+.st-bar button{
+  border:none;background:none;font:inherit;cursor:pointer;
+  font-size:19px;color:#4a5a44;padding:6px 8px;border-radius:9px;line-height:1;
+}
+.st-bar button:active{background:#EFEADA}
+.st-bar b{font-size:16px;font-weight:800;color:#2f4030;letter-spacing:-.01em}
+
+.st-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:6px 16px calc(34px + env(safe-area-inset-bottom))}
+.st-sec{font-size:11px;font-weight:800;color:#8f8d75;letter-spacing:.1em;margin:22px 5px 8px}
+.st-card{background:#FCFAF1;border:1px solid #E2DBC4;border-radius:14px;overflow:hidden}
+
+.st-row{
+  display:flex;align-items:center;gap:12px;width:100%;
+  padding:13px 15px;border:none;border-bottom:1px solid #EFEADA;
+  background:none;font:inherit;text-align:left;color:#3A3327;cursor:pointer;
+}
+.st-row:last-child{border-bottom:none}
+.st-row:active{background:#F6F2E4}
+.st-row .ic{width:22px;flex:none;text-align:center;font-size:15.5px}
+.st-row .lb{flex:1;font-size:14.5px;font-weight:600;letter-spacing:-.01em}
+.st-row .lb small{display:block;font-size:12px;font-weight:500;color:#8f8d75;margin-top:1px;letter-spacing:0}
+.st-row .vl{font-size:13px;color:#8f8d75;flex:none}
+.st-row .ar{color:#c6bfa6;font-size:15px;flex:none}
+.st-row.danger .lb{color:#B4513E}
+.st-row.static{cursor:default}
+.st-row.static:active{background:none}
+
+/* 계정 카드 */
+.st-acc{display:flex;align-items:center;gap:13px;padding:17px 16px}
+.st-av{width:48px;height:48px;border-radius:50%;background:#E3EDDC;border:1.5px solid #cbdcc4;
+  display:grid;place-items:center;font-size:24px;flex:none}
+.st-ainfo{flex:1;min-width:0}
+.st-aname{font-size:16px;font-weight:800;color:#2f4030;letter-spacing:-.01em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st-asub{font-size:12.5px;color:#8f8d75;margin-top:2px}
+.st-badge{display:inline-block;font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:99px;
+  background:#E3EDDC;color:#2E5339;border:1px solid #bcd3b6;margin-left:5px;vertical-align:1px}
+.st-login{
+  width:100%;border:none;background:#FEE500;color:#191600;font-weight:800;font-size:14.5px;
+  padding:13px;border-radius:11px;cursor:pointer;font-family:inherit;
+}
+
+/* 토글 */
+.st-sw{position:relative;width:44px;height:26px;flex:none;border-radius:99px;background:#d5cfb8;
+  transition:background .18s;border:none;padding:0;cursor:pointer}
+.st-sw::after{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;
+  background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .18s}
+.st-sw.on{background:#5B9A68}
+.st-sw.on::after{transform:translateX(18px)}
+
+/* 셀렉트 */
+.st-sel{border:1.5px solid #ddd6bd;background:#fff;border-radius:9px;padding:7px 9px;
+  font-family:inherit;font-size:13.5px;color:#3A3327;max-width:56%}
+
+/* 빈 상태 */
+.st-empty{padding:24px 16px;text-align:center;color:#9a9880;font-size:13.5px;line-height:1.7}
+
+.st-foot{text-align:center;color:#a09e86;font-size:11.5px;line-height:1.9;margin:26px 0 8px}
+
+/* 삭제 확인 */
+.st-del ul{margin:10px 0 0;padding-left:18px;font-size:13.5px;color:#5f5c48;line-height:1.75}
+.st-del li{margin-bottom:4px}
+.st-warn{margin-top:13px;padding:11px 13px;background:#F6E6DF;border-left:3px solid #B4513E;
+  border-radius:0 7px 7px 0;font-size:13px;color:#7a4235;line-height:1.65}
+.st-warn b{color:#8f3826}
+.st-input{width:100%;border:1.5px solid #cdc3aa;border-radius:10px;padding:12px 13px;
+  font-family:inherit;font-size:15px;color:#3A3327;margin-top:12px;background:#fff}
+.st-input:focus{outline:none;border-color:#B4513E}
+.mk-btn.danger{background:#B4513E;border-color:#B4513E;color:#fff;box-shadow:0 3px 0 #8f3f30}
+.mk-btn:disabled{opacity:.42;cursor:not-allowed;box-shadow:none}
+</style>
+
+<div id="setView" role="dialog" aria-modal="true" aria-label="설정" aria-hidden="true">
+  <div class="st-bar">
+    <button id="stClose" aria-label="설정 닫기">←</button>
+    <b>설정</b>
+  </div>
+  <div class="st-body" id="stBody"></div>
+</div>
+
+<script>
+/* ============================================================
+   퍼머컬처ON — 설정 / 계정 삭제
+   ============================================================ */
+(function(){
+"use strict";
+
+/* ⚠️ 출시 전 아래 두 값을 실제 정보로 교체하세요 */
+var APP_VERSION   = "1.0.0";
+var CONTACT_EMAIL = "kdw1350@naver.com";
+
+var MK   = window.Mock;
+var view = document.getElementById("setView");
+var body = document.getElementById("stBody");
+if(!view || !body || !MK) return;
+
+MK.session.blocked = MK.session.blocked || [];
+
+/* ---------- 유틸 ---------- */
+function esc(s){
+  return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+  });
+}
+var LS = {
+  get: function(k,d){ try{ var v = localStorage.getItem(k); return v===null ? d : JSON.parse(v); }catch(e){ return d; } },
+  set: function(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+var prefs = {
+  todo:    LS.get("pcon_push_todo", true),
+  comment: LS.get("pcon_push_comment", true)
+};
+
+function platform(){
+  var ua = navigator.userAgent || "";
+  if(/iPad|iPhone|iPod/.test(ua)) return "ios";
+  if(/Android/.test(ua)) return "android";
+  return "web";
+}
+function openExternal(url){ window.open(url, "_blank", "noopener"); }
+
+/* ---------- 열기 / 닫기 ---------- */
+function open(){
+  render();
+  view.classList.add("open");
+  view.setAttribute("aria-hidden","false");
+  document.body.style.overflow = "hidden";
+}
+function close(){
+  view.classList.remove("open");
+  view.setAttribute("aria-hidden","true");
+  document.body.style.overflow = "";
+}
+document.getElementById("stClose").onclick = close;
+document.addEventListener("keydown", function(e){
+  if(e.key === "Escape" && view.classList.contains("open")) close();
+});
+
+/* ---------- 화면 그리기 ---------- */
+function render(){
+  var u  = MK.session.user;
+  var pr = MK.session.premium;
+  var regions = (typeof PLANT_DATA !== "undefined" && PLANT_DATA.regions) || [];
+  var curRegion = localStorage.getItem("pcon_region") || "south_coast";
+
+  var accountCard = u
+    ? '<div class="st-card">' +
+        '<div class="st-acc">' +
+          '<div class="st-av">' + esc(u.avatar || "🧑‍🌾") + '</div>' +
+          '<div class="st-ainfo">' +
+            '<div class="st-aname">' + esc(u.name) +
+              (pr ? '<span class="st-badge">🌿 프리미엄</span>' : '') + '</div>' +
+            '<div class="st-asub">카카오 계정으로 로그인됨</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>'
+    : '<div class="st-card"><div class="st-acc" style="flex-direction:column;align-items:stretch;gap:11px">' +
+        '<div style="text-align:center">' +
+          '<div style="font-size:15px;font-weight:800;color:#2f4030">로그인하고 텃밭을 저장하세요</div>' +
+          '<div class="st-asub" style="margin-top:4px">저장한 배치도와 커뮤니티 활동이 기기를 바꿔도 그대로 남습니다</div>' +
+        '</div>' +
+        '<button class="st-login" id="stLogin">💬 카카오로 3초 만에 시작하기</button>' +
+      '</div></div>';
+
+  var subCard =
+    '<div class="st-sec">구독</div>' +
+    '<div class="st-card">' +
+      '<div class="st-row static">' +
+        '<span class="ic">🌿</span>' +
+        '<span class="lb">현재 플랜</span>' +
+        '<span class="vl">' + (pr ? "프리미엄" : "무료") + '</span>' +
+      '</div>' +
+      (pr
+        ? '<button class="st-row" data-act="manage"><span class="ic">🧾</span>' +
+          '<span class="lb">구독 관리 · 해지<small>' + storeName() + '에서 관리합니다</small></span><span class="ar">›</span></button>'
+        : '<button class="st-row" data-act="upsell"><span class="ic">✨</span>' +
+          '<span class="lb">프리미엄 알아보기<small>무제한 저장 · 편집 · 내보내기 · 할 일 알림</small></span><span class="ar">›</span></button>') +
+      '<button class="st-row" data-act="restore"><span class="ic">🔄</span>' +
+        '<span class="lb">구매 복원<small>기기를 바꿨거나 앱을 다시 설치했다면</small></span><span class="ar">›</span></button>' +
+    '</div>';
+
+  var notiCard =
+    '<div class="st-sec">알림</div>' +
+    '<div class="st-card">' +
+      '<div class="st-row static"><span class="ic">🔔</span>' +
+        '<span class="lb">월별 텃밭 할 일<small>내가 심은 작물 기준으로 알려드려요</small></span>' +
+        '<button class="st-sw' + (prefs.todo ? " on" : "") + '" data-sw="todo" role="switch" aria-checked="' + prefs.todo + '" aria-label="월별 텃밭 할 일 알림"></button></div>' +
+      '<div class="st-row static"><span class="ic">💬</span>' +
+        '<span class="lb">내 글의 댓글<small>답글이 달리면 알려드려요</small></span>' +
+        '<button class="st-sw' + (prefs.comment ? " on" : "") + '" data-sw="comment" role="switch" aria-checked="' + prefs.comment + '" aria-label="댓글 알림"></button></div>' +
+    '</div>';
+
+  var communityCard =
+    '<div class="st-sec">커뮤니티</div>' +
+    '<div class="st-card">' +
+      '<button class="st-row" data-act="blocked"><span class="ic">🚫</span>' +
+        '<span class="lb">차단한 사용자</span>' +
+        '<span class="vl">' + MK.session.blocked.length + '명</span><span class="ar">›</span></button>' +
+      '<button class="st-row" data-act="guide"><span class="ic">🤝</span>' +
+        '<span class="lb">커뮤니티 이용 규칙</span><span class="ar">›</span></button>' +
+    '</div>';
+
+  var appCard =
+    '<div class="st-sec">앱</div>' +
+    '<div class="st-card">' +
+      '<div class="st-row static"><span class="ic">📍</span>' +
+        '<span class="lb">우리 지역<small>재배 캘린더 기준</small></span>' +
+        '<select class="st-sel" id="stRegion" aria-label="우리 지역 선택">' +
+          regions.map(function(r){
+            return '<option value="' + esc(r.id) + '"' + (r.id === curRegion ? " selected" : "") + '>' + esc(r.name) + '</option>';
+          }).join("") +
+        '</select></div>' +
+      '<button class="st-row" data-act="onboarding"><span class="ic">🌱</span>' +
+        '<span class="lb">앱 소개 다시 보기</span><span class="ar">›</span></button>' +
+    '</div>';
+
+  var infoCard =
+    '<div class="st-sec">정보 및 문의</div>' +
+    '<div class="st-card">' +
+      '<button class="st-row" data-act="contact"><span class="ic">✉️</span>' +
+        '<span class="lb">문의하기 · 신고 접수<small>' + esc(CONTACT_EMAIL) + '</small></span><span class="ar">›</span></button>' +
+      '<button class="st-row" data-act="terms"><span class="ic">📄</span>' +
+        '<span class="lb">이용약관</span><span class="ar">›</span></button>' +
+      '<button class="st-row" data-act="privacy"><span class="ic">🔒</span>' +
+        '<span class="lb">개인정보처리방침</span><span class="ar">›</span></button>' +
+      '<div class="st-row static"><span class="ic">ℹ️</span>' +
+        '<span class="lb">앱 버전</span><span class="vl">' + esc(APP_VERSION) + '</span></div>' +
+    '</div>';
+
+  var accountActions = u
+    ? '<div class="st-sec">계정</div>' +
+      '<div class="st-card">' +
+        '<button class="st-row" data-act="logout"><span class="ic">🚪</span>' +
+          '<span class="lb">로그아웃</span><span class="ar">›</span></button>' +
+        '<button class="st-row danger" data-act="delete"><span class="ic">⚠️</span>' +
+          '<span class="lb">계정 삭제<small>계정과 내 데이터가 모두 삭제됩니다</small></span><span class="ar">›</span></button>' +
+      '</div>'
+    : '';
+
+  body.innerHTML =
+    accountCard + subCard + notiCard + communityCard + appCard + infoCard + accountActions +
+    '<div class="st-foot">퍼머컬처ON v' + esc(APP_VERSION) + '<br>자연과 함께 설계하는 텃밭</div>';
+
+  bind();
+}
+
+function storeName(){
+  var p = platform();
+  return p === "ios" ? "App Store" : p === "android" ? "Google Play" : "결제한 스토어";
+}
+
+/* ---------- 이벤트 연결 ---------- */
+function bind(){
+  var login = document.getElementById("stLogin");
+  if(login) login.onclick = function(){ MK.kakao(function(){ render(); }); };
+
+  var region = document.getElementById("stRegion");
+  if(region) region.onchange = function(e){
+    localStorage.setItem("pcon_region", e.target.value);
+    if(typeof renderDogam === "function") renderDogam();
+    MK.toast("지역을 바꿨어요 — 재배 캘린더에 반영됩니다");
+  };
+
+  Array.prototype.forEach.call(body.querySelectorAll("[data-sw]"), function(sw){
+    sw.onclick = function(){
+      var k = sw.dataset.sw;
+      prefs[k] = !prefs[k];
+      LS.set(k === "todo" ? "pcon_push_todo" : "pcon_push_comment", prefs[k]);
+      sw.classList.toggle("on", prefs[k]);
+      sw.setAttribute("aria-checked", String(prefs[k]));
+    };
+  });
+
+  Array.prototype.forEach.call(body.querySelectorAll("[data-act]"), function(btn){
+    btn.onclick = function(){ act(btn.dataset.act); };
+  });
+}
+
+function act(a){
+  if(a === "manage"){
+    var p = platform();
+    if(p === "ios")          openExternal("https://apps.apple.com/account/subscriptions");
+    else if(p === "android") openExternal("https://play.google.com/store/account/subscriptions");
+    else MK.modal({
+      title:"구독 관리",
+      body:"구독은 결제하신 앱스토어 또는 구글플레이의 <b>구독 관리</b> 화면에서 해지할 수 있습니다.<br><br>" +
+           "<b>iOS</b> — 설정 → [내 이름] → 구독<br><b>Android</b> — Play 스토어 → 프로필 → 결제 및 구독"
+    });
+  }
+  else if(a === "upsell"){
+    close();
+    MK.toast("텃밭 탭에서 배치도를 만들고 저장해보세요 🌿");
+  }
+  else if(a === "restore"){
+    MK.toast("구매 내역을 확인하고 있어요…");
+    setTimeout(function(){ MK.toast("복원할 구독이 없습니다"); }, 1200);
+  }
+  else if(a === "blocked")    blockedList();
+  else if(a === "guide")      communityGuide();
+  else if(a === "onboarding"){ close(); if(window.pconShowOnboarding) window.pconShowOnboarding(); }
+  else if(a === "contact"){
+    var subject = encodeURIComponent("[퍼머컬처ON] 문의");
+    var bodyTxt = encodeURIComponent(
+      "\n\n---\n앱 버전: " + APP_VERSION + "\n기기: " + navigator.userAgent + "\n"
+    );
+    location.href = "mailto:" + CONTACT_EMAIL + "?subject=" + subject + "&body=" + bodyTxt;
+  }
+  else if(a === "terms")   openExternal("terms.html");
+  else if(a === "privacy") openExternal("privacy.html");
+  else if(a === "logout")  logout();
+  else if(a === "delete")  deleteStep1();
+}
+
+/* ---------- 차단 목록 ---------- */
+function blockedList(){
+  var list = MK.session.blocked;
+  var inner = list.length
+    ? '<div class="st-card" style="margin-top:4px">' + list.map(function(b, i){
+        return '<div class="st-row static"><span class="ic">' + esc(b.avatar || "🙍") + '</span>' +
+               '<span class="lb">' + esc(b.name) + '</span>' +
+               '<button class="mk-btn" style="flex:none;padding:6px 12px;font-size:12.5px" data-unblock="' + i + '">차단 해제</button></div>';
+      }).join("") + '</div>'
+    : '<div class="st-empty">차단한 사용자가 없습니다.<br>게시글의 ⋯ 메뉴에서 차단할 수 있어요.</div>';
+
+  var closeModal = MK.modal({ title:"차단한 사용자", body: inner });
+
+  Array.prototype.forEach.call(document.querySelectorAll("[data-unblock]"), function(btn){
+    btn.onclick = function(){
+      MK.session.blocked.splice(+btn.dataset.unblock, 1);
+      closeModal();
+      MK.toast("차단을 해제했어요");
+      render();
+    };
+  });
+}
+
+/* ---------- 커뮤니티 규칙 ---------- */
+function communityGuide(){
+  MK.modal({
+    title:"커뮤니티 이용 규칙",
+    body:
+      '<div style="text-align:left;font-size:13.8px;line-height:1.75;color:#5f5c48">' +
+      '퍼머컬처ON은 서로의 텃밭을 나누는 곳입니다. 아래 내용은 <b>신고 시 24시간 이내에 삭제되고, 작성자의 이용이 제한</b>됩니다.' +
+      '<ul style="margin:11px 0 0;padding-left:18px">' +
+        '<li>비방 · 모욕 · 협박</li>' +
+        '<li>음란물, 청소년 유해 콘텐츠</li>' +
+        '<li>차별 · 혐오 표현</li>' +
+        '<li>타인의 개인정보 무단 게시</li>' +
+        '<li>스팸 · 반복 광고</li>' +
+        '<li>사칭 및 허위 사실 유포</li>' +
+      '</ul>' +
+      '<div style="margin-top:12px">게시글과 댓글의 <b>⋯ 메뉴</b>에서 신고하거나 사용자를 차단할 수 있습니다.</div>' +
+      '</div>',
+    buttons:[{ label:"약관 전문 보기", onClick:function(){ openExternal("terms.html"); } }, { label:"확인", primary:true }]
+  });
+}
+
+/* ---------- 로그아웃 ---------- */
+function logout(){
+  MK.modal({
+    title:"로그아웃할까요?",
+    body:"저장한 텃밭과 작성한 글은 그대로 남아 있어요. 다시 로그인하면 이어서 볼 수 있습니다.",
+    buttons:[
+      { label:"취소" },
+      { label:"로그아웃", primary:true, onClick:function(){
+          MK.session.user = null;
+          MK.toast("로그아웃했습니다");
+          render();
+      }}
+    ]
+  });
+}
+
+/* ---------- 계정 삭제 : 1단계 안내 ---------- */
+function deleteStep1(){
+  var pr = MK.session.premium;
+  var gardens = MK.session.gardens.length;
+
+  MK.modal({
+    title:"계정을 삭제하시겠어요?",
+    body:
+      '<div class="st-del" style="text-align:left">' +
+        '<div style="font-size:14px;color:#5f5c48">삭제하면 아래 데이터가 <b>영구적으로 사라지며 복구할 수 없습니다.</b></div>' +
+        '<ul>' +
+          '<li>계정 정보와 프로필</li>' +
+          '<li>저장한 텃밭 설계 <b>' + gardens + '개</b></li>' +
+          '<li>텃밭 일지와 업로드한 사진</li>' +
+          '<li>작성한 게시글 · 댓글 · 좋아요</li>' +
+        '</ul>' +
+        (pr
+          ? '<div class="st-warn"><b>구독은 자동으로 해지되지 않습니다.</b><br>' +
+            '계정을 삭제해도 ' + storeName() + '의 구독은 계속 결제됩니다. ' +
+            '삭제하기 전에 먼저 구독을 해지해 주세요.</div>'
+          : '') +
+      '</div>',
+    buttons: pr
+      ? [ { label:"먼저 구독 해지하기", primary:true, onClick:function(){ act("manage"); } },
+          { label:"그래도 삭제", onClick:deleteStep2 } ]
+      : [ { label:"취소" },
+          { label:"계속", primary:true, onClick:deleteStep2 } ]
+  });
+}
+
+/* ---------- 계정 삭제 : 2단계 확인 입력 ---------- */
+function deleteStep2(){
+  MK.modal({
+    title:"마지막 확인",
+    body:
+      '<div style="text-align:left;font-size:14px;color:#5f5c48">' +
+        '계정을 삭제하려면 아래에 <b>삭제</b> 라고 입력해 주세요.' +
+        '<input class="st-input" id="stDelConfirm" placeholder="삭제" autocomplete="off" ' +
+        'autocapitalize="off" spellcheck="false" aria-label="삭제 확인 입력">' +
+      '</div>',
+    buttons:[
+      { label:"취소" },
+      { label:"계정 삭제", primary:true, onClick:function(){
+          /* 실제 실행은 아래 입력 검증을 통과한 경우에만 */
+          if(window.__pconDelOK) doDelete();
+      }}
+    ]
+  });
+
+  window.__pconDelOK = false;
+  var input = document.getElementById("stDelConfirm");
+  var btn   = input && input.closest(".mk-modal").querySelector(".mk-btn.primary");
+  if(!input || !btn) return;
+
+  btn.classList.add("danger");
+  btn.disabled = true;
+  input.oninput = function(){
+    var ok = input.value.trim() === "삭제";
+    window.__pconDelOK = ok;
+    btn.disabled = !ok;
+  };
+  setTimeout(function(){ input.focus(); }, 60);
+}
+
+/* ---------- 계정 삭제 : 실행 ---------- */
+function doDelete(){
+  /* TODO(Phase 1) — Supabase 연동 시 이 자리에서 서버 삭제를 호출합니다.
+     await supabase.rpc('delete_my_account')  →  성공 후 signOut()
+     실패 시 아래 화면 정리를 하지 말고 오류를 안내해야 합니다. */
+  MK.session.user    = null;
+  MK.session.premium = false;
+  MK.session.gardens = [];
+  MK.session.blocked = [];
+  try{
+    localStorage.removeItem("pcon_push_todo");
+    localStorage.removeItem("pcon_push_comment");
+  }catch(e){}
+  prefs.todo = true; prefs.comment = true;
+
+  close();
+  setTimeout(function(){
+    MK.modal({
+      title:"계정이 삭제되었습니다",
+      body:"그동안 퍼머컬처ON을 이용해 주셔서 고맙습니다.<br>언제든 다시 찾아와 주세요 🌱",
+      buttons:[{ label:"확인", primary:true }]
+    });
+  }, 320);
+}
+
+/* ---------- 헤더 진입 버튼 ---------- */
+var openBtn = document.getElementById("setOpenBtn");
+if(openBtn) openBtn.onclick = open;
+
+window.pconOpenSettings = open;
+})();
+</script>
+<!-- ══════════════════ PCON_SETTINGS_END ══════════════════ -->
+
 </body>
 </html>
