@@ -1,6 +1,6 @@
 // 퍼머컬처ON 서비스 워커 — 오프라인에서도 도감이 열립니다.
 // 앱을 업데이트할 때마다 아래 버전 숫자를 1씩 올려주세요!
-const VERSION = "pcon-v7";
+const VERSION = "pcon-v8";
 const SHELL = [
   "./", "./index.html", "./app.js",
   "./data/plantdata.js", "./data/content.js",
