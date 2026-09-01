@@ -39,6 +39,14 @@ function ApiError(code, message, cause) {
   return e;
 }
 
+/* 카카오 프로필 이미지는 http:// 로 옵니다.
+   https 페이지에서 http 이미지는 브라우저가 차단하므로 https로 바꿔줍니다.
+   (kakaocdn은 https를 지원합니다) */
+function httpsUrl(u) {
+  if (!u) return null;
+  return String(u).replace(/^http:\/\//i, "https://");
+}
+
 function normalize(error) {
   if (!error) return null;
   var msg = error.message || "";
@@ -115,7 +123,7 @@ function supabaseDriver(sb) {
       .eq("id", userId).single();
     if (res.error) throw normalize(res.error);
     var p = res.data;
-    return { id: p.id, name: p.nickname, avatar: p.avatar_url,
+    return { id: p.id, name: p.nickname, avatar: httpsUrl(p.avatar_url),
              premium: p.is_premium, role: p.role, region: p.region };
   }
 
@@ -155,20 +163,24 @@ function supabaseDriver(sb) {
       refresh: refresh,
 
       signInWithKakao: async function () {
-        /* scopes를 반드시 명시합니다.
-           비워두면 Supabase가 이메일(account_email)까지 요청하는데,
-           카카오 앱의 동의항목에 없는 걸 요청하면 KOE205로 거절당합니다.
-           (이메일을 받으려면 카카오 비즈 앱 전환이 필요해서 빼두었습니다)
+        /* ⚠️ Supabase는 카카오에 account_email, profile_image, profile_nickname 을
+           항상 요청합니다. 여기서 scopes를 지정해도 "대체"가 아니라 "추가"라
+           account_email 을 뺄 수 없습니다.
 
-           여기 적는 항목은 카카오 개발자 콘솔의
-           제품 설정 → 카카오 로그인 → 동의항목 에 설정된 것과 같아야 합니다. */
-        var res = await sb.auth.signInWithOAuth({
-          provider: "kakao",
-          options: {
-            redirectTo: CFG.REDIRECT_URL || global.location.href,
-            scopes: CFG.KAKAO_SCOPES || "profile_nickname profile_image"
-          }
-        });
+           따라서 카카오 개발자 콘솔의 동의항목에 아래 셋이 모두 있어야 합니다.
+             · 닉네임              — 필수 동의
+             · 프로필 사진         — 선택 동의
+             · 카카오계정(이메일)  — 선택 동의  ← 없으면 KOE205
+           (이메일을 "필수"로 하려면 비즈 앱 전환이 필요합니다. 선택이면 됩니다.)
+
+           Supabase의 "Allow users without an email" 도 켜두어야
+           이메일 제공을 거부한 사용자도 가입됩니다.
+
+           CFG.KAKAO_SCOPES 는 항목을 더 추가할 때만 씁니다. 보통은 비워두세요. */
+        var opts = { redirectTo: CFG.REDIRECT_URL || global.location.href };
+        if (CFG.KAKAO_SCOPES) opts.scopes = CFG.KAKAO_SCOPES;
+
+        var res = await sb.auth.signInWithOAuth({ provider: "kakao", options: opts });
         if (res.error) throw normalize(res.error);
         // 카카오 페이지로 이동합니다. 돌아오면 onAuthStateChange가 처리합니다.
       },
