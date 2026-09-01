@@ -16,6 +16,10 @@ window.PCON_CONFIG = {
   // 카카오 로그인 후 돌아올 주소. 비워두면 현재 주소로 돌아옵니다.
   REDIRECT_URL: "https://poetic-scone-037eac.netlify.app/",
 
+  // 카카오에 요청할 동의항목. 카카오 콘솔의 "동의항목"에 설정된 것만 적어야 합니다.
+  // 없는 항목을 요청하면 KOE205 오류가 납니다.
+  KAKAO_SCOPES: "profile_nickname profile_image",
+
   // 무료로 저장할 수 있는 텃밭 개수 (서버의 03_functions.sql 값과 같아야 함)
   FREE_GARDEN_LIMIT: 3
 };

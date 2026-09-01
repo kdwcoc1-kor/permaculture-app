@@ -155,9 +155,19 @@ function supabaseDriver(sb) {
       refresh: refresh,
 
       signInWithKakao: async function () {
+        /* scopes를 반드시 명시합니다.
+           비워두면 Supabase가 이메일(account_email)까지 요청하는데,
+           카카오 앱의 동의항목에 없는 걸 요청하면 KOE205로 거절당합니다.
+           (이메일을 받으려면 카카오 비즈 앱 전환이 필요해서 빼두었습니다)
+
+           여기 적는 항목은 카카오 개발자 콘솔의
+           제품 설정 → 카카오 로그인 → 동의항목 에 설정된 것과 같아야 합니다. */
         var res = await sb.auth.signInWithOAuth({
           provider: "kakao",
-          options: { redirectTo: CFG.REDIRECT_URL || global.location.href }
+          options: {
+            redirectTo: CFG.REDIRECT_URL || global.location.href,
+            scopes: CFG.KAKAO_SCOPES || "profile_nickname profile_image"
+          }
         });
         if (res.error) throw normalize(res.error);
         // 카카오 페이지로 이동합니다. 돌아오면 onAuthStateChange가 처리합니다.
