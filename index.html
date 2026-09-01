@@ -1012,6 +1012,11 @@ main .view.active{animation:vw-in .22s ease both}
 </nav>
 
 </div>
+<!-- 백엔드 연결 — plantdata보다 먼저 로드되어야 합니다 -->
+<script src="config.js"></script>
+<script src="vendor/supabase.js"></script>
+<script src="data/api.js"></script>
+
 <script src="data/plantdata.js"></script>
 <script src="data/content.js"></script>
 <script src="app.js"></script>
@@ -5056,7 +5061,18 @@ function act(a){
 
 /* ---------- 차단 목록 ---------- */
 function blockedList(){
-  var list = MK.session.blocked;
+  var api = window.PCON && window.PCON.api;
+  if(api && api.mode === "supabase"){
+    api.moderation.blockedList()
+      .then(function(rows){ showBlockedList(rows); })
+      .catch(function(e){ MK.toast(e.message || "차단 목록을 불러오지 못했어요"); });
+    return;
+  }
+  showBlockedList(MK.session.blocked);
+}
+
+function showBlockedList(list){
+  var api = window.PCON && window.PCON.api;
   var inner = list.length
     ? '<div class="st-card" style="margin-top:4px">' + list.map(function(b, i){
         return '<div class="st-row static"><span class="ic">' + esc(b.avatar || "🙍") + '</span>' +
@@ -5069,8 +5085,16 @@ function blockedList(){
 
   Array.prototype.forEach.call(document.querySelectorAll("[data-unblock]"), function(btn){
     btn.onclick = function(){
-      MK.session.blocked.splice(+btn.dataset.unblock, 1);
+      var i = +btn.dataset.unblock;
+      var target = list[i];
       closeModal();
+      if(api && api.mode === "supabase"){
+        api.moderation.unblock(target.id)
+          .then(function(){ MK.toast("차단을 해제했어요"); render(); })
+          .catch(function(e){ MK.toast(e.message || "해제하지 못했어요"); });
+        return;
+      }
+      MK.session.blocked.splice(i, 1);
       MK.toast("차단을 해제했어요");
       render();
     };
@@ -5106,6 +5130,13 @@ function logout(){
     buttons:[
       { label:"취소" },
       { label:"로그아웃", primary:true, onClick:function(){
+          var api = window.PCON && window.PCON.api;
+          if(api && api.mode === "supabase"){
+            api.auth.signOut()
+              .then(function(){ MK.toast("로그아웃했습니다"); })
+              .catch(function(e){ MK.toast(e.message || "로그아웃하지 못했어요"); });
+            return;
+          }
           MK.session.user = null;
           MK.toast("로그아웃했습니다");
           render();
@@ -5180,9 +5211,29 @@ function deleteStep2(){
 
 /* ---------- 계정 삭제 : 실행 ---------- */
 function doDelete(){
-  /* TODO(Phase 1) — Supabase 연동 시 이 자리에서 서버 삭제를 호출합니다.
-     await supabase.rpc('delete_my_account')  →  성공 후 signOut()
-     실패 시 아래 화면 정리를 하지 말고 오류를 안내해야 합니다. */
+  var api = window.PCON && window.PCON.api;
+
+  /* 서버 모드 — 삭제가 성공한 뒤에만 화면을 정리합니다.
+     실패했는데 정리해 버리면, 계정이 남아 있는데
+     사용자는 삭제된 줄 알게 됩니다. */
+  if(api && api.mode === "supabase"){
+    MK.toast("계정을 삭제하는 중이에요…", 8000);
+    api.auth.deleteAccount()
+      .then(function(){ clearLocalAfterDelete(); })
+      .catch(function(e){
+        MK.modal({
+          title:"삭제하지 못했어요",
+          body:(e && e.message ? e.message : "잠시 후 다시 시도해 주세요.") +
+               "<br><br>계정은 그대로 남아 있습니다.",
+          buttons:[{ label:"확인", primary:true }]
+        });
+      });
+    return;
+  }
+  clearLocalAfterDelete();
+}
+
+function clearLocalAfterDelete(){
   MK.session.user    = null;
   MK.session.premium = false;
   MK.session.gardens = [];
@@ -5208,9 +5259,107 @@ var openBtn = document.getElementById("setOpenBtn");
 if(openBtn) openBtn.onclick = open;
 
 window.pconOpenSettings = open;
+window.pconRenderSettings = render;
 })();
 </script>
 <!-- ══════════════════ PCON_SETTINGS_END ══════════════════ -->
+
+
+<!-- ══════════════════ PCON_AUTH_BRIDGE_START ══════════════════
+     실제 카카오 로그인을 앱 전체에 연결합니다.
+
+     기존 화면 코드(게시판·텃밭)는 Mock.session 과 Mock.kakao 를
+     쓰고 있습니다. 그 둘을 진짜 인증에 이어두면, 5,200줄을
+     통째로 고치지 않고도 로그인·로그아웃·계정 삭제가 실제로 돕니다.
+
+     아직 목업인 것: 게시판 글·댓글, 텃밭 저장 (다음 단계에서 교체)
+═══════════════════════════════════════════════════════════════ -->
+<script>
+(function () {
+"use strict";
+
+var api = window.PCON && window.PCON.api;
+var MK  = window.Mock;
+if (!api || !MK) return;
+
+/* 설정이 비어 있으면 예전처럼 목업으로 둡니다 */
+if (api.mode !== "supabase") {
+  console.info("[PCON] 목업 모드 — config.js 를 채우면 서버 모드로 전환됩니다.");
+  return;
+}
+
+/* ---------- 로그인 상태를 앱 전체에 반영 ---------- */
+function syncSession(user) {
+  MK.session.user = user
+    ? { id: user.id, name: user.name, avatar: user.avatar || "🧑‍🌾" }
+    : null;
+  MK.session.premium = !!(user && user.premium);
+
+  if (typeof window.pconRenderSettings === "function") window.pconRenderSettings();
+
+  /* 게시판·텃밭 화면도 다시 그립니다 (있을 때만) */
+  try { if (typeof window.renderDogam === "function") window.renderDogam(); } catch (e) {}
+}
+
+api.auth.onChange(syncSession);
+
+/* 새로고침·카카오에서 돌아왔을 때 세션 복원 */
+api.init()
+  .then(function (user) {
+    if (user && sessionStorage.getItem("pcon_just_logged_in") === "1") {
+      sessionStorage.removeItem("pcon_just_logged_in");
+      MK.toast(user.name + "님, 환영합니다 🌱");
+    }
+  })
+  .catch(function (e) {
+    console.warn("[PCON] 세션 복원 실패:", e && e.message);
+  });
+
+
+/* ---------- 로그인 시트를 진짜 카카오 로그인으로 ----------
+   기존 코드가 부르는 Mock.kakao(콜백) 를 그대로 대체합니다.
+   이미 로그인돼 있으면 콜백을 바로 실행하고,
+   아니면 카카오 로그인 시트를 띄웁니다.
+
+   OAuth는 페이지를 카카오로 넘겼다가 되돌아오는 방식이라,
+   로그인 후에 콜백을 이어서 실행할 수 없습니다.
+   돌아오면 화면을 다시 그리고 환영 토스트를 띄웁니다.        */
+MK.kakao = function (onDone) {
+  if (api.auth.current()) { onDone && onDone(); return; }
+
+  var wrap = document.createElement("div");
+  wrap.className = "mk-dim bottom";
+  wrap.innerHTML =
+    '<div class="mk-sheet">' +
+      '<div class="mk-shandle"></div>' +
+      '<div class="mk-stitle">퍼머컬처ON에 오신 걸 환영해요 🌱</div>' +
+      '<div class="mk-ssub">텃밭 자랑, 질문, 나눔 — 로그인하고 함께해요</div>' +
+      '<button class="mk-kakao">💬 카카오로 3초 만에 시작하기</button>' +
+      '<button class="mk-later">나중에 할게요</button>' +
+      '<div class="mk-fine">로그인하면 <a href="terms.html" target="_blank" rel="noopener">이용약관</a>과 ' +
+      '<a href="privacy.html" target="_blank" rel="noopener">개인정보처리방침</a>에 동의하게 됩니다</div>' +
+    '</div>';
+
+  var btn = wrap.querySelector(".mk-kakao");
+  btn.onclick = function () {
+    btn.disabled = true;
+    btn.textContent = "카카오로 이동 중…";
+    try { sessionStorage.setItem("pcon_just_logged_in", "1"); } catch (e) {}
+    api.auth.signInWithKakao().catch(function (e) {
+      btn.disabled = false;
+      btn.textContent = "💬 카카오로 3초 만에 시작하기";
+      MK.toast(e.message || "로그인을 시작하지 못했어요");
+    });
+  };
+  wrap.querySelector(".mk-later").onclick = function () { wrap.remove(); };
+  wrap.addEventListener("click", function (e) { if (e.target === wrap) wrap.remove(); });
+  document.body.appendChild(wrap);
+};
+
+console.info("[PCON] 서버 모드 — 카카오 로그인이 실제로 동작합니다.");
+})();
+</script>
+<!-- ══════════════════ PCON_AUTH_BRIDGE_END ══════════════════ -->
 
 </body>
 </html>
