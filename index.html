@@ -55,6 +55,9 @@ body{
 /* ════ 헤더: 아침 들녘 풍경 ════════════ */
 header.top{
   position:sticky;top:0;z-index:40;overflow:hidden;
+  /* 홈 화면 앱으로 띄우면 상태표시줄이 화면 위를 덮습니다.
+     그만큼 아래로 밀어야 제목과 ⚙ 버튼이 가려지지 않습니다. */
+  padding-top:env(safe-area-inset-top);
   background:linear-gradient(180deg,#F7E9C2 0%, #ECE9C5 38%, #CBDAAE 100%);
   padding:0;
   box-shadow:0 3px 14px rgba(58,51,39,.18);
@@ -98,7 +101,7 @@ header.top .scene{position:relative;height:118px}
 .scene .grass{position:absolute;left:0;right:0;bottom:-1px;width:100%;
   animation:grass-sway 6s ease-in-out infinite;transform-origin:bottom center}
 @keyframes grass-sway{0%,100%{transform:skewX(0)}40%{transform:skewX(1.6deg)}75%{transform:skewX(-1.1deg)}}
-.brand{position:absolute;left:20px;top:20px;z-index:3}
+.brand{position:absolute;left:20px;top:calc(20px + env(safe-area-inset-top));z-index:3}
 .brand h1{
   font-family:var(--display);font-size:1.5rem;font-weight:700;letter-spacing:.02em;color:#2C4731;
   text-shadow:0 1px 0 rgba(255,250,230,.7);
@@ -4720,14 +4723,16 @@ if(!isShared) splash();             // 공유 링크로 오면 시작화면 자�
 .bd-rn b{color:#5f5c48}
 
 .set-btn{
-  position:absolute;right:16px;top:18px;z-index:4;
-  width:38px;height:38px;border-radius:50%;
+  position:absolute;right:14px;top:calc(14px + env(safe-area-inset-top));z-index:45;
+  width:44px;height:44px;border-radius:50%;          /* 44px = iOS 최소 터치 영역 */
   border:1.5px solid rgba(46,83,57,.28);
   background:rgba(252,250,241,.82);backdrop-filter:blur(6px);
   display:grid;place-items:center;cursor:pointer;padding:0;
   box-shadow:0 2px 6px rgba(58,51,39,.14);
+  touch-action:manipulation;                          /* 더블탭 확대 지연 제거 */
+  -webkit-tap-highlight-color:transparent;
 }
-.set-btn svg{width:20px;height:20px;stroke:#2E5339;stroke-width:1.7;fill:none;
+.set-btn svg{width:21px;height:21px;stroke:#2E5339;stroke-width:1.7;fill:none;
   stroke-linecap:round;stroke-linejoin:round}
 .set-btn:active{transform:scale(.94)}
 
@@ -4776,7 +4781,8 @@ if(!isShared) splash();             // 공유 링크로 오면 시작화면 자�
 /* 계정 카드 */
 .st-acc{display:flex;align-items:center;gap:13px;padding:17px 16px}
 .st-av{width:48px;height:48px;border-radius:50%;background:#E3EDDC;border:1.5px solid #cbdcc4;
-  display:grid;place-items:center;font-size:24px;flex:none}
+  display:grid;place-items:center;font-size:24px;flex:none;overflow:hidden}
+.st-av img{width:100%;height:100%;object-fit:cover;display:block}
 .st-ainfo{flex:1;min-width:0}
 .st-aname{font-size:16px;font-weight:800;color:#2f4030;letter-spacing:-.01em;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -4894,7 +4900,7 @@ function render(){
   var accountCard = u
     ? '<div class="st-card">' +
         '<div class="st-acc">' +
-          '<div class="st-av">' + esc(u.avatar || "🧑‍🌾") + '</div>' +
+          '<div class="st-av">' + avatarHTML(u.avatar) + '</div>' +
           '<div class="st-ainfo">' +
             '<div class="st-aname">' + esc(u.name) +
               (pr ? '<span class="st-badge">🌿 프리미엄</span>' : '') + '</div>' +
@@ -4990,6 +4996,16 @@ function render(){
     '<div class="st-foot">퍼머컬처ON v' + esc(APP_VERSION) + '<br>자연과 함께 설계하는 텃밭</div>';
 
   bind();
+}
+
+/* 아바타 — 카카오는 이미지 주소를, 목업은 이모지를 줍니다.
+   주소면 <img>로, 아니면 글자 그대로 표시합니다. */
+function avatarHTML(a){
+  if(a && /^https?:\/\//.test(a)){
+    return '<img src="' + esc(a) + '" alt="" referrerpolicy="no-referrer" ' +
+           'onerror="this.replaceWith(document.createTextNode(\'🧑‍🌾\'))">';
+  }
+  return esc(a || "🧑‍🌾");
 }
 
 function storeName(){
@@ -5310,10 +5326,32 @@ api.init()
       sessionStorage.removeItem("pcon_just_logged_in");
       MK.toast(user.name + "님, 환영합니다 🌱");
     }
+    cleanAuthUrl(!!user);
   })
   .catch(function (e) {
     console.warn("[PCON] 세션 복원 실패:", e && e.message);
+    cleanAuthUrl(false);
   });
+
+/* 로그인 후 주소창에 남는 찌꺼기를 지웁니다.
+   Supabase는 결과를 ?query 와 #hash 양쪽에 붙여 돌려보내는데,
+   그대로 두면 사용자가 오류 문구를 계속 보게 되고
+   새로고침 시 만료된 코드로 다시 시도해 엉뚱한 오류가 납니다. */
+function cleanAuthUrl(hasSession) {
+  try {
+    var q = new URLSearchParams(location.search);
+    var h = new URLSearchParams((location.hash || "").replace(/^#/, ""));
+    var junk = q.has("error") || q.has("code") ||
+               h.has("error") || h.has("access_token");
+    if (!junk) return;
+
+    var desc = q.get("error_description") || h.get("error_description");
+    if (desc && !hasSession) {
+      MK.toast("로그인에 실패했어요 — " + decodeURIComponent(desc).slice(0, 60), 5000);
+    }
+    history.replaceState(null, "", location.pathname);
+  } catch (e) {}
+}
 
 
 /* ---------- 로그인 시트를 진짜 카카오 로그인으로 ----------
