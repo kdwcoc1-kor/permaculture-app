@@ -3283,6 +3283,33 @@ function gdRefreshMyCnt(){
   if(c) c.textContent = MK.session.gardens.length;
 }
 
+/* ── 서버 모드일 때만 api를 돌려줍니다. 목업이면 null ── */
+function gdApi(){
+  const a = window.PCON && window.PCON.api;
+  return (a && a.mode === "supabase") ? a : null;
+}
+
+/* 목록 카드에 쓸 작물 수 — 서버는 plant_count, 목업은 plantIds */
+function gdPlantCount(g){
+  return g.plantIds ? g.plantIds.length : (g.plant_count || 0);
+}
+
+/* 서버에서 내 텃밭 목록을 가져와 캐시에 채웁니다.
+   목록에는 큰 데이터(배치 좌표)를 담지 않고, 불러올 때 한 건만 받아옵니다. */
+function gdSyncGardens(){
+  const api = gdApi();
+  if(!api || !api.auth.current()){ gdRefreshMyCnt(); return Promise.resolve(); }
+  return api.gardens.list()
+    .then(function(rows){
+      MK.session.gardens = rows.map(function(r){
+        return { id:r.id, name:r.name, bed:r.bed, plant_count:r.plant_count||0 };
+      });
+      gdRefreshMyCnt();
+    })
+    .catch(function(e){ console.warn("[PCON] 텃밭 목록을 못 불러왔어요:", e.message); });
+}
+window.pconSyncGardens = gdSyncGardens;
+
 /* ---------- 결제벽 ---------- */
 function gdPaywall(afterSubscribe){
   MK.modal({
@@ -3368,19 +3395,37 @@ function gdDragDown(e){
 if(gdSaveBtn) gdSaveBtn.onclick = ()=> MK.kakao(gdDoSave);
 function gdDoSave(){
   if(!lastResult || !lastResult.place){ MK.toast("먼저 배치도를 만들어주세요"); return; }
-  if(!MK.session.premium && MK.session.gardens.length >= 1){
-    gdPaywall(gdDoSave); return;
-  }
+
   const d = new Date();
   const emojis = state.elements.map(e=>TECH_BY_ID[e.tech].emoji).join("") || "🌱";
-  MK.session.gardens.unshift({
-    id: Date.now(),
+  const g = {
     name: `${emojis} ${state.bed.w}×${state.bed.h}m · ${d.getMonth()+1}/${d.getDate()}`,
     bed: {...state.bed}, sun: state.sun, material: state.material,
     plantIds: [...state.selected],
     elements: JSON.parse(JSON.stringify(state.elements)),
-    placeSlim: lastResult.place.map(p=>({pid:p.plant.id, cx:p.cx, cy:p.cy, elUid:p.elUid})),
-  });
+    placement: lastResult.place.map(p=>({pid:p.plant.id, cx:p.cx, cy:p.cy, elUid:p.elUid})),
+    schemaVersion: 1
+  };
+
+  const api = gdApi();
+  if(api){
+    MK.toast("저장하는 중이에요…", 6000);
+    api.gardens.save(g)
+      .then(gdSyncGardens)
+      .then(function(){ MK.toast("내 텃밭에 저장했어요 💾"); })
+      .catch(function(e){
+        /* 개수 제한은 서버가 판단합니다. 앱에서 세지 않습니다 —
+           앱에서 세면 개발자도구로 우회되고, 유료화의 근거가 무너집니다. */
+        if(e.code === "QUOTA"){ gdPaywall(null); return; }
+        if(e.code === "AUTH"){ MK.kakao(gdDoSave); return; }
+        MK.toast(e.message || "저장하지 못했어요");
+      });
+    return;
+  }
+
+  /* 목업 모드 — 서버와 같은 규칙(무료 3개) */
+  if(!MK.session.premium && MK.session.gardens.length >= 3){ gdPaywall(gdDoSave); return; }
+  MK.session.gardens.unshift(Object.assign({ id: Date.now(), placeSlim: g.placement }, g));
   gdRefreshMyCnt();
   MK.toast("내 텃밭에 저장했어요 💾");
 }
@@ -3421,18 +3466,26 @@ if(gdExportBtn) gdExportBtn.onclick = ()=>{
 /* ---------- 내 텃밭 목록 ---------- */
 if(gdMyBtn) gdMyBtn.onclick = gdOpenMy;
 function gdOpenMy(){
+  const api = gdApi();
+  if(api && !api.auth.current()){ MK.kakao(function(){}); return; }
+  if(api){ gdSyncGardens().then(gdRenderMy); return; }
+  gdRenderMy();
+}
+
+function gdRenderMy(){
+  const api = gdApi();
   const gs = MK.session.gardens;
   const wrap = document.createElement("div");
   wrap.className = "mk-dim bottom";
   wrap.innerHTML = `<div class="mk-sheet" style="max-height:76vh;overflow-y:auto">
     <div class="mk-shandle"></div>
     <div class="mk-stitle">🌾 내 텃밭</div>
-    <div class="mk-ssub">${MK.session.premium ? "프리미엄 🌿 무제한 저장" : "무료 · 1개까지 저장"}</div>
+    <div class="mk-ssub">${MK.session.premium ? "프리미엄 🌿 무제한 저장" : "무료 · 3개까지 저장"}</div>
     ${gs.length ? gs.map(g=>`
       <div class="gd-mycard">
         <div>
           <div class="gd-myname">${g.name}</div>
-          <div class="gd-myinfo">${g.bed.w}×${g.bed.h}m · 작물 ${g.plantIds.length}종</div>
+          <div class="gd-myinfo">${g.bed.w}×${g.bed.h}m · 작물 ${gdPlantCount(g)}종</div>
         </div>
         <div class="gd-myacts">
           <button data-load="${g.id}">불러오기</button>
@@ -3447,15 +3500,45 @@ function gdOpenMy(){
     const del = e.target.closest("[data-del]");
     const load = e.target.closest("[data-load]");
     if(del){
-      MK.session.gardens = MK.session.gardens.filter(g=>g.id != +del.dataset.del);
-      gdRefreshMyCnt(); wrap.remove(); gdOpenMy();
+      const id = del.dataset.del;
+      wrap.remove();
+      if(api){
+        api.gardens.remove(id)
+          .then(gdSyncGardens)
+          .then(function(){ MK.toast("삭제했어요"); gdRenderMy(); })
+          .catch(function(e){ MK.toast(e.message || "삭제하지 못했어요"); });
+      } else {
+        MK.session.gardens = MK.session.gardens.filter(g=>String(g.id) !== String(id));
+        gdRefreshMyCnt(); gdRenderMy();
+      }
     }
     if(load){
-      const g = MK.session.gardens.find(x=>x.id == +load.dataset.load);
-      wrap.remove(); if(g) gdLoadGarden(g);
+      wrap.remove();
+      gdOpenGarden(load.dataset.load);
     }
   });
   document.body.appendChild(wrap);
+}
+
+/* 목록에는 좌표를 담지 않았으므로, 불러올 때 서버에서 한 건을 받아옵니다. */
+function gdOpenGarden(id){
+  const api = gdApi();
+  if(!api){
+    const g = MK.session.gardens.find(x=>String(x.id) === String(id));
+    if(g) gdLoadGarden(g);
+    return;
+  }
+  MK.toast("불러오는 중이에요…", 6000);
+  api.gardens.get(id)
+    .then(function(r){
+      gdLoadGarden({
+        id: r.id, name: r.name, bed: r.bed, sun: r.sun, material: r.material,
+        plantIds: r.plant_ids || [],
+        elements: r.elements || [],
+        placeSlim: r.placement || []
+      });
+    })
+    .catch(function(e){ MK.toast(e.message || "불러오지 못했어요"); });
 }
 
 function gdLoadGarden(g){
@@ -3487,7 +3570,7 @@ buildLayout = function(){
   if(gdEditBtn){ gdEditBtn.textContent = "✏️ 편집"; gdEditBtn.classList.remove("on"); }
   _gdBuild();
 };
-gdRefreshMyCnt();
+gdSyncGardens();
 
 /* ============================================================
    텃밭 설계 공유 링크 (서버 없음 · URL에 설계를 담음)
@@ -5312,6 +5395,7 @@ function syncSession(user) {
   MK.session.premium = !!(user && user.premium);
 
   if (typeof window.pconRenderSettings === "function") window.pconRenderSettings();
+  if (typeof window.pconSyncGardens === "function") window.pconSyncGardens();
 
   /* 게시판·텃밭 화면도 다시 그립니다 (있을 때만) */
   try { if (typeof window.renderDogam === "function") window.renderDogam(); } catch (e) {}
