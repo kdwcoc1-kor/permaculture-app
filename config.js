@@ -14,7 +14,7 @@ window.PCON_CONFIG = {
   SUPABASE_ANON_KEY: "sb_publishable_Ww6JJOtQz1uLlreXsbToVw_38X6X5Mx",
 
   // 카카오 로그인 후 돌아올 주소. 비워두면 현재 주소로 돌아옵니다.
-  REDIRECT_URL: "https://poetic-scone-037eac.netlify.app/",
+  REDIRECT_URL: "https://kdwcoc1-kor.github.io/permaculture-app/",
 
   // 카카오 동의항목을 더 요청할 때만 씁니다. 보통은 비워두세요.
   // Supabase가 닉네임·프로필사진·이메일은 이미 요청하므로,
