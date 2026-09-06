@@ -503,6 +503,19 @@ nav.tabs button:focus-visible{outline:2px solid var(--sun);outline-offset:-2px}
 #view-garden .three-stage:active{cursor:grabbing}
 #view-garden .three-scene{transform-style:preserve-3d;position:relative;width:1px;height:1px}
 #view-garden .three-cap{text-align:center;font-size:12px;color:#8a8a78;margin-top:7px}
+#view-garden .gd-palette{margin-top:10px;background:var(--gd-card);border:1.5px solid var(--gd-bd);
+  border-radius:12px;padding:10px 12px}
+#view-garden .pal-ttl{font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--soil);
+  text-transform:uppercase;margin-bottom:7px}
+#view-garden .pal-list{display:flex;flex-wrap:wrap;gap:6px}
+#view-garden .pal-item{display:inline-flex;align-items:center;gap:5px;background:#fffdf6;
+  border:1px solid #e0d7c0;border-radius:999px;padding:4px 9px 4px 5px;font-size:12px;color:#3f4a38}
+#view-garden .pal-sw{position:relative;width:15px;height:15px;border-radius:5px;flex:0 0 auto;
+  box-shadow:inset 0 -1px 2px rgba(0,0,0,.18)}
+#view-garden .pal-sw i{position:absolute;right:-2px;bottom:-2px;width:7px;height:7px;border-radius:50%;
+  border:1.5px solid #fffdf6}
+#view-garden .pal-em{font-size:12px;line-height:1}
+#view-garden .pal-nm{font-weight:700}
 
 #view-garden .bed-wrap{background:var(--gd-card);border:2px solid var(--gd-bd);border-radius:var(--radius);
   padding:14px;margin-bottom:16px;box-shadow:0 6px 16px -8px rgba(58,51,39,.22)}
@@ -540,7 +553,7 @@ nav.tabs button:focus-visible{outline:2px solid var(--sun);outline-offset:-2px}
 /* ── v2 정밀화 ── */
 #view-garden #gdBedHost svg{width:100%;height:auto;border-radius:12px;display:block;
   background:linear-gradient(180deg,#f2ead6,#e9dec6)}
-#view-garden .three-stage{height:260px;
+#view-garden .three-stage{height:290px;
   background:linear-gradient(180deg,#f3ecd9 0%, #ece1c8 55%, #e2d4b6 100%)}
 #view-garden .bed-wrap{padding:12px}
 #view-garden .bed-meta{font-weight:700}
@@ -933,6 +946,7 @@ main .view.active{animation:vw-in .22s ease both}
       <div class="three-wrap" id="gdThreeWrap">
         <div class="three-stage" id="gdThreeStage"><div class="three-scene" id="gdThreeScene"></div></div>
         <div class="three-cap" id="gdThreeCap">손으로 돌려보세요 · 자동 회전 중</div>
+        <div class="gd-palette" id="gdPalette" style="display:none"></div>
       </div>
       <div class="bed-wrap">
         <div class="bed-meta"><span id="gdBedDim">—</span><span class="compass" id="gdBedSun">⬆ 햇빛</span></div>
@@ -1933,7 +1947,7 @@ function elemChip(x, y, label){
    배치도(place)와 같은 좌표를 공유해 작물 위치 일치.
    ============================================================ */
 
-const SOIL = (i, light=0) => `hsl(${34 - i*1.5}, 34%, ${40 + i*3 + light}%)`;
+const SOIL = (i, light=0) => `hsl(${33 - i*1.4}, 25%, ${44 + i*3 + light}%)`;
 
 function el(tag, cls, css){
   const e = document.createElement(tag);
@@ -1999,17 +2013,420 @@ function stone(parent, x, y, z, s=10, hue=30){
 /* place(배치도 좌표계 400×300, 중심 200,150) → 3D 좌표(중심 0,0) */
 function p2xy(pl){ return [ (pl.cx-200)*0.62, (pl.cy-150)*0.62 ]; }
 
+/* ============================================================
+   퍼머컬처ON — 작물 입체 표현 v3 "수채 텃밭"
+   이모지 한 글자 대신, 작물마다 실제 모양(잎·줄기·열매·꽃)을
+   작은 3D 조각으로 세워 "이렇게 심으면 이런 모습이겠구나"를 보여줍니다.
+   ------------------------------------------------------------
+   · 십자 빌보드(0°/90°) — 무대가 돌아도 부피감이 유지됩니다.
+   · 형태는 8가지 원형(rosette/bush/vine/allium…)으로 나누고
+     작물별 색·크기·열매만 갈아끼웁니다.
+   · 성능: 작물 1포기 ≈ 8~16 div. 예산(BUDGET)을 넘으면 자동 간소화.
+   ============================================================ */
+
+/* ── 잎 색 팔레트(수채화 느낌: 채도를 낮추고 밝은 끝 → 짙은 밑동) ── */
+const LEAFC = {
+  fresh : { hi:"#b9d48c", mid:"#8ab55f", lo:"#5d8b3c" },  // 상추·시금치
+  deep  : { hi:"#8fbb6a", mid:"#5f9245", lo:"#3d6b30" },  // 토마토·케일
+  blue  : { hi:"#a9c6a2", mid:"#7c9f78", lo:"#557454" },  // 대파·마늘
+  silver: { hi:"#bccaa8", mid:"#93a583", lo:"#6c7d5f" },  // 로즈마리·허브
+  warm  : { hi:"#c9d98f", mid:"#9cb65c", lo:"#6f8a3a" },  // 호박·오이
+  dark  : { hi:"#7ba85f", mid:"#4d7f3a", lo:"#325a28" },  // 들깨·양배추
+};
+
+/* ── 작물 → 형태 원형 ── */
+const FORM = {
+  tomato:"bushFruit", pepper:"bushFruit", eggplant:"bushFruit",
+  cucumber:"vine",    bean:"vine",        pea:"vine",
+  pumpkin:"sprawl",   zucchini:"sprawl",
+  strawberry:"lowSpread",
+  lettuce:"rosette",  spinach:"rosette",
+  cabbage:"head",     napa:"head",
+  kale:"upright",     chard:"upright",
+  perilla:"bush",     potato:"bush",  basil:"bush",  mint:"bush",
+  radish:"root",      carrot:"root",
+  onion:"allium",     garlic:"allium", scallion:"allium",
+  rosemary:"shrub",   dill:"umbel",
+  chamomile:"bloom",  marigold:"bloom", nasturt:"bloom",
+  borage:"spike",     sunflower:"tall",
+};
+const FORM_BY_CAT = { fruit:"bushFruit", veg:"rosette", herb:"bush", flower:"bloom" };
+
+/* ── 열매·꽃 색 ── */
+const ACCENT = {
+  tomato:"#d4553f", pepper:"#c33f2c", eggplant:"#6c4a86", cucumber:"#5e9440",
+  pumpkin:"#d68a35", zucchini:"#557f36", strawberry:"#cd4a48",
+  marigold:"#dfa032", nasturt:"#db7a3a", sunflower:"#e4bf49",
+  borage:"#7a8ec6", chamomile:"#f2ead0", dill:"#d9d789",
+  bean:"#93a35f", pea:"#9cb96e", onion:"#c2a3bd", garlic:"#efe6d4",
+  potato:"#c9b48c", radish:"#d17a86", carrot:"#d98a45",
+};
+const LEAFOF = {
+  lettuce:"fresh", spinach:"fresh", chard:"fresh", strawberry:"fresh",
+  cabbage:"dark", napa:"dark", perilla:"dark", kale:"dark", eggplant:"dark",
+  onion:"blue", garlic:"blue", scallion:"blue", pea:"blue",
+  rosemary:"silver", mint:"silver", dill:"silver", borage:"silver",
+  pumpkin:"warm", zucchini:"warm", cucumber:"warm", carrot:"warm",
+};
+
+/* ── 조각 예산 ──
+   작물이 많은 밭은 십자 빌보드를 한 장으로 줄이고 무리 수도 줄여
+   조각 수를 절반으로 낮춥니다. 휴대폰에서 회전이 끊기지 않게 하는 장치입니다. */
+let RICH = true;
+function rich(){ return RICH; }
+function spend(){}
+
+/* 작물 그룹(한 포기) — 여기에 조각들을 담습니다 */
+function grp(x, y, z, spinDeg){
+  return el("div", null, {
+    position:"absolute", left:"50%", top:"50%", width:"0", height:"0",
+    transformStyle:"preserve-3d",
+    transform:`translate3d(${x.toFixed(1)}px,${y.toFixed(1)}px,${z}px) rotateZ(${(spinDeg||0).toFixed(0)}deg)`,
+  });
+}
+
+/* 세워진 잎 한 장 — a:방위각, len/wid:크기, lean:눕는 각(0=수직) */
+function blade(g, a, len, wid, lean, c, z, radius, shine){
+  const d = el("div", null, {
+    position:"absolute", left:"0", top:"0",
+    width:wid.toFixed(1)+"px", height:len.toFixed(1)+"px",
+    marginLeft:(-wid/2).toFixed(1)+"px", marginTop:(-len).toFixed(1)+"px",
+    background:`linear-gradient(180deg, ${c.hi} 0%, ${c.mid} 52%, ${c.lo} 100%)`,
+    borderRadius: radius || "62% 62% 24% 24% / 76% 76% 28% 28%",
+    transform:`translateZ(${(z||0).toFixed(1)}px) rotateZ(${a.toFixed(0)}deg) rotateX(${(-90+lean).toFixed(0)}deg)`,
+    transformOrigin:"bottom center", transformStyle:"preserve-3d",
+    boxShadow:"0 1px 2px rgba(48,58,34,.20)",
+  });
+  if(shine !== false){
+    d.style.backgroundImage =
+      `linear-gradient(93deg, transparent 38%, rgba(255,255,255,.20) 50%, transparent 62%),`+
+      `linear-gradient(180deg, ${c.hi} 0%, ${c.mid} 52%, ${c.lo} 100%)`;
+  }
+  g.appendChild(d); spend(1);
+  return d;
+}
+
+/* 잎 뭉치(십자 빌보드) — 수채화의 번진 덩어리 느낌 */
+function puff(g, dx, dy, z, w, h, c, opac, spin){
+  const angles = rich() ? [0, 90] : [0];
+  angles.forEach((a, i) => {
+    g.appendChild(el("div", null, {
+      position:"absolute", left:"0", top:"0",
+      width:w.toFixed(1)+"px", height:h.toFixed(1)+"px",
+      marginLeft:(-w/2).toFixed(1)+"px", marginTop:(-h).toFixed(1)+"px",
+      background:`radial-gradient(ellipse at 40% 32%, ${c.hi} 0%, ${c.mid} 45%, ${c.lo} 100%)`,
+      borderRadius: i ? "48% 52% 54% 46% / 62% 58% 42% 38%"
+                      : "54% 46% 44% 56% / 58% 64% 36% 42%",
+      opacity: opac == null ? .94 : opac,
+      transform:`translate3d(${dx.toFixed(1)}px,${dy.toFixed(1)}px,${z.toFixed(1)}px) rotateZ(${((spin||0)+a).toFixed(0)}deg) rotateX(-90deg)`,
+      transformOrigin:"bottom center", transformStyle:"preserve-3d",
+      boxShadow:"0 2px 4px rgba(48,58,34,.18)",
+    }));
+    spend(1);
+  });
+}
+
+/* 열매·꽃송이 하나 */
+function bead(g, dx, dy, z, r, col, ring){
+  const angles = rich() ? [0, 90] : [0];
+  angles.forEach(a => {
+    g.appendChild(el("div", null, {
+      position:"absolute", left:"0", top:"0",
+      width:(r*2).toFixed(1)+"px", height:(r*2).toFixed(1)+"px",
+      marginLeft:(-r).toFixed(1)+"px", marginTop:(-r*2).toFixed(1)+"px",
+      borderRadius:"50%",
+      background: ring
+        ? `radial-gradient(circle at 50% 50%, ${ring} 0 28%, ${col} 32%, ${col} 100%)`
+        : `radial-gradient(circle at 36% 30%, #ffffffaa 0 12%, ${col} 46%, rgba(0,0,0,.22) 130%)`,
+      transform:`translate3d(${dx.toFixed(1)}px,${dy.toFixed(1)}px,${z.toFixed(1)}px) rotateZ(${a}deg) rotateX(-90deg)`,
+      transformOrigin:"bottom center", transformStyle:"preserve-3d",
+    }));
+    spend(1);
+  });
+}
+
+/* 줄기 */
+function stalk(g, dx, dy, z, h, w, col, lean){
+  g.appendChild(el("div", null, {
+    position:"absolute", left:"0", top:"0",
+    width:w.toFixed(1)+"px", height:h.toFixed(1)+"px",
+    marginLeft:(-w/2).toFixed(1)+"px", marginTop:(-h).toFixed(1)+"px",
+    background:`linear-gradient(90deg, ${col}bb, ${col}, ${col}bb)`,
+    borderRadius:w+"px",
+    transform:`translate3d(${dx.toFixed(1)}px,${dy.toFixed(1)}px,${z.toFixed(1)}px) rotateX(${(-90+(lean||0)).toFixed(0)}deg)`,
+    transformOrigin:"bottom center", transformStyle:"preserve-3d",
+  }));
+  spend(1);
+}
+
+/* 포기 밑 그림자 — 땅에 붙어 있어야 "심겨 있다"는 느낌이 납니다 */
+function footShadow(g, w){
+  g.appendChild(el("div", null, {
+    position:"absolute", left:"0", top:"0",
+    width:w.toFixed(1)+"px", height:(w*0.72).toFixed(1)+"px",
+    marginLeft:(-w/2).toFixed(1)+"px", marginTop:(-w*0.36).toFixed(1)+"px",
+    borderRadius:"50%",
+    background:"radial-gradient(ellipse at 50% 50%, rgba(62,52,32,.34) 0%, rgba(62,52,32,.14) 55%, transparent 76%)",
+    transform:"translateZ(0.6px)", transformStyle:"preserve-3d",
+  }));
+  spend(1);
+}
+
+/* 난수 — 같은 작물이 같은 자리에 오면 항상 같은 모양이 되도록 씨앗 고정 */
+function rnd(seed){
+  let s = seed % 2147483647; if(s <= 0) s += 2147483646;
+  return () => (s = s * 16807 % 2147483647) / 2147483647;
+}
+
+/* ============================================================
+   원형(archetype)별 그리기
+   S = 크기 배율, C = 잎 색, A = 열매·꽃 색, R = 난수
+   ============================================================ */
+const DRAW = {
+  /* 상추·시금치 — 겹겹이 벌어진 로제트 */
+  rosette(g, S, C, A, R){
+    for(let i=0;i<7;i++)
+      blade(g, i*51 + R()*20, (13 + R()*3)*S, (9 + R()*2.5)*S, 40 + R()*14, C, 0);
+    for(let i=0;i<4;i++)
+      blade(g, i*90 + 35, 8.5*S, 6*S, 16 + R()*12, C, 0.8);
+  },
+
+  /* 양배추·배추 — 겉잎이 벌어지고 속은 단단한 공 */
+  head(g, S, C, A, R){
+    for(let i=0;i<6;i++)
+      blade(g, i*60 + R()*16, 11*S, 12*S, 58 + R()*10, C, 0);
+    puff(g, 0, 0, 1, 15*S, 12*S, { hi:"#accb80", mid:"#84ad5e", lo:"#5c8541" }, .97);
+    puff(g, 0, 0, 2.4, 9*S, 8*S, { hi:"#c3da9c", mid:"#9cc072", lo:"#729a52" }, .9);
+  },
+
+  /* 케일·근대 — 곧게 선 큰 잎 (근대는 흰 잎줄기) */
+  upright(g, S, C, A, R){
+    for(let i=0;i<7;i++)
+      blade(g, i*51 + R()*22, (19 + R()*5)*S, 8.5*S, 16 + R()*18, C, 0,
+            "58% 58% 16% 16% / 72% 72% 28% 28%");
+  },
+
+  /* 바질·민트·감자·들깨 — 둥근 덤불 */
+  bush(g, S, C, A, R){
+    puff(g,  0,      0,     0,   16*S, 13*S, C, .95);
+    puff(g, -4.5*S,  2*S,   3*S, 11*S, 10*S, C, .92, 26);
+    puff(g,  4.5*S, -2*S,   5*S, 12*S, 11*S, C, .92, -20);
+    for(let i=0;i<4;i++) blade(g, i*90 + R()*40, 10*S, 5.5*S, 44, C, 0.5);
+  },
+
+  /* 로즈마리 — 은빛 바늘잎이 곧게 */
+  shrub(g, S, C, A, R){
+    for(let i=0;i<9;i++)
+      blade(g, i*40 + R()*18, (16 + R()*5)*S, 3*S, 6 + R()*16, C, 0, "42% 42% 28% 28%");
+    puff(g, 0, 0, 0, 10*S, 7*S, C, .5);
+  },
+
+  /* 대파·마늘·양파 — 가는 잎이 부챗살로 */
+  allium(g, S, C, A, R){
+    for(let i=0;i<7;i++)
+      blade(g, i*51 + R()*14, (20 + R()*7)*S, 4*S, 5 + R()*18, C, 0, "50% 50% 18% 18%", false);
+    if(A) puff(g, 0, 0, 0, 8*S, 5.5*S, { hi:"#f2ebdc", mid:A, lo:"#9d8296" }, .92);
+  },
+
+  /* 무·당근 — 깃털 같은 잎이 위로, 뿌리 어깨가 흙 위로 */
+  root(g, S, C, A, R){
+    for(let i=0;i<10;i++)
+      blade(g, i*36 + R()*22, (17 + R()*5)*S, 4*S, 10 + R()*20, C, 0, "44% 44% 24% 24%", false);
+    if(A) bead(g, 0, 0, 0, 3*S, A);
+  },
+
+  /* 토마토·고추·가지 — 줄기 + 층층 잎 + 매달린 열매 */
+  bushFruit(g, S, C, A, R){
+    const H = 27*S;
+    stalk(g, 0, 0, 0, H, 2.4*S, "#5e7d3f");
+    puff(g,  0,     0,    H*0.26, 15*S, 11*S,  C, .95);
+    puff(g, -3.5*S, 1*S,  H*0.54, 13*S, 9.5*S, C, .93, 30);
+    puff(g,  2.5*S,-1*S,  H*0.82, 10*S, 8*S,   C, .92, -22);
+    const fr = [[5.5*S,-1*S,H*0.32],[-5*S,2*S,H*0.50],[1.5*S,3*S,H*0.18],[4*S,2*S,H*0.66]];
+    fr.slice(0, rich()?4:2).forEach(([fx,fy,fz]) => bead(g, fx, fy, fz, 2.7*S, A));
+  },
+
+  /* 오이·콩·완두 — 지지대를 타고 오르는 덩굴 */
+  vine(g, S, C, A, R, climbH){
+    const H = climbH || 33*S;
+    stalk(g, 0, 0, 0, H, 2*S, "#5f8a44");
+    const steps = Math.max(3, Math.min(7, Math.round(H/(8*S))));
+    for(let i=1;i<=steps;i++){
+      const t = i/steps, side = i%2 ? 1 : -1;
+      puff(g, side*4.5*S, 0, H*t*0.94, 11*S, 8*S, C, .93, side*26);
+      if(i%2===0) blade(g, side*70, 6*S, 1.6*S, 34, C, H*t, "50%", false);
+    }
+    if(A){ bead(g, 3.5*S, 1*S, H*0.42, 2.5*S, A); if(rich()) bead(g, -3.5*S, -1*S, H*0.66, 2.2*S, A); }
+  },
+
+  /* 호박·애호박 — 넓게 퍼지는 큰 잎 + 굵은 열매 */
+  sprawl(g, S, C, A, R){
+    for(let i=0;i<6;i++)
+      blade(g, i*60 + R()*22, (14 + R()*4)*S, (17 + R()*4)*S, 36 + R()*14, C, 0,
+            "48% 52% 44% 56% / 58% 62% 38% 42%");
+    puff(g, 0, 0, 1, 13*S, 8.5*S, C, .82);
+    if(A) bead(g, 7*S, 3*S, 1.5, 4.6*S, A);
+  },
+
+  /* 딸기 — 땅에 붙어 퍼지고 빨간 열매·흰 꽃 */
+  lowSpread(g, S, C, A, R){
+    for(let i=0;i<7;i++)
+      blade(g, i*51 + R()*20, (12 + R()*3)*S, 10*S, 40 + R()*12, C, 0,
+            "50% 50% 42% 42% / 62% 62% 38% 38%");
+    bead(g, 5*S, 1*S, 2.5, 2.6*S, A);
+    if(rich()) bead(g, -4*S, 3.5*S, 2.5, 2.4*S, A);
+    if(rich()) bead(g, 0.5*S, -4*S, 3.5*S, 1.6*S, "#faf6ea", "#e8c94e");
+  },
+
+  /* 딜 — 가는 줄기 끝에 자잘한 우산꽃 */
+  umbel(g, S, C, A, R){
+    for(let i=0;i<6;i++)
+      blade(g, i*60 + R()*24, (11 + R()*4)*S, 1.9*S, 20 + R()*22, C, 0, "42% 42% 24% 24%", false);
+    const n = rich() ? 3 : 2;
+    for(let i=0;i<n;i++){
+      const h = (19 + R()*6)*S, dx = (R()-.5)*7*S, dy = (R()-.5)*7*S;
+      stalk(g, dx, dy, 0, h, 1.5*S, "#8aa06a");
+      for(let k=0;k<5;k++){
+        const a = k*72 + R()*30, r = 2.6*S;
+        bead(g, dx + Math.cos(a*Math.PI/180)*r, dy + Math.sin(a*Math.PI/180)*r,
+             h - 0.5*S, 1.5*S, A || "#d9d789");
+      }
+    }
+  },
+
+  /* 메리골드·한련화·캐모마일 — 덤불 위에 동글동글 꽃송이 */
+  bloom(g, S, C, A, R){
+    puff(g,  0,     0,   0,   13*S, 9.5*S, C, .93);
+    puff(g, -3.5*S, 2*S, 2*S, 9*S,  7.5*S, C, .9, 28);
+    puff(g,  3.5*S,-2*S, 3*S, 9*S,  7.5*S, C, .9, -24);
+    const n = rich() ? 6 : 3;
+    for(let i=0;i<n;i++){
+      const a = i*(360/n) + R()*34, r = (3.5 + R()*3.5)*S;
+      const dx = Math.cos(a*Math.PI/180)*r, dy = Math.sin(a*Math.PI/180)*r;
+      const h = (9 + R()*6)*S;
+      stalk(g, dx, dy, 0, h, 1.3*S, "#7f9a5c");
+      bead(g, dx, dy, h, 2.7*S, A, "#fdf6d8");
+    }
+  },
+
+  /* 보리지·라벤더형 — 위로 솟는 꽃대 (수채 그림의 그 느낌) */
+  spike(g, S, C, A, R){
+    for(let i=0;i<6;i++) blade(g, i*60 + R()*22, 10*S, 4.5*S, 44 + R()*10, C, 0);
+    const n = rich() ? 6 : 3;
+    for(let i=0;i<n;i++){
+      const a = i*(360/n) + R()*40, r = (2 + R()*4)*S;
+      const dx = Math.cos(a*Math.PI/180)*r, dy = Math.sin(a*Math.PI/180)*r;
+      const h = (17 + R()*7)*S;
+      stalk(g, dx, dy, 0, h*0.5, 1.2*S, "#8aa06a");
+      g.appendChild(el("div", null, {
+        position:"absolute", left:"0", top:"0",
+        width:(3.4*S).toFixed(1)+"px", height:(h*0.55).toFixed(1)+"px",
+        marginLeft:(-1.7*S).toFixed(1)+"px", marginTop:(-h*0.55).toFixed(1)+"px",
+        borderRadius:"46% 46% 30% 30% / 22% 22% 78% 78%",
+        background:`linear-gradient(180deg, ${A}55 0%, ${A} 42%, ${A}cc 100%)`,
+        transform:`translate3d(${dx.toFixed(1)}px,${dy.toFixed(1)}px,${(h*0.5).toFixed(1)}px) rotateZ(${a.toFixed(0)}deg) rotateX(-90deg)`,
+        transformOrigin:"bottom center", transformStyle:"preserve-3d",
+      }));
+      spend(1);
+    }
+  },
+
+  /* 해바라기 — 키 큰 줄기 + 큰 꽃 얼굴 */
+  tall(g, S, C, A, R){
+    const H = 40*S;
+    stalk(g, 0, 0, 0, H, 2.6*S, "#5f7f3e");
+    for(let i=0;i<4;i++){
+      const t = .28 + i*.15, side = i%2 ? 1 : -1;
+      blade(g, side*80 + R()*24, 9*S, 6.5*S, 54, C, H*t);
+    }
+    const ang = rich() ? [0,90] : [0];
+    ang.forEach(a => {
+      g.appendChild(el("div", null, {
+        position:"absolute", left:"0", top:"0",
+        width:(12*S).toFixed(1)+"px", height:(12*S).toFixed(1)+"px",
+        marginLeft:(-6*S).toFixed(1)+"px", marginTop:(-12*S).toFixed(1)+"px",
+        borderRadius:"50%",
+        background:`radial-gradient(circle at 50% 50%, #6b4a28 0 26%, #8a5f2f 28%, ${A} 34%, #d3ae40 100%)`,
+        transform:`translate3d(0px,0px,${H.toFixed(1)}px) rotateZ(${a}deg) rotateX(-90deg)`,
+        transformOrigin:"bottom center", transformStyle:"preserve-3d",
+        boxShadow:"0 2px 5px rgba(60,45,20,.3)",
+      }));
+      spend(1);
+    });
+  },
+};
+
+/* ============================================================
+   공개 함수 — 기존 이모지 빌보드 자리를 그대로 대신합니다.
+   plant: PLANTS 항목({id, cat, height, emoji, climb})
+   ============================================================ */
+/* 한 자리에 몇 포기를 심을지 — 상추 한 자리는 실제로 여러 포기입니다 */
+const CLUMP = {
+  lowSpread:3, rosette:3, root:3, allium:3,
+  head:2, bush:2, bloom:2, spike:2, shrub:2, upright:2, umbel:2,
+  bushFruit:1, vine:1, sprawl:1, tall:1,
+};
+
+function plantForm(plant, x, y, z, scale, climbH){
+  const p = plant || {};
+  const form = FORM[p.id] || FORM_BY_CAT[p.cat] || "bush";
+  const C = LEAFC[LEAFOF[p.id] || (p.cat === "flower" ? "silver" : "deep")];
+  const A = ACCENT[p.id] || null;
+  const draw = DRAW[form] || DRAW.bush;
+
+  /* 크기 차이는 원형(archetype)이 이미 담고 있으므로
+     키(cm)는 같은 원형 안에서 살짝만 갈라놓습니다. */
+  const cm = p.height || 40;
+  const hs = Math.max(0.86, Math.min(1.18, Math.pow(cm / 55, 0.22)));
+  const S0 = hs * (scale == null ? 1 : scale);
+
+  /* 자리마다 조금씩 다른 모양 — 줄 세운 아이콘이 아니라 "심은 밭"으로 보이게 */
+  const seed = Math.round((x + 500) * 31 + (y + 500) * 17 + (p.id || "x").length * 7);
+  const R = rnd(seed);
+  const g = grp(x, y, z, (R() - .5) * 60);
+
+  /* 한 자리 = 한 무리. 예산이 빠듯하면 포기 수를 줄입니다. */
+  let n = CLUMP[form] || 1;
+  if(!rich()) n = Math.min(n, 2);
+
+  if(n === 1){
+    footShadow(g, 15 * S0);
+    draw(g, S0, C, A, R, climbH);
+    return g;
+  }
+
+  footShadow(g, (12 + n * 3.2) * S0);
+  const spread = (form === "lowSpread" ? 6.5 : 5.2) * S0;
+  for(let i=0;i<n;i++){
+    const a = i * (360 / n) + R() * 40;
+    const r = i === 0 ? 0 : spread * (0.7 + R() * 0.5);
+    const sub = el("div", null, {
+      position:"absolute", left:"0", top:"0", width:"0", height:"0",
+      transformStyle:"preserve-3d",
+      transform:`translate3d(${(Math.cos(a*Math.PI/180)*r).toFixed(1)}px,`+
+                `${(Math.sin(a*Math.PI/180)*r).toFixed(1)}px,0px) rotateZ(${(R()*360).toFixed(0)}deg)`,
+    });
+    g.appendChild(sub);
+    draw(sub, S0 * (0.82 + R() * 0.28), C, A, R, climbH);
+  }
+  return g;
+}
+
+/* 화면 하나를 그리기 전에 호출 — 밀도에 따라 정밀/간소 모드를 고릅니다 */
+function beginPlanting(count){ RICH = (count || 0) <= 12; }
+
+
 const BUILD = {
   /* ── 키홀: 돌 테두리 + 흙 두둑 + 철망 퇴비통 + 통로 ── */
   keyhole(scene, plants, opts){
     const R=86;
-    scene.appendChild(disc(R*2+26, 2, "#c9b892", {opacity:.55})); // 주변 땅
+    scene.appendChild(disc(R*2+26, 2, "#d9cdaf", {opacity:.55})); // 주변 땅
     // 두둑(도넛 흙)
     scene.appendChild(disc(R*2, 12, SOIL(2)));
     scene.appendChild(disc(R*2, 13, "transparent", {backgroundImage:"radial-gradient(circle at 30% 30%, rgba(0,0,0,.12) 0 2px, transparent 3px)", backgroundSize:"14px 14px"}));
     // 통로(앞쪽 V) - 밝은 쐐기
     const path = el("div",null,{position:"absolute",left:"50%",top:"50%",width:"52px",height:R+14+"px",
-      marginLeft:"-26px",marginTop:"-4px",background:"#e8ddc2",
+      marginLeft:"-26px",marginTop:"-4px",background:"#efe6d0",
       clipPath:"polygon(50% 0,100% 100%,0 100%)",transform:"translateZ(13.5px)",transformStyle:"preserve-3d"});
     scene.appendChild(path);
     // 테두리 돌담(원 둘레 돌 24개, 통로 각도 비움)
@@ -2029,14 +2446,14 @@ const BUILD = {
     // 작물: place 좌표 사용
     (opts.place||[]).forEach(pl=>{
       const [x,y]=p2xy(pl);
-      scene.appendChild(sprout(pl.plant.emoji, x, y, 22, 1));
+      scene.appendChild(plantForm(pl.plant, x, y, 22, 1));
     });
   },
 
   /* ── 스파이럴: 나선 '돌벽 띠'가 올라가는 진짜 구조 ── */
   spiral(scene, plants, opts){
     const mat = opts.material || null;
-    scene.appendChild(disc(210, 2, "#c9b892", {opacity:.5}));
+    scene.appendChild(disc(210, 2, "#d9cdaf", {opacity:.5}));
     // 흙 심(작은 언덕): 층 원반은 벽 안 채움용으로 은은하게
     for(let i=0;i<6;i++) scene.appendChild(disc(140-i*20, 6+i*13, SOIL(i,2)));
     // 나선 벽: 아르키메데스 나선 따라 '벽 조각'을 촘촘히 세움
@@ -2078,7 +2495,7 @@ const BUILD = {
       // place는 위→아래 순서이므로 z 근사: 중심距離로 높이 추정
       const dist=Math.hypot(x,y);
       const z = 88 - (dist/70)*70;   // 중심 가까울수록 높이↑
-      scene.appendChild(sprout(pl.plant.emoji, x, y, Math.max(16,Math.min(92,z)), 1-(z/240)));
+      scene.appendChild(plantForm(pl.plant, x, y, Math.max(16,Math.min(92,z)), 1-(z/300)));
     });
   },
 
@@ -2128,14 +2545,16 @@ const BUILD = {
     (opts.place||[]).forEach(pl=>{
       const [x,y]=p2xy(pl);
       const isClimb = !!pl.plant.climb;
-      scene.appendChild(sprout(pl.plant.emoji, x, isClimb? -52 : y, isClimb? 58+((x/40)%2)*18 : 12, 1));
+      scene.appendChild(isClimb
+        ? plantForm(pl.plant, x, -52, 12, 1, 74+((x/40)%2)*10)
+        : plantForm(pl.plant, x, y, 12, 1));
     });
   },
 
   /* ── 만다라: 꽃잎 두둑 8개(사이 통로) + 중심 ── */
   mandala(scene, plants, opts){
-    scene.appendChild(disc(212, 2, "#c9b892",{opacity:.5}));
-    scene.appendChild(disc(196, 8, "#e8ddc2")); // 통로 바닥(밝음)
+    scene.appendChild(disc(212, 2, "#d9cdaf",{opacity:.5}));
+    scene.appendChild(disc(196, 8, "#efe6d0")); // 통로 바닥(밝음)
     const P=8;
     for(let i=0;i<P;i++){
       const ang=-Math.PI/2 + (i/P)*Math.PI*2;
@@ -2157,7 +2576,7 @@ const BUILD = {
     // 작물
     (opts.place||[]).forEach(pl=>{
       const [x,y]=p2xy(pl);
-      scene.appendChild(sprout(pl.plant.emoji, x, y, 20, 1));
+      scene.appendChild(plantForm(pl.plant, x, y, 20, 1));
     });
   },
 
@@ -2171,7 +2590,7 @@ const BUILD = {
         boxShadow:"0 3px 8px rgba(60,44,24,.28)"});
     }
     scene.appendChild(el("div",null,{position:"absolute",left:"50%",top:"50%",width:"230px",height:"120px",
-      marginLeft:"-115px",marginTop:"-60px",borderRadius:"18px",background:"#c9b892",opacity:.5,
+      marginLeft:"-115px",marginTop:"-60px",borderRadius:"18px",background:"#d9cdaf",opacity:.5,
       transform:"translateZ(1px)",transformStyle:"preserve-3d"}));
     scene.appendChild(mound(206, 92, 6, SOIL(0)));
     scene.appendChild(mound(188, 68, 24, SOIL(3),
@@ -2191,18 +2610,58 @@ const BUILD = {
     (opts.place||[]).forEach(pl=>{
       const [x,y]=p2xy(pl);
       const z = y<-10? 52 : y<15? 32 : 14;  // 꼭대기/비탈/발치
-      scene.appendChild(sprout(pl.plant.emoji, x*0.9, y*0.62, z, 1));
+      scene.appendChild(plantForm(pl.plant, x*0.9, y*0.62, z, 1));
     });
   },
 };
+
+/* ── 식물 팔레트 — 화면에 심긴 작물을 색과 함께 한눈에 ── */
+function renderPlantPalette(plants, opts){
+  const host = document.getElementById("gdPalette");
+  if(!host) return;
+
+  /* 실제로 심긴 작물만 모읍니다 */
+  const seen = new Map();
+  const push = p => { if(p && p.id && !seen.has(p.id)) seen.set(p.id, p); };
+  ((opts && opts.place) || []).forEach(pl => push(pl.plant));
+  if(opts && opts.multi)
+    (opts.multi.elements || []).forEach(e => (e.place || []).forEach(pl => push(pl.plant)));
+  if(!seen.size) (plants || []).forEach(push);
+
+  if(!seen.size){ host.innerHTML = ""; host.style.display = "none"; return; }
+  host.style.display = "";
+
+  host.innerHTML = '<div class="pal-ttl">식물 팔레트</div><div class="pal-list"></div>';
+  const list = host.querySelector(".pal-list");
+  [...seen.values()].forEach(p => {
+    const C = LEAFC[LEAFOF[p.id] || (p.cat === "flower" ? "silver" : "deep")];
+    const A = ACCENT[p.id];
+    const chip = el("div", "pal-item");
+    chip.innerHTML =
+      '<span class="pal-sw" style="background:linear-gradient(135deg,' + C.hi + ',' + C.lo + ')">' +
+        (A ? '<i style="background:' + A + '"></i>' : '') +
+      '</span>' +
+      '<span class="pal-em">' + (p.emoji || "🌱") + '</span>' +
+      '<span class="pal-nm">' + (p.name || "") + '</span>';
+    list.appendChild(chip);
+  });
+}
 
 /* ---------- 무대 제어 ---------- */
 let threeCtrl = null;
 function renderThree(techId, plants, opts={}){
   const scene = document.getElementById("gdThreeScene");
   scene.innerHTML = "";
+
+  /* 심는 포기 수를 먼저 세어 정밀/간소 모드를 정합니다 */
+  let nPlant = (opts.place || []).length;
+  if(opts.multi) nPlant = (opts.multi.elements || [])
+    .reduce((a, e) => a + ((e.place || []).length), 0);
+  beginPlanting(nPlant);
+
   if(opts.multi){ buildMultiScene(scene, opts.multi); }
   else { (BUILD[techId] || BUILD.spiral)(scene, plants, opts); }
+  renderPlantPalette(plants, opts);
 
   if(threeCtrl) threeCtrl.destroy();
   let rx=58, rz=18, auto=true, raf=null, dragging=false, lx=0, ly=0;
@@ -2229,13 +2688,13 @@ BUILD.custom = function(scene, plants, opts={}){
     width:w+"px",height:h+"px",marginLeft:(-w/2)+"px",marginTop:(-h/2)+"px",
     borderRadius:"14px",background:c,transform:`translateZ(${z}px)`,
     transformStyle:"preserve-3d",boxShadow:"0 3px 7px rgba(60,44,24,.28)"});
-  scene.appendChild(mk(212,150,4,"#c9b892"));
+  scene.appendChild(mk(212,150,4,"#d9cdaf"));
   const bed=mk(196,134,14,SOIL(3));
   bed.style.backgroundImage="repeating-linear-gradient(0deg, rgba(0,0,0,.09) 0 2px, transparent 2px 26px)";
   scene.appendChild(bed);
   (opts.place||[]).forEach(pl=>{
     const [x,y]=p2xy(pl);
-    scene.appendChild(sprout(pl.plant.emoji, x*0.86, y*0.8, 18, 0.95));
+    scene.appendChild(plantForm(pl.plant, x*0.86, y*0.8, 18, 0.95));
   });
 };
 
@@ -2247,8 +2706,8 @@ function buildMultiScene(scene, M){
     width:w+"px",height:h+"px",marginLeft:(-w/2)+"px",marginTop:(-h/2)+"px",
     borderRadius:(r||14)+"px",background:c,transform:`translateZ(${z}px)`,
     transformStyle:"preserve-3d",boxShadow:"0 3px 9px rgba(60,44,24,.22)"});
-  scene.appendChild(mk(gw+18, gh+18, 1, "#dccfae", 20));
-  scene.appendChild(mk(gw, gh, 2.5, "#e8ddc2"));
+  scene.appendChild(mk(gw+18, gh+18, 1, "#e3d8bc", 20));
+  scene.appendChild(mk(gw, gh, 2.5, "#efe6d0"));
   M.elements.forEach(e=>{
     const s3 = Math.max(0.34, Math.min(1.15, e.wM*K/(ELEM_N3[e.tech]||212)));
     const sub = el("div", null, {position:"absolute", left:"50%", top:"50%",
@@ -3009,7 +3468,7 @@ function renderPrev(){
   const {S,ox,oy} = plotTransform();
   document.getElementById("gdPrevDim").textContent = `· ${state.bed.w}×${state.bed.h}m`;
   let s = `<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">`;
-  s += `<rect x="${ox}" y="${oy}" width="${state.bed.w*S}" height="${state.bed.h*S}" rx="10" fill="#e8ddc2" stroke="#cdbf9a" stroke-width="2"/>`;
+  s += `<rect x="${ox}" y="${oy}" width="${state.bed.w*S}" height="${state.bed.h*S}" rx="10" fill="#efe6d0" stroke="#cdbf9a" stroke-width="2"/>`;
   state.elements.forEach(e=>{
     s += `<rect x="${ox+e.x*S}" y="${oy+e.y*S}" width="${e.w*S}" height="${e.h*S}" rx="8" fill="#a9855e" opacity="0.82"/>`;
     s += `<text x="${ox+(e.x+e.w/2)*S}" y="${oy+(e.y+e.h/2)*S+5}" font-size="14" text-anchor="middle">${TECH_BY_ID[e.tech].emoji}</text>`;
@@ -3143,8 +3602,8 @@ buildLayout = function(){
 function renderPlotAll(){
   const R = lastResult; if(!R) return;
   let s = `<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">` + soilDefs();
-  s += `<rect x="${R.ox-6}" y="${R.oy-6}" width="${R.bed.w*R.S+12}" height="${R.bed.h*R.S+12}" rx="14" fill="#dccfae"/>`;
-  s += `<rect x="${R.ox}" y="${R.oy}" width="${R.bed.w*R.S}" height="${R.bed.h*R.S}" rx="10" fill="#e8ddc2"/>`;
+  s += `<rect x="${R.ox-6}" y="${R.oy-6}" width="${R.bed.w*R.S+12}" height="${R.bed.h*R.S+12}" rx="14" fill="#e3d8bc"/>`;
+  s += `<rect x="${R.ox}" y="${R.oy}" width="${R.bed.w*R.S}" height="${R.bed.h*R.S}" rx="10" fill="#efe6d0"/>`;
   R.elements.forEach(rt=>{
     const shape = (BED_SHAPE[rt.el.tech]||BED_SHAPE.custom)(rt.meta);
     s += `<g transform="translate(${rt.exPx},${rt.eyPx}) scale(${rt.sx.toFixed(4)},${rt.sy.toFixed(4)})">${shape}</g>`;
@@ -4621,7 +5080,7 @@ const GRASS = `<svg class="ob-grass" viewBox="0 0 540 34" preserveAspectRatio="n
 
 /* 2장: 실제 배치도와 같은 그림 언어(두둑 + 번호 마커) */
 const ART_PLAN = `<svg viewBox="0 0 280 190" class="ob-art" aria-hidden="true">
-  <rect x="8" y="8" width="264" height="174" rx="12" fill="#e8ddc2" stroke="#cdbf9a" stroke-width="2"/>
+  <rect x="8" y="8" width="264" height="174" rx="12" fill="#efe6d0" stroke="#cdbf9a" stroke-width="2"/>
   <rect x="24" y="24" width="112" height="52" rx="8" fill="#a9855e"/>
   <rect x="152" y="24" width="104" height="86" rx="8" fill="#b08e64"/>
   <rect x="24" y="92" width="112" height="70" rx="8" fill="#9d7a53"/>
