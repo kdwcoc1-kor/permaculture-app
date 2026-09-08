@@ -495,17 +495,6 @@ nav.tabs button:focus-visible{outline:2px solid var(--sun);outline-offset:-2px}
   font-size:13px;color:var(--muted)}
 #view-garden .gd-basket b{color:var(--gd-green)}
 
-#view-garden .three-wrap{margin-bottom:16px}
-#view-garden .three-stage{width:100%;height:240px;perspective:760px;
-  background:radial-gradient(ellipse at 50% 40%, #f7f1e2, #e9dec6);
-  border:2px solid var(--gd-bd);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;
-  overflow:hidden;touch-action:none;cursor:grab;box-shadow:0 6px 16px -8px rgba(58,51,39,.25)}
-#view-garden .three-stage:active{cursor:grabbing}
-#view-garden .three-scene{transform-style:preserve-3d;position:relative;width:1px;height:1px}
-#view-garden .three-cap{text-align:center;font-size:12px;color:#8a8a78;margin-top:7px}
-#view-garden .gd-palette{margin-top:10px;background:var(--gd-card);border:1.5px solid var(--gd-bd);
-  border-radius:12px;padding:10px 12px}
-#view-garden .pal-ttl{font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--soil);
   text-transform:uppercase;margin-bottom:7px}
 #view-garden .pal-list{display:flex;flex-wrap:wrap;gap:6px}
 #view-garden .pal-item{display:inline-flex;align-items:center;gap:5px;background:#fffdf6;
@@ -517,6 +506,18 @@ nav.tabs button:focus-visible{outline:2px solid var(--sun);outline-offset:-2px}
 #view-garden .pal-em{font-size:12px;line-height:1}
 #view-garden .pal-nm{font-weight:700}
 
+#view-garden .plan-wrap{margin-bottom:16px;background:var(--gd-card);
+  border:2px solid var(--gd-bd);border-radius:var(--radius);overflow:hidden;
+  box-shadow:0 6px 16px -8px rgba(58,51,39,.25)}
+#view-garden .plan-stage{background:linear-gradient(180deg,#f3ecd9,#ece1c8 55%,#e3d6b8)}
+#view-garden .plan-cv{display:block;width:100%;height:auto}
+#view-garden .plan-bar{display:flex;align-items:center;gap:8px;padding:9px 12px;
+  border-top:1.5px solid var(--gd-bd);background:#fffdf6}
+#view-garden .plan-cap{flex:1;font-size:12px;font-weight:700;color:var(--muted)}
+#view-garden .plan-edit{background:var(--leaf-soft);border:1.5px solid var(--gd-green);
+  color:var(--gd-green);border-radius:999px;padding:8px 14px;font:inherit;font-size:12.5px;
+  font-weight:800;cursor:pointer;min-height:40px;touch-action:manipulation}
+#view-garden .plan-edit:active{background:#d6e6cc}
 #view-garden .bed-wrap{background:var(--gd-card);border:2px solid var(--gd-bd);border-radius:var(--radius);
   padding:14px;margin-bottom:16px;box-shadow:0 6px 16px -8px rgba(58,51,39,.22)}
 #view-garden .bed-meta{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;color:var(--muted);margin-bottom:10px}
@@ -533,6 +534,10 @@ nav.tabs button:focus-visible{outline:2px solid var(--sun);outline-offset:-2px}
 #view-garden .note.info{border-left-color:#8a93a0}
 #view-garden .note .ic{font-size:16px;line-height:1.4}
 #view-garden .note b{font-weight:800}
+#view-garden .ctag{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.02em;
+  background:var(--leaf-soft);color:var(--gd-green);border-radius:999px;padding:1px 7px;
+  margin-left:3px;vertical-align:1px}
+#view-garden .csrc{font-size:11px;color:var(--muted);margin:6px 2px 2px}
 
 #view-garden .gd-bar{position:fixed;left:0;right:0;bottom:calc(72px + env(safe-area-inset-bottom));z-index:45;
   max-width:540px;margin:0 auto;display:flex;gap:10px;padding:12px 16px;
@@ -547,14 +552,11 @@ nav.tabs button:focus-visible{outline:2px solid var(--sun);outline-offset:-2px}
 #view-garden.active{padding-bottom:150px}
 
 @media (prefers-reduced-motion:reduce){
-  #view-garden .three-scene{animation:none !important}
-}
+  }
 
 /* ── v2 정밀화 ── */
 #view-garden #gdBedHost svg{width:100%;height:auto;border-radius:12px;display:block;
   background:linear-gradient(180deg,#f2ead6,#e9dec6)}
-#view-garden .three-stage{height:290px;
-  background:linear-gradient(180deg,#f3ecd9 0%, #ece1c8 55%, #e2d4b6 100%)}
 #view-garden .bed-wrap{padding:12px}
 #view-garden .bed-meta{font-weight:700}
 
@@ -943,10 +945,13 @@ main .view.active{animation:vw-in .22s ease both}
         <button id="gdPrintBtn">🖨 인쇄</button>
         <button id="gdShopBtn">🧺 장보기</button>
       </div>
-      <div class="three-wrap" id="gdThreeWrap">
-        <div class="three-stage" id="gdThreeStage"><div class="three-scene" id="gdThreeScene"></div></div>
-        <div class="three-cap" id="gdThreeCap">손으로 돌려보세요 · 자동 회전 중</div>
-        <div class="gd-palette" id="gdPalette" style="display:none"></div>
+      <div class="plan-wrap" id="gdPlanWrap">
+        <div class="plan-stage"><svg class="plan-cv" id="gdPlanCv"></svg></div>
+        <div class="plan-bar">
+          <span class="plan-cap" id="gdPlanCap">위에서 본 텃밭</span>
+          <button class="plan-edit" id="gdEditPlanBtn">✏️ 직접 고치기</button>
+        </div>
+      </div>
       </div>
       <div class="bed-wrap">
         <div class="bed-meta"><span id="gdBedDim">—</span><span class="compass" id="gdBedSun">⬆ 햇빛</span></div>
@@ -1166,51 +1171,129 @@ const PLANTS = [
   { id:"nasturt",  feed:"light", water:"dry", name:"한련화", emoji:"🌺", cat:"flower",height:30, spacing:30, sow:[4,6],  sun:"full",  note:"진딧물을 유인해 작물 대신 받아줌" , },
   { id:"sunflower",name:"해바라기",emoji:"🌻", cat:"flower",height:200,spacing:50, sow:[4,6],  sun:"full",  note:"매우 큼. 북쪽 끝에 심어 그늘 활용" , },
   { id:"borage",   feed:"light", water:"mid", name:"보리지", emoji:"💠", cat:"flower",height:60, spacing:35, sow:[4,6],  sun:"full",  note:"벌을 부르고 토마토 곁에서 잘 어울림" , },
+
+  /* ── 농촌진흥청 동반식물 자료(18종 채소 연구)에 자주 나오는 작물 ── */
+  { id:"chive",    feed:"light", water:"mid", name:"부추",   emoji:"🌿", cat:"veg", height:30,  spacing:15, sow:[3,9],  sun:"full",  note:"한 번 심으면 몇 해 계속 베어 먹음. 뿌리 향이 해충을 쫓음" , },
+  { id:"celery",   feed:"heavy", water:"wet", name:"셀러리", emoji:"🥬", cat:"veg", height:60,  spacing:25, sow:[3,8],  sun:"part",  note:"물을 좋아함. 향이 강해 배추·토마토 곁을 지켜줌" , },
+  { id:"corn",     feed:"heavy", water:"mid", name:"옥수수", emoji:"🌽", cat:"veg", height:200, spacing:30, sow:[4,6],  sun:"full",  note:"키가 매우 큼. 북쪽 끝에 줄지어 심어 그늘을 활용" , },
+  { id:"broccoli", feed:"heavy", water:"mid", name:"브로콜리",emoji:"🥦", cat:"veg", height:60,  spacing:45, sow:[3,8],  sun:"full",  note:"넓은 자리가 필요. 배추흰나비 주의" , },
+  { id:"parsley",  feed:"mid", water:"wet", name:"파슬리", emoji:"🌿", cat:"herb", height:30,  spacing:20, sow:[3,8],  sun:"part",  note:"익충을 부르고 그늘도 견딤. 감자·아스파라거스와 잘 맞음" , },
 ];
 
-/* 궁합표: 한 쌍을 한 번만 적음. type: good(좋음) / bad(상극) */
-const COMPANION = [
-  // 좋은 궁합
-  { a:"tomato",  b:"basil",     type:"good", why:"바질이 토마토 해충을 쫓고 풍미를 살림" },
-  { a:"tomato",  b:"marigold",  type:"good", why:"메리골드가 뿌리 선충을 막아줌" },
-  { a:"tomato",  b:"borage",    type:"good", why:"보리지가 벌을 불러 수정을 도움" },
-  { a:"tomato",  b:"carrot",    type:"good", why:"공간을 위아래로 나눠 효율적으로 사용" },
-  { a:"carrot",  b:"onion",     type:"good", why:"양파 향이 당근파리를 쫓음" },
-  { a:"carrot",  b:"scallion",  type:"good", why:"파 향이 당근 해충을 막음" },
-  { a:"carrot",  b:"lettuce",   type:"good", why:"자라는 속도가 달라 자리를 겹치지 않음" },
-  { a:"cucumber",b:"bean",      type:"good", why:"콩이 땅을 비옥하게 해 오이가 잘 자람" },
-  { a:"cucumber",b:"nasturt",   type:"good", why:"한련화가 오이벌레를 유인해 막음" },
-  { a:"cabbage", b:"chamomile", type:"good", why:"캐모마일이 익충을 불러 배추벌레를 줄임" },
-  { a:"cabbage", b:"scallion",  type:"good", why:"파 향이 배추흰나비를 쫓음" },
-  { a:"napa",    b:"scallion",  type:"good", why:"파가 배추 해충을 기피시킴" },
-  { a:"lettuce", b:"radish",    type:"good", why:"무가 흙을 부드럽게 해 상추가 잘 큼" },
-  { a:"pepper",  b:"basil",     type:"good", why:"바질이 고추 해충도 함께 쫓음" },
-  { a:"bean",    b:"marigold",  type:"good", why:"메리골드가 콩 주변 해충을 줄임" },
-  { a:"pumpkin", b:"nasturt",   type:"good", why:"한련화가 호박벌레를 막음" },
-  { a:"potato",  b:"bean",      type:"good", why:"콩이 감자 곁 땅을 살림" },
-  { a:"eggplant",b:"bean",      type:"good", why:"콩이 가지에 양분을 보탬" },
-  { a:"strawberry",b:"borage",  type:"good", why:"보리지가 딸기 풍미와 수정을 도움" },
+/* ════════════════════════════════════════════════════════════
+   궁합표 — 한 쌍을 한 번만 적습니다.
+     type : good(좋음) / bad(상극)
+     kind : pest(해충방제형) / grow(생육촉진형) / mutual(상호의존형)
+   근거: 농촌진흥청 동반식물 연구(텃밭 채소 18종)를 정리한
+         「건강한 텃밭 가꾸기? 동반식물을 심으세요!」(애니스마트, 2020.12.29)
+   ════════════════════════════════════════════════════════════ */
+const COMP_KIND = {
+  pest:   { label:"해충방제", emoji:"🛡️", desc:"곁에 있는 것만으로 병·해충 발생을 낮춥니다" },
+  grow:   { label:"생육촉진", emoji:"🌱", desc:"토양과 양분 조건을 좋게 해 상대를 밀어줍니다" },
+  mutual: { label:"상호의존", emoji:"🤝", desc:"수분·햇빛 등 서로의 단점을 보완합니다" },
+};
 
-  // 상극
-  { a:"tomato",  b:"potato",    type:"bad",  why:"같은 가지과라 역병이 옮기 쉬움" },
-  { a:"tomato",  b:"pepper",    type:"bad",  why:"같은 가지과, 같은 해충·병을 공유" },
-  { a:"tomato",  b:"cucumber",  type:"bad",  why:"물·양분 경쟁이 심하고 병을 나눔" },
-  { a:"carrot",  b:"dill",      type:"bad",  why:"딜이 당근 생장을 방해함" },
-  { a:"bean",    b:"onion",     type:"bad",  why:"파·양파 향이 콩 생장을 억제" },
-  { a:"bean",    b:"garlic",    type:"bad",  why:"마늘이 콩 뿌리 발달을 막음" },
-  { a:"pea",     b:"onion",     type:"bad",  why:"양파가 완두 생장을 방해" },
-  { a:"pea",     b:"garlic",    type:"bad",  why:"마늘이 완두에 좋지 않음" },
-  { a:"cabbage", b:"tomato",    type:"bad",  why:"서로 양분 경쟁이 심함" },
-  { a:"potato",  b:"pumpkin",   type:"bad",  why:"둘 다 병에 약해 함께 두면 위험" },
-  { a:"potato",  b:"cucumber",  type:"bad",  why:"감자 역병이 오이로 옮길 수 있음" },
+const COMPANION = [
+  /* ── 해충방제형 ─────────────────────────────────────── */
+  { a:"cabbage",  b:"radish",   type:"good", kind:"pest",   why:"무가 배추흰나비를 분산시켜 양배추 피해를 줄임" },
+  { a:"cabbage",  b:"basil",    type:"good", kind:"pest",   why:"바질 향이 양배추 해충을 쫓음" },
+  { a:"cabbage",  b:"marigold", type:"good", kind:"pest",   why:"메리골드가 뿌리 선충과 해충을 막음" },
+  { a:"napa",     b:"celery",   type:"good", kind:"pest",   why:"셀러리의 강한 향이 배추 해충을 기피시킴" },
+  { a:"chive",    b:"scallion", type:"good", kind:"pest",   why:"부추·대파 뿌리의 천연 항생물질이 병을 예방" },
+  { a:"lettuce",  b:"chive",    type:"good", kind:"pest",   why:"부추 향이 상추 진딧물을 막음" },
+  { a:"spinach",  b:"dill",     type:"good", kind:"pest",   why:"딜이 익충을 불러 시금치 해충을 줄임" },
+  { a:"spinach",  b:"radish",   type:"good", kind:"pest",   why:"무가 흙을 부드럽게 하고 해충을 분산시킴" },
+  { a:"carrot",   b:"garlic",   type:"good", kind:"pest",   why:"마늘 향이 당근파리를 쫓음" },
+  { a:"garlic",   b:"scallion", type:"good", kind:"pest",   why:"파·마늘 뿌리의 항생물질이 서로의 병을 막음" },
+  { a:"onion",    b:"lettuce",  type:"good", kind:"pest",   why:"양파 향이 상추 해충을 쫓고, 상추는 빈자리를 채움" },
+  { a:"onion",    b:"pepper",   type:"good", kind:"pest",   why:"양파가 고추 곁 해충 발생을 낮춤" },
+  { a:"cucumber", b:"marigold", type:"good", kind:"pest",   why:"메리골드가 오이 뿌리 선충을 막음" },
+  { a:"eggplant", b:"sunflower",type:"good", kind:"pest",   why:"해바라기가 익충을 불러 가지 해충을 줄임" },
+  { a:"tomato",   b:"chive",    type:"good", kind:"pest",   why:"부추 뿌리의 항생물질이 토마토 시들음병을 예방" },
+  { a:"celery",   b:"onion",    type:"good", kind:"pest",   why:"양파 향이 셀러리 해충을 막음" },
+  { a:"potato",   b:"pea",      type:"good", kind:"pest",   why:"완두가 감자 곁 해충을 줄이고 땅도 살림" },
+  { a:"potato",   b:"mint",     type:"good", kind:"pest",   why:"민트 향이 감자 해충을 쫓음(번지니 화분째 묻어 심기)" },
+  { a:"tomato",   b:"marigold", type:"good", kind:"pest",   why:"메리골드가 뿌리 선충을 막아줌" },
+  { a:"cucumber", b:"nasturt",  type:"good", kind:"pest",   why:"한련화가 오이벌레를 유인해 대신 받아줌" },
+  { a:"cabbage",  b:"scallion", type:"good", kind:"pest",   why:"파 향이 배추흰나비를 쫓음" },
+  { a:"napa",     b:"scallion", type:"good", kind:"pest",   why:"파가 배추 해충을 기피시킴" },
+  { a:"pepper",   b:"basil",    type:"good", kind:"pest",   why:"바질이 고추 해충도 함께 쫓음" },
+  { a:"bean",     b:"marigold", type:"good", kind:"pest",   why:"메리골드가 콩 주변 해충을 줄임" },
+  { a:"pumpkin",  b:"nasturt",  type:"good", kind:"pest",   why:"한련화가 호박벌레를 막음" },
+  { a:"carrot",   b:"scallion", type:"good", kind:"pest",   why:"파 향이 당근 해충을 막음" },
+
+  /* ── 생육촉진형 ─────────────────────────────────────── */
+  { a:"cabbage",  b:"chamomile",type:"good", kind:"grow",   why:"캐모마일이 익충을 부르고 양배추 생육을 도움" },
+  { a:"cabbage",  b:"onion",    type:"good", kind:"grow",   why:"양파가 곁에서 양배추 생육 조건을 좋게 함" },
+  { a:"eggplant", b:"pepper",   type:"good", kind:"grow",   why:"같은 가지과지만 서로 생육을 밀어줌(병은 함께 도니 간격은 넉넉히)" },
+  { a:"chive",    b:"broccoli", type:"good", kind:"grow",   why:"부추가 브로콜리 생육을 도움" },
+  { a:"chive",    b:"strawberry",type:"good",kind:"grow",   why:"부추가 딸기 뿌리병을 막고 생육을 도움" },
+  { a:"carrot",   b:"bean",     type:"good", kind:"grow",   why:"콩이 질소를 고정해 당근 땅을 비옥하게 함" },
+  { a:"carrot",   b:"rosemary", type:"good", kind:"grow",   why:"로즈마리가 당근 생육 조건을 좋게 함" },
+  { a:"garlic",   b:"celery",   type:"good", kind:"grow",   why:"셀러리가 마늘 생육을 도움" },
+  { a:"carrot",   b:"onion",    type:"good", kind:"grow",   why:"양파 향이 당근파리를 쫓고 서로 생육을 밀어줌" },
+  { a:"cucumber", b:"bean",     type:"good", kind:"grow",   why:"콩이 땅을 비옥하게 해 오이가 잘 자람" },
+  { a:"cucumber", b:"chamomile",type:"good", kind:"grow",   why:"캐모마일이 오이 생육과 수정을 도움" },
+  { a:"eggplant", b:"bean",     type:"good", kind:"grow",   why:"콩 뿌리혹박테리아가 질소를 끌어와 가지에 보탬" },
+  { a:"eggplant", b:"lettuce",  type:"good", kind:"grow",   why:"상추가 아래를 덮어 흙 수분을 지켜줌" },
+  { a:"celery",   b:"pea",      type:"good", kind:"grow",   why:"완두가 질소를 고정해 셀러리를 도움" },
+  { a:"corn",     b:"bean",     type:"good", kind:"grow",   why:"콩이 질소를 고정하고 옥수수대를 타고 오름(세 자매)" },
+  { a:"corn",     b:"sunflower",type:"good", kind:"grow",   why:"해바라기가 익충을 불러 옥수수 생육을 도움" },
+  { a:"potato",   b:"parsley",  type:"good", kind:"grow",   why:"파슬리가 익충을 불러 감자 생육을 도움" },
+  { a:"potato",   b:"basil",    type:"good", kind:"grow",   why:"바질이 감자 곁 해충을 줄이고 생육을 도움" },
+  { a:"potato",   b:"bean",     type:"good", kind:"grow",   why:"콩이 감자 곁 땅을 살림" },
+  { a:"parsley",  b:"spinach",  type:"good", kind:"grow",   why:"파슬리와 시금치가 반그늘을 나눠 쓰며 잘 자람" },
+
+  /* ── 상호의존형 ─────────────────────────────────────── */
+  { a:"tomato",   b:"basil",    type:"good", kind:"mutual", why:"바질이 여분의 수분을 빨아들여 토마토 열매 터짐을 막고, 바질은 토마토 그늘에서 잎이 부드러워짐" },
+  { a:"tomato",   b:"carrot",   type:"good", kind:"mutual", why:"위아래로 공간을 나눠 씁니다 ※ 자료에 따라 상극으로 보기도 하니 간격을 넉넉히" },
+  { a:"onion",    b:"strawberry",type:"good",kind:"mutual", why:"양파가 딸기 잿빛곰팡이를 막고, 딸기는 땅을 덮어 수분을 지킴" },
+  { a:"cucumber", b:"napa",     type:"good", kind:"mutual", why:"오이가 위로 크고 배추가 아래를 덮어 서로 자리를 보완" },
+  { a:"cucumber", b:"corn",     type:"good", kind:"mutual", why:"옥수수대가 오이 덩굴의 지지대가 되고 바람도 막아줌" },
+  { a:"eggplant", b:"corn",     type:"good", kind:"mutual", why:"옥수수가 강한 바람과 볕을 가려 가지를 지켜줌" },
+  { a:"celery",   b:"tomato",   type:"good", kind:"mutual", why:"셀러리가 토마토 해충을 막고, 토마토 그늘이 셀러리 수분을 지킴" },
+  { a:"tomato",   b:"borage",   type:"good", kind:"mutual", why:"보리지가 벌을 불러 수정을 도움" },
+  { a:"strawberry",b:"borage",  type:"good", kind:"mutual", why:"보리지가 딸기 풍미와 수정을 도움" },
+  { a:"lettuce",  b:"radish",   type:"good", kind:"mutual", why:"무가 흙을 부드럽게 해 상추가 잘 큼" },
+  { a:"carrot",   b:"lettuce",  type:"good", kind:"mutual", why:"자라는 속도가 달라 자리를 겹치지 않음" },
+
+  /* ── 기피형 (함께 심으면 생리장애) ──────────────────── */
+  { a:"cabbage",  b:"garlic",   type:"bad",  why:"마늘이 양배추 생육을 방해함" },
+  { a:"cabbage",  b:"broccoli", type:"bad",  why:"같은 배추과라 양분 경쟁과 병을 나눔" },
+  { a:"napa",     b:"garlic",   type:"bad",  why:"마늘이 배추 생리장애를 일으킴" },
+  { a:"napa",     b:"pepper",   type:"bad",  why:"함께 심으면 배추에 생리장애가 옴" },
+  { a:"napa",     b:"tomato",   type:"bad",  why:"양분 경쟁이 심하고 배추가 눌림" },
+  { a:"chive",    b:"pea",      type:"bad",  why:"부추·파 향이 완두 뿌리 발달을 막음" },
+  { a:"chive",    b:"bean",     type:"bad",  why:"부추 향이 콩 생장을 억제" },
+  { a:"radish",   b:"scallion", type:"bad",  why:"파 뿌리의 유기산이 유기물을 분해해 무가 곧게 뻗지 못하고 바람이 듦" },
+  { a:"carrot",   b:"dill",     type:"bad",  why:"딜이 당근 생장을 방해함" },
+  { a:"onion",    b:"pea",      type:"bad",  why:"양파가 완두 생장을 방해" },
+  { a:"onion",    b:"radish",   type:"bad",  why:"양파가 무 뿌리 비대를 방해" },
+  { a:"onion",    b:"broccoli", type:"bad",  why:"양파가 브로콜리 생육을 억제" },
+  { a:"onion",    b:"potato",   type:"bad",  why:"함께 심으면 감자 덩이줄기가 잘 굵지 않음" },
+  { a:"cucumber", b:"potato",   type:"bad",  why:"감자 역병이 오이로 옮길 수 있음" },
+  { a:"cucumber", b:"rosemary", type:"bad",  why:"로즈마리가 오이 생육을 억제" },
+  { a:"eggplant", b:"potato",   type:"bad",  why:"같은 가지과라 역병과 해충을 그대로 나눔" },
+  { a:"tomato",   b:"bean",     type:"bad",  why:"콩이 토마토 생육을 방해하고 양분을 다툼" },
+  { a:"tomato",   b:"broccoli", type:"bad",  why:"양분 경쟁이 심해 둘 다 작아짐" },
+  { a:"tomato",   b:"cucumber", type:"bad",  why:"물·양분 경쟁이 심하고 병을 나눔" },
+  { a:"tomato",   b:"potato",   type:"bad",  why:"같은 가지과라 역병이 옮기 쉬움" },
+  { a:"tomato",   b:"pepper",   type:"bad",  why:"같은 가지과, 같은 해충·병을 공유" },
+  { a:"celery",   b:"corn",     type:"bad",  why:"옥수수 그늘과 양분 경쟁에 셀러리가 눌림" },
+  { a:"corn",     b:"tomato",   type:"bad",  why:"같은 해충(밤나방류)을 불러 피해가 커짐" },
+  { a:"bean",     b:"garlic",   type:"bad",  why:"마늘이 콩 뿌리 발달을 막음" },
+  { a:"bean",     b:"onion",    type:"bad",  why:"파·양파 향이 콩 생장을 억제" },
+  { a:"pea",      b:"garlic",   type:"bad",  why:"마늘이 완두에 좋지 않음" },
+  { a:"cabbage",  b:"tomato",   type:"bad",  why:"서로 양분 경쟁이 심함" },
+  { a:"potato",   b:"pumpkin",  type:"bad",  why:"둘 다 병에 약해 함께 두면 위험" },
 ];
 
 /* 궁합 빠른 조회: lookup[id1][id2] = {type, why} */
 const COMP_LOOKUP = (() => {
   const m = {};
   for (const c of COMPANION) {
-    (m[c.a] ??= {})[c.b] = { type:c.type, why:c.why };
-    (m[c.b] ??= {})[c.a] = { type:c.type, why:c.why };
+    (m[c.a] ??= {})[c.b] = { type:c.type, kind:c.kind, why:c.why };
+    (m[c.b] ??= {})[c.a] = { type:c.type, kind:c.kind, why:c.why };
   }
   return m;
 })();
@@ -1438,7 +1521,6 @@ const ELEM_SPEC = {
   custom:  { pref:[1.2,0.9], min:[0.6,0.6], sizable:true },
 };
 /* 3D 기준 폭(px) — 스케일 계산용 */
-const ELEM_N3 = { keyhole:206, spiral:212, trellis:224, mandala:214, hugel:232, custom:212 };
 
 /* ── 배치 원리 상세 (실제 문헌 기반) ── */
 const EXPLAIN = {
@@ -1940,784 +2022,80 @@ function elemChip(x, y, label){
 
 
 /* ============================================================
-   퍼머컬처ON — 정밀 3D 입체 (v2)
-   기법별 실제 구조 분석 반영:
-   키홀=돌테두리+철망퇴비통+통로 / 스파이럴=나선 돌벽띠
-   트렐리스=기둥+그물+덩굴 / 만다라=꽃잎두둑+통로 / 후겔=통나무심 언덕
-   배치도(place)와 같은 좌표를 공유해 작물 위치 일치.
+   설계 키트(gardenkit) — 위에서 본 평면도 · 설계 편집기
+   용량이 커서 텃밭 화면에 처음 들어올 때만 내려받습니다.
    ============================================================ */
-
-const SOIL = (i, light=0) => `hsl(${33 - i*1.4}, 25%, ${44 + i*3 + light}%)`;
-
-function el(tag, cls, css){
-  const e = document.createElement(tag);
-  if(cls) e.className = cls;
-  if(css) Object.assign(e.style, css);
-  return e;
-}
-function disc(size, z, color, extra={}){
-  return el("div", null, Object.assign({
-    position:"absolute", left:"50%", top:"50%",
-    width:size+"px", height:size+"px",
-    marginLeft:(-size/2)+"px", marginTop:(-size/2)+"px",
-    borderRadius:"50%", background:color,
-    transform:`translateZ(${z}px)`,
-    boxShadow:"0 3px 7px rgba(60,44,24,.28)",
-    transformStyle:"preserve-3d",
-  }, extra));
-}
-/* 세워진 빌보드(작물/라벨) */
-function sprout(emoji, x, y, z, scale=1){
-  const s = el("div", null, {
-    position:"absolute", left:"50%", top:"50%",
-    transform:`translate3d(${x}px,${y}px,${z}px) rotateX(-90deg)`,
-    transformStyle:"preserve-3d", fontSize:(20*scale)+"px",
-    marginLeft:"-11px", marginTop:"-11px", lineHeight:1,
-    textShadow:"0 1px 2px rgba(0,0,0,.25)", pointerEvents:"none",
+let kitPromise = null;
+function loadKit(){
+  if(window.PCON_KIT) return Promise.resolve(window.PCON_KIT);
+  if(kitPromise) return kitPromise;
+  kitPromise = new Promise((res, rej) => {
+    const sc = document.createElement("script");
+    sc.src = "data/gardenkit.js";
+    sc.onload  = () => res(window.PCON_KIT);
+    sc.onerror = () => { kitPromise = null; rej(new Error("kit")); };
+    document.head.appendChild(sc);
   });
-  s.textContent = emoji;
-  return s;
-}
-/* 수직 원기둥 근사: 얇은 판 N장을 회전 배치 */
-function cylinder(parent, cx, cy, r, h, zBase, color, sides=10, opac=1){
-  for(let i=0;i<sides;i++){
-    const ang=(i/sides)*Math.PI*2;
-    const w = 2*r*Math.tan(Math.PI/sides)+1;
-    const p = el("div",null,{
-      position:"absolute", left:"50%", top:"50%",
-      width:w+"px", height:h+"px",
-      marginLeft:(-w/2)+"px", marginTop:(-h)+"px",
-      background:color, opacity:opac,
-      transform:`translate3d(${cx+Math.cos(ang)*r}px,${cy+Math.sin(ang)*r}px,${zBase}px) rotateZ(${ang+Math.PI/2}rad) rotateX(-90deg)`,
-      transformOrigin:"bottom center",
-      transformStyle:"preserve-3d",
-    });
-    parent.appendChild(p);
-  }
-}
-/* 돌멩이 하나(테두리 장식) */
-function stone(parent, x, y, z, s=10, hue=30){
-  const st = el("div",null,{
-    position:"absolute",left:"50%",top:"50%",
-    width:s+"px",height:(s*0.8)+"px",
-    marginLeft:(-s/2)+"px",marginTop:(-s*0.4)+"px",
-    borderRadius:"46% 54% 50% 50%",
-    background:`hsl(${hue},14%,${52+Math.random()*10}%)`,
-    boxShadow:"inset -1px -2px 3px rgba(0,0,0,.3), 0 2px 3px rgba(0,0,0,.25)",
-    transform:`translate3d(${x}px,${y}px,${z}px)`,
-    transformStyle:"preserve-3d",
-  });
-  parent.appendChild(st);
+  return kitPromise;
 }
 
-/* place(배치도 좌표계 400×300, 중심 200,150) → 3D 좌표(중심 0,0) */
-function p2xy(pl){ return [ (pl.cx-200)*0.62, (pl.cy-150)*0.62 ]; }
+/* 마지막으로 그린 설계 — 편집기 시작점이자 저장 대상 */
+let gdDesign = null;
+/* 저장해둔 텃밭을 불러올 때, 자동 배치가 덮어쓰지 않도록 잠시 맡아둡니다 */
+let gdPendingDesign = null;
+/* 직접 고친 설계인지 — 저장할 때 이 표시를 함께 넣습니다 */
+let gdEdited = false;
 
-/* ============================================================
-   퍼머컬처ON — 작물 입체 표현 v3 "수채 텃밭"
-   이모지 한 글자 대신, 작물마다 실제 모양(잎·줄기·열매·꽃)을
-   작은 3D 조각으로 세워 "이렇게 심으면 이런 모습이겠구나"를 보여줍니다.
-   ------------------------------------------------------------
-   · 십자 빌보드(0°/90°) — 무대가 돌아도 부피감이 유지됩니다.
-   · 형태는 8가지 원형(rosette/bush/vine/allium…)으로 나누고
-     작물별 색·크기·열매만 갈아끼웁니다.
-   · 성능: 작물 1포기 ≈ 8~16 div. 예산(BUDGET)을 넘으면 자동 간소화.
-   ============================================================ */
+function gdPlanCaption(d){
+  return `${d.bed.w} × ${d.bed.h} m · 작물 ${d.crops.length}포기`
+       + (gdEdited ? " · 직접 고침" : "");
+}
 
-/* ── 잎 색 팔레트(수채화 느낌: 채도를 낮추고 밝은 끝 → 짙은 밑동) ── */
-const LEAFC = {
-  fresh : { hi:"#b9d48c", mid:"#8ab55f", lo:"#5d8b3c" },  // 상추·시금치
-  deep  : { hi:"#8fbb6a", mid:"#5f9245", lo:"#3d6b30" },  // 토마토·케일
-  blue  : { hi:"#a9c6a2", mid:"#7c9f78", lo:"#557454" },  // 대파·마늘
-  silver: { hi:"#bccaa8", mid:"#93a583", lo:"#6c7d5f" },  // 로즈마리·허브
-  warm  : { hi:"#c9d98f", mid:"#9cb65c", lo:"#6f8a3a" },  // 호박·오이
-  dark  : { hi:"#7ba85f", mid:"#4d7f3a", lo:"#325a28" },  // 들깨·양배추
-};
-
-/* ── 작물 → 형태 원형 ── */
-const FORM = {
-  tomato:"bushFruit", pepper:"bushFruit", eggplant:"bushFruit",
-  cucumber:"vine",    bean:"vine",        pea:"vine",
-  pumpkin:"sprawl",   zucchini:"sprawl",
-  strawberry:"lowSpread",
-  lettuce:"rosette",  spinach:"rosette",
-  cabbage:"head",     napa:"head",
-  kale:"upright",     chard:"upright",
-  perilla:"bush",     potato:"bush",  basil:"bush",  mint:"bush",
-  radish:"root",      carrot:"root",
-  onion:"allium",     garlic:"allium", scallion:"allium",
-  rosemary:"shrub",   dill:"umbel",
-  chamomile:"bloom",  marigold:"bloom", nasturt:"bloom",
-  borage:"spike",     sunflower:"tall",
-};
-const FORM_BY_CAT = { fruit:"bushFruit", veg:"rosette", herb:"bush", flower:"bloom" };
-
-/* ── 열매·꽃 색 ── */
-const ACCENT = {
-  tomato:"#d4553f", pepper:"#c33f2c", eggplant:"#6c4a86", cucumber:"#5e9440",
-  pumpkin:"#d68a35", zucchini:"#557f36", strawberry:"#cd4a48",
-  marigold:"#dfa032", nasturt:"#db7a3a", sunflower:"#e4bf49",
-  borage:"#7a8ec6", chamomile:"#f2ead0", dill:"#d9d789",
-  bean:"#93a35f", pea:"#9cb96e", onion:"#c2a3bd", garlic:"#efe6d4",
-  potato:"#c9b48c", radish:"#d17a86", carrot:"#d98a45",
-};
-const LEAFOF = {
-  lettuce:"fresh", spinach:"fresh", chard:"fresh", strawberry:"fresh",
-  cabbage:"dark", napa:"dark", perilla:"dark", kale:"dark", eggplant:"dark",
-  onion:"blue", garlic:"blue", scallion:"blue", pea:"blue",
-  rosemary:"silver", mint:"silver", dill:"silver", borage:"silver",
-  pumpkin:"warm", zucchini:"warm", cucumber:"warm", carrot:"warm",
-};
-
-/* ── 조각 예산 ──
-   작물이 많은 밭은 십자 빌보드를 한 장으로 줄이고 무리 수도 줄여
-   조각 수를 절반으로 낮춥니다. 휴대폰에서 회전이 끊기지 않게 하는 장치입니다. */
-let RICH = true;
-function rich(){ return RICH; }
-function spend(){}
-
-/* 작물 그룹(한 포기) — 여기에 조각들을 담습니다 */
-function grp(x, y, z, spinDeg){
-  return el("div", null, {
-    position:"absolute", left:"50%", top:"50%", width:"0", height:"0",
-    transformStyle:"preserve-3d",
-    transform:`translate3d(${x.toFixed(1)}px,${y.toFixed(1)}px,${z}px) rotateZ(${(spinDeg||0).toFixed(0)}deg)`,
+/* 자동 배치 결과(R)를 평면도로 그립니다.
+   불러온 설계(gdPendingDesign)가 있으면 그쪽이 우선입니다. */
+function gdShowPlan(R){
+  const cvEl = document.getElementById("gdPlanCv");
+  const cap  = document.getElementById("gdPlanCap");
+  if(!cvEl) return;
+  loadKit().then(K => {
+    /* 불러왔거나 직접 고친 설계가 있으면 계속 그쪽을 씁니다.
+       (gdShowPlan 은 한 번의 불러오기에서 여러 번 불릴 수 있습니다) */
+    if(gdPendingDesign){
+      gdDesign = gdPendingDesign; gdEdited = true;
+    } else {
+      if(!R) return;
+      gdDesign = K.fromResult(R); gdEdited = false;
+    }
+    if(!gdDesign) return;
+    K.drawPlan(cvEl, gdDesign, {minCrop:20});
+    if(cap) cap.textContent = gdPlanCaption(gdDesign);
+  }).catch(() => {
+    if(cap) cap.textContent = "평면도를 불러오지 못했어요 — 잠시 뒤 다시 시도해 주세요.";
   });
 }
 
-/* 세워진 잎 한 장 — a:방위각, len/wid:크기, lean:눕는 각(0=수직) */
-function blade(g, a, len, wid, lean, c, z, radius, shine){
-  const d = el("div", null, {
-    position:"absolute", left:"0", top:"0",
-    width:wid.toFixed(1)+"px", height:len.toFixed(1)+"px",
-    marginLeft:(-wid/2).toFixed(1)+"px", marginTop:(-len).toFixed(1)+"px",
-    background:`linear-gradient(180deg, ${c.hi} 0%, ${c.mid} 52%, ${c.lo} 100%)`,
-    borderRadius: radius || "62% 62% 24% 24% / 76% 76% 28% 28%",
-    transform:`translateZ(${(z||0).toFixed(1)}px) rotateZ(${a.toFixed(0)}deg) rotateX(${(-90+lean).toFixed(0)}deg)`,
-    transformOrigin:"bottom center", transformStyle:"preserve-3d",
-    boxShadow:"0 1px 2px rgba(48,58,34,.20)",
-  });
-  if(shine !== false){
-    d.style.backgroundImage =
-      `linear-gradient(93deg, transparent 38%, rgba(255,255,255,.20) 50%, transparent 62%),`+
-      `linear-gradient(180deg, ${c.hi} 0%, ${c.mid} 52%, ${c.lo} 100%)`;
-  }
-  g.appendChild(d); spend(1);
-  return d;
-}
-
-/* 잎 뭉치(십자 빌보드) — 수채화의 번진 덩어리 느낌 */
-function puff(g, dx, dy, z, w, h, c, opac, spin){
-  const angles = rich() ? [0, 90] : [0];
-  angles.forEach((a, i) => {
-    g.appendChild(el("div", null, {
-      position:"absolute", left:"0", top:"0",
-      width:w.toFixed(1)+"px", height:h.toFixed(1)+"px",
-      marginLeft:(-w/2).toFixed(1)+"px", marginTop:(-h).toFixed(1)+"px",
-      background:`radial-gradient(ellipse at 40% 32%, ${c.hi} 0%, ${c.mid} 45%, ${c.lo} 100%)`,
-      borderRadius: i ? "48% 52% 54% 46% / 62% 58% 42% 38%"
-                      : "54% 46% 44% 56% / 58% 64% 36% 42%",
-      opacity: opac == null ? .94 : opac,
-      transform:`translate3d(${dx.toFixed(1)}px,${dy.toFixed(1)}px,${z.toFixed(1)}px) rotateZ(${((spin||0)+a).toFixed(0)}deg) rotateX(-90deg)`,
-      transformOrigin:"bottom center", transformStyle:"preserve-3d",
-      boxShadow:"0 2px 4px rgba(48,58,34,.18)",
-    }));
-    spend(1);
-  });
-}
-
-/* 열매·꽃송이 하나 */
-function bead(g, dx, dy, z, r, col, ring){
-  const angles = rich() ? [0, 90] : [0];
-  angles.forEach(a => {
-    g.appendChild(el("div", null, {
-      position:"absolute", left:"0", top:"0",
-      width:(r*2).toFixed(1)+"px", height:(r*2).toFixed(1)+"px",
-      marginLeft:(-r).toFixed(1)+"px", marginTop:(-r*2).toFixed(1)+"px",
-      borderRadius:"50%",
-      background: ring
-        ? `radial-gradient(circle at 50% 50%, ${ring} 0 28%, ${col} 32%, ${col} 100%)`
-        : `radial-gradient(circle at 36% 30%, #ffffffaa 0 12%, ${col} 46%, rgba(0,0,0,.22) 130%)`,
-      transform:`translate3d(${dx.toFixed(1)}px,${dy.toFixed(1)}px,${z.toFixed(1)}px) rotateZ(${a}deg) rotateX(-90deg)`,
-      transformOrigin:"bottom center", transformStyle:"preserve-3d",
-    }));
-    spend(1);
-  });
-}
-
-/* 줄기 */
-function stalk(g, dx, dy, z, h, w, col, lean){
-  g.appendChild(el("div", null, {
-    position:"absolute", left:"0", top:"0",
-    width:w.toFixed(1)+"px", height:h.toFixed(1)+"px",
-    marginLeft:(-w/2).toFixed(1)+"px", marginTop:(-h).toFixed(1)+"px",
-    background:`linear-gradient(90deg, ${col}bb, ${col}, ${col}bb)`,
-    borderRadius:w+"px",
-    transform:`translate3d(${dx.toFixed(1)}px,${dy.toFixed(1)}px,${z.toFixed(1)}px) rotateX(${(-90+(lean||0)).toFixed(0)}deg)`,
-    transformOrigin:"bottom center", transformStyle:"preserve-3d",
-  }));
-  spend(1);
-}
-
-/* 포기 밑 그림자 — 땅에 붙어 있어야 "심겨 있다"는 느낌이 납니다 */
-function footShadow(g, w){
-  g.appendChild(el("div", null, {
-    position:"absolute", left:"0", top:"0",
-    width:w.toFixed(1)+"px", height:(w*0.72).toFixed(1)+"px",
-    marginLeft:(-w/2).toFixed(1)+"px", marginTop:(-w*0.36).toFixed(1)+"px",
-    borderRadius:"50%",
-    background:"radial-gradient(ellipse at 50% 50%, rgba(62,52,32,.34) 0%, rgba(62,52,32,.14) 55%, transparent 76%)",
-    transform:"translateZ(0.6px)", transformStyle:"preserve-3d",
-  }));
-  spend(1);
-}
-
-/* 난수 — 같은 작물이 같은 자리에 오면 항상 같은 모양이 되도록 씨앗 고정 */
-function rnd(seed){
-  let s = seed % 2147483647; if(s <= 0) s += 2147483646;
-  return () => (s = s * 16807 % 2147483647) / 2147483647;
-}
-
-/* ============================================================
-   원형(archetype)별 그리기
-   S = 크기 배율, C = 잎 색, A = 열매·꽃 색, R = 난수
-   ============================================================ */
-const DRAW = {
-  /* 상추·시금치 — 겹겹이 벌어진 로제트 */
-  rosette(g, S, C, A, R){
-    for(let i=0;i<7;i++)
-      blade(g, i*51 + R()*20, (13 + R()*3)*S, (9 + R()*2.5)*S, 40 + R()*14, C, 0);
-    for(let i=0;i<4;i++)
-      blade(g, i*90 + 35, 8.5*S, 6*S, 16 + R()*12, C, 0.8);
-  },
-
-  /* 양배추·배추 — 겉잎이 벌어지고 속은 단단한 공 */
-  head(g, S, C, A, R){
-    for(let i=0;i<6;i++)
-      blade(g, i*60 + R()*16, 11*S, 12*S, 58 + R()*10, C, 0);
-    puff(g, 0, 0, 1, 15*S, 12*S, { hi:"#accb80", mid:"#84ad5e", lo:"#5c8541" }, .97);
-    puff(g, 0, 0, 2.4, 9*S, 8*S, { hi:"#c3da9c", mid:"#9cc072", lo:"#729a52" }, .9);
-  },
-
-  /* 케일·근대 — 곧게 선 큰 잎 (근대는 흰 잎줄기) */
-  upright(g, S, C, A, R){
-    for(let i=0;i<7;i++)
-      blade(g, i*51 + R()*22, (19 + R()*5)*S, 8.5*S, 16 + R()*18, C, 0,
-            "58% 58% 16% 16% / 72% 72% 28% 28%");
-  },
-
-  /* 바질·민트·감자·들깨 — 둥근 덤불 */
-  bush(g, S, C, A, R){
-    puff(g,  0,      0,     0,   16*S, 13*S, C, .95);
-    puff(g, -4.5*S,  2*S,   3*S, 11*S, 10*S, C, .92, 26);
-    puff(g,  4.5*S, -2*S,   5*S, 12*S, 11*S, C, .92, -20);
-    for(let i=0;i<4;i++) blade(g, i*90 + R()*40, 10*S, 5.5*S, 44, C, 0.5);
-  },
-
-  /* 로즈마리 — 은빛 바늘잎이 곧게 */
-  shrub(g, S, C, A, R){
-    for(let i=0;i<9;i++)
-      blade(g, i*40 + R()*18, (16 + R()*5)*S, 3*S, 6 + R()*16, C, 0, "42% 42% 28% 28%");
-    puff(g, 0, 0, 0, 10*S, 7*S, C, .5);
-  },
-
-  /* 대파·마늘·양파 — 가는 잎이 부챗살로 */
-  allium(g, S, C, A, R){
-    for(let i=0;i<7;i++)
-      blade(g, i*51 + R()*14, (20 + R()*7)*S, 4*S, 5 + R()*18, C, 0, "50% 50% 18% 18%", false);
-    if(A) puff(g, 0, 0, 0, 8*S, 5.5*S, { hi:"#f2ebdc", mid:A, lo:"#9d8296" }, .92);
-  },
-
-  /* 무·당근 — 깃털 같은 잎이 위로, 뿌리 어깨가 흙 위로 */
-  root(g, S, C, A, R){
-    for(let i=0;i<10;i++)
-      blade(g, i*36 + R()*22, (17 + R()*5)*S, 4*S, 10 + R()*20, C, 0, "44% 44% 24% 24%", false);
-    if(A) bead(g, 0, 0, 0, 3*S, A);
-  },
-
-  /* 토마토·고추·가지 — 줄기 + 층층 잎 + 매달린 열매 */
-  bushFruit(g, S, C, A, R){
-    const H = 27*S;
-    stalk(g, 0, 0, 0, H, 2.4*S, "#5e7d3f");
-    puff(g,  0,     0,    H*0.26, 15*S, 11*S,  C, .95);
-    puff(g, -3.5*S, 1*S,  H*0.54, 13*S, 9.5*S, C, .93, 30);
-    puff(g,  2.5*S,-1*S,  H*0.82, 10*S, 8*S,   C, .92, -22);
-    const fr = [[5.5*S,-1*S,H*0.32],[-5*S,2*S,H*0.50],[1.5*S,3*S,H*0.18],[4*S,2*S,H*0.66]];
-    fr.slice(0, rich()?4:2).forEach(([fx,fy,fz]) => bead(g, fx, fy, fz, 2.7*S, A));
-  },
-
-  /* 오이·콩·완두 — 지지대를 타고 오르는 덩굴 */
-  vine(g, S, C, A, R, climbH){
-    const H = climbH || 33*S;
-    stalk(g, 0, 0, 0, H, 2*S, "#5f8a44");
-    const steps = Math.max(3, Math.min(7, Math.round(H/(8*S))));
-    for(let i=1;i<=steps;i++){
-      const t = i/steps, side = i%2 ? 1 : -1;
-      puff(g, side*4.5*S, 0, H*t*0.94, 11*S, 8*S, C, .93, side*26);
-      if(i%2===0) blade(g, side*70, 6*S, 1.6*S, 34, C, H*t, "50%", false);
-    }
-    if(A){ bead(g, 3.5*S, 1*S, H*0.42, 2.5*S, A); if(rich()) bead(g, -3.5*S, -1*S, H*0.66, 2.2*S, A); }
-  },
-
-  /* 호박·애호박 — 넓게 퍼지는 큰 잎 + 굵은 열매 */
-  sprawl(g, S, C, A, R){
-    for(let i=0;i<6;i++)
-      blade(g, i*60 + R()*22, (14 + R()*4)*S, (17 + R()*4)*S, 36 + R()*14, C, 0,
-            "48% 52% 44% 56% / 58% 62% 38% 42%");
-    puff(g, 0, 0, 1, 13*S, 8.5*S, C, .82);
-    if(A) bead(g, 7*S, 3*S, 1.5, 4.6*S, A);
-  },
-
-  /* 딸기 — 땅에 붙어 퍼지고 빨간 열매·흰 꽃 */
-  lowSpread(g, S, C, A, R){
-    for(let i=0;i<7;i++)
-      blade(g, i*51 + R()*20, (12 + R()*3)*S, 10*S, 40 + R()*12, C, 0,
-            "50% 50% 42% 42% / 62% 62% 38% 38%");
-    bead(g, 5*S, 1*S, 2.5, 2.6*S, A);
-    if(rich()) bead(g, -4*S, 3.5*S, 2.5, 2.4*S, A);
-    if(rich()) bead(g, 0.5*S, -4*S, 3.5*S, 1.6*S, "#faf6ea", "#e8c94e");
-  },
-
-  /* 딜 — 가는 줄기 끝에 자잘한 우산꽃 */
-  umbel(g, S, C, A, R){
-    for(let i=0;i<6;i++)
-      blade(g, i*60 + R()*24, (11 + R()*4)*S, 1.9*S, 20 + R()*22, C, 0, "42% 42% 24% 24%", false);
-    const n = rich() ? 3 : 2;
-    for(let i=0;i<n;i++){
-      const h = (19 + R()*6)*S, dx = (R()-.5)*7*S, dy = (R()-.5)*7*S;
-      stalk(g, dx, dy, 0, h, 1.5*S, "#8aa06a");
-      for(let k=0;k<5;k++){
-        const a = k*72 + R()*30, r = 2.6*S;
-        bead(g, dx + Math.cos(a*Math.PI/180)*r, dy + Math.sin(a*Math.PI/180)*r,
-             h - 0.5*S, 1.5*S, A || "#d9d789");
-      }
-    }
-  },
-
-  /* 메리골드·한련화·캐모마일 — 덤불 위에 동글동글 꽃송이 */
-  bloom(g, S, C, A, R){
-    puff(g,  0,     0,   0,   13*S, 9.5*S, C, .93);
-    puff(g, -3.5*S, 2*S, 2*S, 9*S,  7.5*S, C, .9, 28);
-    puff(g,  3.5*S,-2*S, 3*S, 9*S,  7.5*S, C, .9, -24);
-    const n = rich() ? 6 : 3;
-    for(let i=0;i<n;i++){
-      const a = i*(360/n) + R()*34, r = (3.5 + R()*3.5)*S;
-      const dx = Math.cos(a*Math.PI/180)*r, dy = Math.sin(a*Math.PI/180)*r;
-      const h = (9 + R()*6)*S;
-      stalk(g, dx, dy, 0, h, 1.3*S, "#7f9a5c");
-      bead(g, dx, dy, h, 2.7*S, A, "#fdf6d8");
-    }
-  },
-
-  /* 보리지·라벤더형 — 위로 솟는 꽃대 (수채 그림의 그 느낌) */
-  spike(g, S, C, A, R){
-    for(let i=0;i<6;i++) blade(g, i*60 + R()*22, 10*S, 4.5*S, 44 + R()*10, C, 0);
-    const n = rich() ? 6 : 3;
-    for(let i=0;i<n;i++){
-      const a = i*(360/n) + R()*40, r = (2 + R()*4)*S;
-      const dx = Math.cos(a*Math.PI/180)*r, dy = Math.sin(a*Math.PI/180)*r;
-      const h = (17 + R()*7)*S;
-      stalk(g, dx, dy, 0, h*0.5, 1.2*S, "#8aa06a");
-      g.appendChild(el("div", null, {
-        position:"absolute", left:"0", top:"0",
-        width:(3.4*S).toFixed(1)+"px", height:(h*0.55).toFixed(1)+"px",
-        marginLeft:(-1.7*S).toFixed(1)+"px", marginTop:(-h*0.55).toFixed(1)+"px",
-        borderRadius:"46% 46% 30% 30% / 22% 22% 78% 78%",
-        background:`linear-gradient(180deg, ${A}55 0%, ${A} 42%, ${A}cc 100%)`,
-        transform:`translate3d(${dx.toFixed(1)}px,${dy.toFixed(1)}px,${(h*0.5).toFixed(1)}px) rotateZ(${a.toFixed(0)}deg) rotateX(-90deg)`,
-        transformOrigin:"bottom center", transformStyle:"preserve-3d",
-      }));
-      spend(1);
-    }
-  },
-
-  /* 해바라기 — 키 큰 줄기 + 큰 꽃 얼굴 */
-  tall(g, S, C, A, R){
-    const H = 40*S;
-    stalk(g, 0, 0, 0, H, 2.6*S, "#5f7f3e");
-    for(let i=0;i<4;i++){
-      const t = .28 + i*.15, side = i%2 ? 1 : -1;
-      blade(g, side*80 + R()*24, 9*S, 6.5*S, 54, C, H*t);
-    }
-    const ang = rich() ? [0,90] : [0];
-    ang.forEach(a => {
-      g.appendChild(el("div", null, {
-        position:"absolute", left:"0", top:"0",
-        width:(12*S).toFixed(1)+"px", height:(12*S).toFixed(1)+"px",
-        marginLeft:(-6*S).toFixed(1)+"px", marginTop:(-12*S).toFixed(1)+"px",
-        borderRadius:"50%",
-        background:`radial-gradient(circle at 50% 50%, #6b4a28 0 26%, #8a5f2f 28%, ${A} 34%, #d3ae40 100%)`,
-        transform:`translate3d(0px,0px,${H.toFixed(1)}px) rotateZ(${a}deg) rotateX(-90deg)`,
-        transformOrigin:"bottom center", transformStyle:"preserve-3d",
-        boxShadow:"0 2px 5px rgba(60,45,20,.3)",
-      }));
-      spend(1);
-    });
-  },
-};
-
-/* ============================================================
-   공개 함수 — 기존 이모지 빌보드 자리를 그대로 대신합니다.
-   plant: PLANTS 항목({id, cat, height, emoji, climb})
-   ============================================================ */
-/* 한 자리에 몇 포기를 심을지 — 상추 한 자리는 실제로 여러 포기입니다 */
-const CLUMP = {
-  lowSpread:3, rosette:3, root:3, allium:3,
-  head:2, bush:2, bloom:2, spike:2, shrub:2, upright:2, umbel:2,
-  bushFruit:1, vine:1, sprawl:1, tall:1,
-};
-
-function plantForm(plant, x, y, z, scale, climbH){
-  const p = plant || {};
-  const form = FORM[p.id] || FORM_BY_CAT[p.cat] || "bush";
-  const C = LEAFC[LEAFOF[p.id] || (p.cat === "flower" ? "silver" : "deep")];
-  const A = ACCENT[p.id] || null;
-  const draw = DRAW[form] || DRAW.bush;
-
-  /* 크기 차이는 원형(archetype)이 이미 담고 있으므로
-     키(cm)는 같은 원형 안에서 살짝만 갈라놓습니다. */
-  const cm = p.height || 40;
-  const hs = Math.max(0.86, Math.min(1.18, Math.pow(cm / 55, 0.22)));
-  const S0 = hs * (scale == null ? 1 : scale);
-
-  /* 자리마다 조금씩 다른 모양 — 줄 세운 아이콘이 아니라 "심은 밭"으로 보이게 */
-  const seed = Math.round((x + 500) * 31 + (y + 500) * 17 + (p.id || "x").length * 7);
-  const R = rnd(seed);
-  const g = grp(x, y, z, (R() - .5) * 60);
-
-  /* 한 자리 = 한 무리. 예산이 빠듯하면 포기 수를 줄입니다. */
-  let n = CLUMP[form] || 1;
-  if(!rich()) n = Math.min(n, 2);
-
-  if(n === 1){
-    footShadow(g, 15 * S0);
-    draw(g, S0, C, A, R, climbH);
-    return g;
-  }
-
-  footShadow(g, (12 + n * 3.2) * S0);
-  const spread = (form === "lowSpread" ? 6.5 : 5.2) * S0;
-  for(let i=0;i<n;i++){
-    const a = i * (360 / n) + R() * 40;
-    const r = i === 0 ? 0 : spread * (0.7 + R() * 0.5);
-    const sub = el("div", null, {
-      position:"absolute", left:"0", top:"0", width:"0", height:"0",
-      transformStyle:"preserve-3d",
-      transform:`translate3d(${(Math.cos(a*Math.PI/180)*r).toFixed(1)}px,`+
-                `${(Math.sin(a*Math.PI/180)*r).toFixed(1)}px,0px) rotateZ(${(R()*360).toFixed(0)}deg)`,
-    });
-    g.appendChild(sub);
-    draw(sub, S0 * (0.82 + R() * 0.28), C, A, R, climbH);
-  }
-  return g;
-}
-
-/* 화면 하나를 그리기 전에 호출 — 밀도에 따라 정밀/간소 모드를 고릅니다 */
-function beginPlanting(count){ RICH = (count || 0) <= 12; }
-
-
-const BUILD = {
-  /* ── 키홀: 돌 테두리 + 흙 두둑 + 철망 퇴비통 + 통로 ── */
-  keyhole(scene, plants, opts){
-    const R=86;
-    scene.appendChild(disc(R*2+26, 2, "#d9cdaf", {opacity:.55})); // 주변 땅
-    // 두둑(도넛 흙)
-    scene.appendChild(disc(R*2, 12, SOIL(2)));
-    scene.appendChild(disc(R*2, 13, "transparent", {backgroundImage:"radial-gradient(circle at 30% 30%, rgba(0,0,0,.12) 0 2px, transparent 3px)", backgroundSize:"14px 14px"}));
-    // 통로(앞쪽 V) - 밝은 쐐기
-    const path = el("div",null,{position:"absolute",left:"50%",top:"50%",width:"52px",height:R+14+"px",
-      marginLeft:"-26px",marginTop:"-4px",background:"#efe6d0",
-      clipPath:"polygon(50% 0,100% 100%,0 100%)",transform:"translateZ(13.5px)",transformStyle:"preserve-3d"});
-    scene.appendChild(path);
-    // 테두리 돌담(원 둘레 돌 24개, 통로 각도 비움)
-    for(let i=0;i<26;i++){
-      const ang=-Math.PI/2 + (i/26)*Math.PI*2;
-      const norm=(ang+Math.PI*2)%(Math.PI*2);
-      if(norm>Math.PI*0.40 && norm<Math.PI*0.60) continue;
-      stone(scene, Math.cos(ang)*R, Math.sin(ang)*R, 18, 13+(i%3)*2);
-    }
-    // 중앙 퇴비통: 철망 원기둥
-    cylinder(scene, 0,0, 20, 34, 14,
-      "repeating-linear-gradient(0deg,#777 0 2px,transparent 2px 7px),repeating-linear-gradient(90deg,#777 0 2px,transparent 2px 7px)",
-      12, .9);
-    const compostTop = disc(36, 46, "#4e3a22");
-    scene.appendChild(compostTop);
-    scene.appendChild(sprout("♻️",0,-1,50,.7));
-    // 작물: place 좌표 사용
-    (opts.place||[]).forEach(pl=>{
-      const [x,y]=p2xy(pl);
-      scene.appendChild(plantForm(pl.plant, x, y, 22, 1));
-    });
-  },
-
-  /* ── 스파이럴: 나선 '돌벽 띠'가 올라가는 진짜 구조 ── */
-  spiral(scene, plants, opts){
-    const mat = opts.material || null;
-    scene.appendChild(disc(210, 2, "#d9cdaf", {opacity:.5}));
-    // 흙 심(작은 언덕): 층 원반은 벽 안 채움용으로 은은하게
-    for(let i=0;i<6;i++) scene.appendChild(disc(140-i*20, 6+i*13, SOIL(i,2)));
-    // 나선 벽: 아르키메데스 나선 따라 '벽 조각'을 촘촘히 세움
-    const [h,s,l] = mat ? mat.color : [30,20,50];
-    const patternCss = (()=>{
-      if(!mat) return null;
-      switch(mat.pattern){
-        case "brick": return "repeating-linear-gradient(0deg,rgba(0,0,0,.25) 0 1.5px,transparent 1.5px 8px)";
-        case "stone": return "radial-gradient(circle at 40% 40%, rgba(255,255,255,.25) 0 2px, rgba(0,0,0,.15) 5px, transparent 6px)";
-        case "wood":  return "repeating-linear-gradient(90deg,rgba(0,0,0,.2) 0 2px,transparent 2px 9px)";
-        case "block": return "repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 2px,transparent 2px 12px)";
-        case "bottle":return "repeating-linear-gradient(90deg,rgba(255,255,255,.35) 0 4px,rgba(0,0,0,.1) 4px 8px)";
-      }
-    })();
-    const steps=64;
-    for(let i=0;i<steps;i++){
-      const t=i/steps;
-      const a=t*Math.PI*3.2;
-      const rad=98-t*66;
-      const zb=4+t*76;
-      const wallH=26;
-      const x=Math.cos(a-Math.PI/2)*rad, y=Math.sin(a-Math.PI/2)*rad;
-      const seg = el("div",null,{
-        position:"absolute",left:"50%",top:"50%",
-        width:"12px",height:wallH+"px",marginLeft:"-6px",marginTop:(-wallH)+"px",
-        background:`hsl(${h},${s}%,${l - t*6}%)`,
-        backgroundImage:patternCss||"none",
-        boxShadow:"inset -1px 0 2px rgba(0,0,0,.25)",
-        transform:`translate3d(${x}px,${y}px,${zb}px) rotateZ(${a}rad) rotateX(-90deg)`,
-        transformOrigin:"bottom center", transformStyle:"preserve-3d",
-      });
-      scene.appendChild(seg);
-    }
-    // 꼭대기 마감돌
-    scene.appendChild(disc(34, 86, `hsl(${h},${s}%,${l+8}%)`));
-    // 작물: place의 zone(t) 반영해 나선 위 높이까지 일치
-    (opts.place||[]).forEach((pl,i)=>{
-      const [x,y]=p2xy(pl);
-      // place는 위→아래 순서이므로 z 근사: 중심距離로 높이 추정
-      const dist=Math.hypot(x,y);
-      const z = 88 - (dist/70)*70;   // 중심 가까울수록 높이↑
-      scene.appendChild(plantForm(pl.plant, x, y, Math.max(16,Math.min(92,z)), 1-(z/300)));
-    });
-  },
-
-  /* ── 트렐리스: 기둥 2 + 가로대 + 그물 + 덩굴줄기 ── */
-  trellis(scene, plants, opts){
-    scene.appendChild(el("div",null,{position:"absolute",left:"50%",top:"50%",width:"210px",height:"140px",
-      marginLeft:"-105px",marginTop:"-70px",borderRadius:"14px",background:SOIL(2),
-      transform:"translateZ(8px)",transformStyle:"preserve-3d",
-      boxShadow:"0 4px 9px rgba(60,44,24,.3)"}));
-    // 이랑 결
-    scene.appendChild(el("div",null,{position:"absolute",left:"50%",top:"50%",width:"210px",height:"140px",
-      marginLeft:"-105px",marginTop:"-70px",borderRadius:"14px",
-      backgroundImage:"repeating-linear-gradient(90deg, rgba(0,0,0,.1) 0 2px, transparent 2px 16px)",
-      transform:"translateZ(8.5px)",transformStyle:"preserve-3d"}));
-    // 기둥 2개 (뒤쪽 y=-52)
-    [-80,80].forEach(px=>{
-      const post = el("div",null,{position:"absolute",left:"50%",top:"50%",width:"7px",height:"92px",
-        marginLeft:"-3.5px",marginTop:"-92px",background:"linear-gradient(90deg,#7a5a38,#9a7448,#7a5a38)",
-        transform:`translate3d(${px}px,-52px,9px) rotateX(-90deg)`,transformOrigin:"bottom center",
-        transformStyle:"preserve-3d",boxShadow:"inset -2px 0 3px rgba(0,0,0,.3)"});
-      scene.appendChild(post);
-    });
-    // 가로대(맨 위)
-    const beam = el("div",null,{position:"absolute",left:"50%",top:"50%",width:"172px",height:"7px",
-      marginLeft:"-86px",marginTop:"-7px",background:"#8a6a44",
-      transform:"translate3d(0px,-52px,96px) rotateX(-90deg)",transformOrigin:"bottom center",
-      transformStyle:"preserve-3d"});
-    scene.appendChild(beam);
-    // 그물(반투명 격자판)
-    const net = el("div",null,{position:"absolute",left:"50%",top:"50%",width:"160px",height:"86px",
-      marginLeft:"-80px",marginTop:"-86px",
-      backgroundImage:"repeating-linear-gradient(0deg,#c8b98e 0 1.5px,transparent 1.5px 14px),repeating-linear-gradient(90deg,#c8b98e 0 1.5px,transparent 1.5px 14px)",
-      transform:"translate3d(0px,-52px,9px) rotateX(-90deg)",transformOrigin:"bottom center",
-      transformStyle:"preserve-3d",opacity:.95});
-    scene.appendChild(net);
-    // 덩굴 줄기(초록 지그재그) 2줄
-    [[-46,1],[38,-1]].forEach(([sx,dir])=>{
-      for(let k=0;k<5;k++){
-        const seg = el("div",null,{position:"absolute",left:"50%",top:"50%",width:"3.5px",height:"20px",
-          marginLeft:"-1.75px",marginTop:"-20px",background:"#3f8a52",borderRadius:"3px",
-          transform:`translate3d(${sx+Math.sin(k*1.3)*8*dir}px,-52px,${10+k*17}px) rotateX(-90deg) rotateY(${dir*14}deg)`,
-          transformOrigin:"bottom center",transformStyle:"preserve-3d"});
-        scene.appendChild(seg);
+/* 편집기(별도 모드) 열기 */
+function gdOpenEditor(){
+  loadKit().then(K => {
+    K.openEditor(gdDesign || K.defaultDesign(), {
+      onSave(d){
+        gdDesign = d;
+        gdPendingDesign = d;
+        gdEdited = true;
+        const cvEl = document.getElementById("gdPlanCv");
+        const cap  = document.getElementById("gdPlanCap");
+        if(cvEl) K.drawPlan(cvEl, d, {minCrop:20});
+        if(cap) cap.textContent = gdPlanCaption(d);
+        if(window.Mock && Mock.toast) Mock.toast("설계를 반영했어요 — 💾 저장을 눌러 보관하세요");
       }
     });
-    // 작물: place 좌표 (climb는 그물 위 높이로)
-    (opts.place||[]).forEach(pl=>{
-      const [x,y]=p2xy(pl);
-      const isClimb = !!pl.plant.climb;
-      scene.appendChild(isClimb
-        ? plantForm(pl.plant, x, -52, 12, 1, 74+((x/40)%2)*10)
-        : plantForm(pl.plant, x, y, 12, 1));
-    });
-  },
-
-  /* ── 만다라: 꽃잎 두둑 8개(사이 통로) + 중심 ── */
-  mandala(scene, plants, opts){
-    scene.appendChild(disc(212, 2, "#d9cdaf",{opacity:.5}));
-    scene.appendChild(disc(196, 8, "#efe6d0")); // 통로 바닥(밝음)
-    const P=8;
-    for(let i=0;i<P;i++){
-      const ang=-Math.PI/2 + (i/P)*Math.PI*2;
-      // 꽃잎 두둑: 타원형 흙판을 방사 배치
-      const petal = el("div",null,{position:"absolute",left:"50%",top:"50%",
-        width:"58px",height:"84px",marginLeft:"-29px",marginTop:"-42px",
-        borderRadius:"50% 50% 46% 46%",
-        background:SOIL(3),
-        backgroundImage:"radial-gradient(circle at 35% 30%, rgba(0,0,0,.1) 0 2px, transparent 3px)",
-        backgroundSize:"12px 12px",
-        boxShadow:"0 3px 6px rgba(60,44,24,.3)",
-        transform:`translate3d(${Math.cos(ang)*62}px,${Math.sin(ang)*62}px,12px) rotateZ(${ang+Math.PI/2}rad)`,
-        transformStyle:"preserve-3d"});
-      scene.appendChild(petal);
-    }
-    // 중심 (물확/퇴비)
-    scene.appendChild(disc(42, 16, "#6b4d2e"));
-    scene.appendChild(disc(30, 18, "#8fb4c9", {boxShadow:"inset 0 2px 5px rgba(0,0,0,.35)"})); // 물
-    // 작물
-    (opts.place||[]).forEach(pl=>{
-      const [x,y]=p2xy(pl);
-      scene.appendChild(plantForm(pl.plant, x, y, 20, 1));
-    });
-  },
-
-  /* ── 후겔: 단면에 통나무 심이 보이는 긴 언덕 ── */
-  hugel(scene, plants, opts){
-    function mound(w,h,z,color,img){
-      return el("div", null, {position:"absolute",left:"50%",top:"50%",width:w+"px",height:h+"px",
-        marginLeft:(-w/2)+"px",marginTop:(-h/2)+"px",borderRadius:h+"px",
-        background:color, backgroundImage:img||"none",
-        transform:`translateZ(${z}px)`,transformStyle:"preserve-3d",
-        boxShadow:"0 3px 8px rgba(60,44,24,.28)"});
-    }
-    scene.appendChild(el("div",null,{position:"absolute",left:"50%",top:"50%",width:"230px",height:"120px",
-      marginLeft:"-115px",marginTop:"-60px",borderRadius:"18px",background:"#d9cdaf",opacity:.5,
-      transform:"translateZ(1px)",transformStyle:"preserve-3d"}));
-    scene.appendChild(mound(206, 92, 6, SOIL(0)));
-    scene.appendChild(mound(188, 68, 24, SOIL(3),
-      "radial-gradient(circle at 30% 35%, rgba(0,0,0,.1) 0 2px, transparent 3px)"));
-    scene.appendChild(mound(164, 44, 42, SOIL(5)));
-    // 단면 통나무 심: 언덕 앞면에 나이테 원 3개
-    [-42,0,42].forEach((lx,i)=>{
-      const log = el("div",null,{position:"absolute",left:"50%",top:"50%",width:"26px",height:"26px",
-        marginLeft:"-13px",marginTop:"-26px",borderRadius:"50%",
-        background:"radial-gradient(circle, #caa46e 0 3px, #8a6238 4px 7px, #6b4a28 8px 11px, #543a1e 12px)",
-        transform:`translate3d(${lx}px,46px,${14+i%2*4}px) rotateX(-90deg)`,
-        transformOrigin:"bottom center",transformStyle:"preserve-3d",
-        boxShadow:"0 2px 4px rgba(0,0,0,.4)"});
-      scene.appendChild(log);
-    });
-    // 작물: place 좌표, y(습윤도)→능선 높이 변환
-    (opts.place||[]).forEach(pl=>{
-      const [x,y]=p2xy(pl);
-      const z = y<-10? 52 : y<15? 32 : 14;  // 꼭대기/비탈/발치
-      scene.appendChild(plantForm(pl.plant, x*0.9, y*0.62, z, 1));
-    });
-  },
-};
-
-/* ── 식물 팔레트 — 화면에 심긴 작물을 색과 함께 한눈에 ── */
-function renderPlantPalette(plants, opts){
-  const host = document.getElementById("gdPalette");
-  if(!host) return;
-
-  /* 실제로 심긴 작물만 모읍니다 */
-  const seen = new Map();
-  const push = p => { if(p && p.id && !seen.has(p.id)) seen.set(p.id, p); };
-  ((opts && opts.place) || []).forEach(pl => push(pl.plant));
-  if(opts && opts.multi)
-    (opts.multi.elements || []).forEach(e => (e.place || []).forEach(pl => push(pl.plant)));
-  if(!seen.size) (plants || []).forEach(push);
-
-  if(!seen.size){ host.innerHTML = ""; host.style.display = "none"; return; }
-  host.style.display = "";
-
-  host.innerHTML = '<div class="pal-ttl">식물 팔레트</div><div class="pal-list"></div>';
-  const list = host.querySelector(".pal-list");
-  [...seen.values()].forEach(p => {
-    const C = LEAFC[LEAFOF[p.id] || (p.cat === "flower" ? "silver" : "deep")];
-    const A = ACCENT[p.id];
-    const chip = el("div", "pal-item");
-    chip.innerHTML =
-      '<span class="pal-sw" style="background:linear-gradient(135deg,' + C.hi + ',' + C.lo + ')">' +
-        (A ? '<i style="background:' + A + '"></i>' : '') +
-      '</span>' +
-      '<span class="pal-em">' + (p.emoji || "🌱") + '</span>' +
-      '<span class="pal-nm">' + (p.name || "") + '</span>';
-    list.appendChild(chip);
+  }).catch(() => {
+    if(window.Mock && Mock.toast) Mock.toast("편집기를 불러오지 못했어요");
   });
 }
-
-/* ---------- 무대 제어 ---------- */
-let threeCtrl = null;
-function renderThree(techId, plants, opts={}){
-  const scene = document.getElementById("gdThreeScene");
-  scene.innerHTML = "";
-
-  /* 심는 포기 수를 먼저 세어 정밀/간소 모드를 정합니다 */
-  let nPlant = (opts.place || []).length;
-  if(opts.multi) nPlant = (opts.multi.elements || [])
-    .reduce((a, e) => a + ((e.place || []).length), 0);
-  beginPlanting(nPlant);
-
-  if(opts.multi){ buildMultiScene(scene, opts.multi); }
-  else { (BUILD[techId] || BUILD.spiral)(scene, plants, opts); }
-  renderPlantPalette(plants, opts);
-
-  if(threeCtrl) threeCtrl.destroy();
-  let rx=58, rz=18, auto=true, raf=null, dragging=false, lx=0, ly=0;
-  const reduce = window.matchMedia("(prefers-reduced-motion:reduce)").matches;
-  function apply(){ scene.style.transform = `rotateX(${rx}deg) rotateZ(${rz}deg)`; }
-  function loop(){ if(auto && !reduce){ rz=(rz+0.25)%360; apply(); } raf=requestAnimationFrame(loop); }
-  apply(); loop();
-  const stage = document.getElementById("gdThreeStage") || scene.parentElement;
-  const cap = document.getElementById("gdThreeCap");
-  function down(e){ dragging=true; auto=false; const p=e.touches?e.touches[0]:e; lx=p.clientX; ly=p.clientY; if(cap)cap.textContent="손으로 돌려보세요"; }
-  function move(e){ if(!dragging)return; const p=e.touches?e.touches[0]:e; rz+=(p.clientX-lx)*0.5; rx=Math.max(20,Math.min(80,rx-(p.clientY-ly)*0.3)); lx=p.clientX; ly=p.clientY; apply(); if(e.cancelable)e.preventDefault(); }
-  function up(){ dragging=false; }
-  stage.addEventListener("mousedown",down); window.addEventListener("mousemove",move); window.addEventListener("mouseup",up);
-  stage.addEventListener("touchstart",down,{passive:false}); stage.addEventListener("touchmove",move,{passive:false}); window.addEventListener("touchend",up);
-  threeCtrl = { destroy(){ cancelAnimationFrame(raf);
-    stage.removeEventListener("mousedown",down); window.removeEventListener("mousemove",move); window.removeEventListener("mouseup",up);
-    stage.removeEventListener("touchstart",down); stage.removeEventListener("touchmove",move); window.removeEventListener("touchend",up);
-  }};
-}
-
-/* ── 자유 두둑 3D ── */
-BUILD.custom = function(scene, plants, opts={}){
-  const mk=(w,h,z,c)=>el("div",null,{position:"absolute",left:"50%",top:"50%",
-    width:w+"px",height:h+"px",marginLeft:(-w/2)+"px",marginTop:(-h/2)+"px",
-    borderRadius:"14px",background:c,transform:`translateZ(${z}px)`,
-    transformStyle:"preserve-3d",boxShadow:"0 3px 7px rgba(60,44,24,.28)"});
-  scene.appendChild(mk(212,150,4,"#d9cdaf"));
-  const bed=mk(196,134,14,SOIL(3));
-  bed.style.backgroundImage="repeating-linear-gradient(0deg, rgba(0,0,0,.09) 0 2px, transparent 2px 26px)";
-  scene.appendChild(bed);
-  (opts.place||[]).forEach(pl=>{
-    const [x,y]=p2xy(pl);
-    scene.appendChild(plantForm(pl.plant, x*0.86, y*0.8, 18, 0.95));
-  });
-};
-
-/* ── 멀티 요소 씬: 밭 바닥 + 요소별 축소 배치 ── */
-function buildMultiScene(scene, M){
-  const K = Math.min(250/M.bed.w, 185/M.bed.h);
-  const gw = M.bed.w*K, gh = M.bed.h*K;
-  const mk=(w,h,z,c,r)=>el("div",null,{position:"absolute",left:"50%",top:"50%",
-    width:w+"px",height:h+"px",marginLeft:(-w/2)+"px",marginTop:(-h/2)+"px",
-    borderRadius:(r||14)+"px",background:c,transform:`translateZ(${z}px)`,
-    transformStyle:"preserve-3d",boxShadow:"0 3px 9px rgba(60,44,24,.22)"});
-  scene.appendChild(mk(gw+18, gh+18, 1, "#e3d8bc", 20));
-  scene.appendChild(mk(gw, gh, 2.5, "#efe6d0"));
-  M.elements.forEach(e=>{
-    const s3 = Math.max(0.34, Math.min(1.15, e.wM*K/(ELEM_N3[e.tech]||212)));
-    const sub = el("div", null, {position:"absolute", left:"50%", top:"50%",
-      width:"1px", height:"1px", transformStyle:"preserve-3d",
-      transform:`translate3d(${((e.cxM-M.bed.w/2)*K).toFixed(1)}px,${((e.cyM-M.bed.h/2)*K).toFixed(1)}px,0) scale3d(${s3.toFixed(3)},${s3.toFixed(3)},${s3.toFixed(3)})`});
-    scene.appendChild(sub);
-    (BUILD[e.tech]||BUILD.custom)(sub, [], {material:e.material, place:e.place});
-  });
-}
-
+document.addEventListener("click", e => {
+  if(e.target && e.target.id === "gdEditPlanBtn") gdOpenEditor();
+});
 
 /* ============================================================
    퍼머컬처ON — 텃밭 디자인 로직
@@ -3049,8 +2427,8 @@ function buildLayout(){
   const bsun=document.getElementById("gdBedSun");
   if(bsun) bsun.textContent = "☀ " + (SUNS.find(s=>s.id===state.sun)?.label||"") + " 햇빛";
 
-  // 3D — 같은 배치(place) 공유해 배치도와 일치
-  renderThree(state.tech, plants, { material: mat, place: lastResult.place });
+  // 평면도 미리보기 — 배치도(place)와 같은 좌표를 씁니다
+  gdShowPlan(bedResult);
   renderReport(lastResult);
 
   // 제목에 기법명 반영
@@ -3135,7 +2513,7 @@ function renderReport(R){
   for(let i=0;i<plants.length;i++)for(let j=i+1;j<plants.length;j++){
     const a=plants[i], b=plants[j];
     const rel = COMP_LOOKUP[a.id]?.[b.id];
-    if(rel?.type==="good") goods.push({a,b,why:rel.why});
+    if(rel?.type==="good") goods.push({a,b,why:rel.why,kind:rel.kind});
     if(rel?.type==="bad")  bads.push({a,b,why:rel.why});
   }
   if(bads.length){
@@ -3143,8 +2521,10 @@ function renderReport(R){
       `<b class="pair">${g.a.name} ✕ ${g.b.name}</b> — ${g.why}. 멀리 떨어뜨려 심으세요.`));
   }
   if(goods.length){
-    goods.forEach(g=> html += note("good","🤝",
-      `<b class="pair">${g.a.name} + ${g.b.name}</b> — ${g.why}.`));
+    goods.forEach(g=>{ const k = COMP_KIND[g.kind];
+      html += note("good", k ? k.emoji : "🤝",
+        `<b class="pair">${g.a.name} + ${g.b.name}</b>` +
+        (k ? ` <span class="ctag">${k.label}</span>` : "") + ` — ${g.why}.`); });
   }
   if(!goods.length && !bads.length){
     html += note("info","🌱","서로 특별한 궁합 관계는 없어요. 나란히 심어도 무방합니다.");
@@ -3657,16 +3037,7 @@ function renderPlotAll(){
   document.getElementById("gdBedDim").textContent = `${R.bed.w} × ${R.bed.h} m 밭 · 두둑 ${R.elements.length}개`;
   const sl = SUNS.find(x=>x.id===R.sun);
   document.getElementById("gdBedSun").textContent = "☀ " + (sl?sl.label:"남쪽") + " 햇빛";
-  renderThree(null, R.plants, { multi:{
-    bed:R.bed,
-    elements:R.elements.map(rt=>({
-      tech:rt.el.tech,
-      material: rt.el.tech==="spiral" && state.material ? MAT_BY_ID[state.material] : null,
-      cxM: rt.el.x+rt.el.w/2, cyM: rt.el.y+rt.el.h/2, wM: rt.el.w,
-      place: R.place.filter(p=>p.elUid===rt.el.uid)
-                    .map(p=>({ plant:p.plant, cx:(p.cx-rt.exPx)/rt.sx, cy:(p.cy-rt.eyPx)/rt.sy })),
-    })),
-  }});
+  gdShowPlan(R);
 }
 
 /* ── 리포트 (요소별 + 문헌 근거) ── */
@@ -3685,12 +3056,17 @@ renderReport = function(R){
   const plants=R.plants, goods=[], bads=[];
   for(let i=0;i<plants.length;i++)for(let j=i+1;j<plants.length;j++){
     const rel = COMP_LOOKUP[plants[i].id]?.[plants[j].id];
-    if(rel?.type==="good") goods.push({a:plants[i],b:plants[j],why:rel.why});
+    if(rel?.type==="good") goods.push({a:plants[i],b:plants[j],why:rel.why,kind:rel.kind});
     if(rel?.type==="bad")  bads.push({a:plants[i],b:plants[j],why:rel.why});
   }
   bads.forEach(g=> html += note("bad","⚠️",`<b>${g.a.name} ✕ ${g.b.name}</b> — ${g.why}. 서로 다른 두둑으로 나눠 심으세요.`));
-  goods.forEach(g=> html += note("good","🤝",`<b>${g.a.name} + ${g.b.name}</b> — ${g.why}.`));
+  goods.forEach(g=>{ const k = COMP_KIND[g.kind];
+    html += note("good", k ? k.emoji : "🤝",
+      `<b>${g.a.name} + ${g.b.name}</b>` +
+      (k ? ` <span class="ctag">${k.label}</span>` : "") + ` — ${g.why}.`); });
   if(!goods.length && !bads.length) html += note("info","🌱","특별한 궁합 관계는 없어요.");
+  if(goods.length || bads.length)
+    html += `<p class="csrc">궁합 근거 — 농촌진흥청 동반식물 연구(텃밭 채소 18종) 정리</p>`;
   html += `<h3>📅 심는 시기</h3>`;
   plants.forEach(p=>{ const[a,b]=p.sow;
     html += note("info","·",`<b>${p.name}</b> — ${a===b?MONTHS[a-1]:MONTHS[a-1]+"~"+MONTHS[b-1]}에 심기`); });
@@ -3726,7 +3102,7 @@ renderPalette(); renderPlaced(); renderPrev();
 /* ============================================================
    프리미엄 "내 텃밭" 목업 — 저장/결제벽/드래그편집/내보내기
    (garden IIFE 내부: state, lastResult, goto, buildLayout,
-    renderTechBed, renderThree, *_BY_ID 접근 가능)
+    renderTechBed, gdShowPlan, *_BY_ID 접근 가능)
    ============================================================ */
 const MK = window.Mock;
 const gdSaveBtn = document.getElementById("gdSaveBtn");
@@ -3858,11 +3234,13 @@ function gdDoSave(){
   const d = new Date();
   const emojis = state.elements.map(e=>TECH_BY_ID[e.tech].emoji).join("") || "🌱";
   const g = {
-    name: `${emojis} ${state.bed.w}×${state.bed.h}m · ${d.getMonth()+1}/${d.getDate()}`,
+    name: `${emojis} ${state.bed.w}×${state.bed.h}m${gdEdited ? " ✏️" : ""} · ${d.getMonth()+1}/${d.getDate()}`,
     bed: {...state.bed}, sun: state.sun, material: state.material,
     plantIds: [...state.selected],
     elements: JSON.parse(JSON.stringify(state.elements)),
     placement: lastResult.place.map(p=>({pid:p.plant.id, cx:p.cx, cy:p.cy, elUid:p.elUid})),
+    /* 편집기에서 고친 설계 — 통로·파츠까지 그대로 보관합니다 */
+    design: gdDesign || null,
     schemaVersion: 1
   };
 
@@ -3994,13 +3372,17 @@ function gdOpenGarden(id){
         id: r.id, name: r.name, bed: r.bed, sun: r.sun, material: r.material,
         plantIds: r.plant_ids || [],
         elements: r.elements || [],
-        placeSlim: r.placement || []
+        placeSlim: r.placement || [],
+        design: r.design || null
       });
     })
     .catch(function(e){ MK.toast(e.message || "불러오지 못했어요"); });
 }
 
 function gdLoadGarden(g){
+  /* 직접 고친 설계가 있으면 자동 배치보다 이쪽을 씁니다 */
+  gdPendingDesign = g.design || null;
+  gdEdited = false;
   state.bed = {...g.bed};
   state.sun = g.sun;
   state.material = g.material;
@@ -4023,6 +3405,14 @@ function gdLoadGarden(g){
 }
 
 /* ---------- 상태 리셋 훅 (다시 만들기/새 배치 시 편집모드 해제) ---------- */
+/* 마법사 앞 단계로 돌아가면 = 처음부터 다시 짜는 것이므로
+   손질해둔 설계를 버리고 자동 배치를 다시 씁니다. */
+const _gdGoto = goto;
+goto = function(step){
+  if(step < 3){ gdPendingDesign = null; gdEdited = false; }
+  return _gdGoto.apply(this, arguments);
+};
+
 const _gdBuild = buildLayout;
 buildLayout = function(){
   gdEditing = false;
