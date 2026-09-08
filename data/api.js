@@ -321,7 +321,9 @@ function supabaseDriver(sb) {
           bed: g.bed, sun: g.sun, material: g.material,
           plant_ids: g.plantIds || [],
           elements: g.elements || [],
-          placement: g.placement || []
+          placement: g.placement || [],
+          /* 편집기에서 고친 설계(통로·파츠·작물 좌표). 없으면 null */
+          design: g.design || null
         };
         var res = g.id
           ? await sb.from("gardens").update(row).eq("id", g.id).select("id").single()
