@@ -474,6 +474,13 @@ nav.tabs button:focus-visible{outline:2px solid var(--sun);outline-offset:-2px}
 #view-garden .mat-pc .no{color:var(--gd-bad);font-weight:800}
 #view-garden .mat-tip{font-size:12.5px;color:#3f4a40;margin-top:8px;padding-top:8px;border-top:1px dashed #d8cdb3}
 
+#view-garden .season-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:0 0 10px}
+#view-garden .season-row .lbl{font-size:11.5px;font-weight:800;color:var(--soil);margin-right:2px}
+#view-garden .season-chip{border:1.5px solid #d8cdb3;background:var(--gd-card);color:var(--muted);
+  border-radius:999px;padding:7px 13px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;
+  min-height:38px;touch-action:manipulation}
+#view-garden .season-chip.sel{background:var(--gd-gold);border-color:var(--gd-gold);color:#3a2c12}
+#view-garden .season-note{width:100%;font-size:11px;color:var(--muted);margin-top:1px}
 #view-garden .cat-tabs{display:flex;gap:6px;overflow-x:auto;margin:0 -2px 12px;padding:0 2px 2px;scrollbar-width:none}
 #view-garden .cat-tabs::-webkit-scrollbar{display:none}
 #view-garden .cat-tab{white-space:nowrap;border:none;background:#e7decb;color:#6b6450;border-radius:999px;
@@ -488,6 +495,14 @@ nav.tabs button:focus-visible{outline:2px solid var(--sun);outline-offset:-2px}
 #view-garden .plant .e{font-size:26px;line-height:1}
 #view-garden .plant .n{font-size:12.5px;font-weight:700;margin-top:4px}
 #view-garden .plant.sel::after{content:"✓";position:absolute;top:5px;right:7px;color:var(--gd-green);font-weight:900;font-size:13px}
+#view-garden .plant.off{opacity:.42}
+#view-garden .plant.off:hover{opacity:.7}
+#view-garden .plant .sowtag{font-size:9.5px;font-weight:700;color:var(--muted);margin-top:2px;letter-spacing:-.02em}
+#view-garden .plant .nowtag{position:absolute;top:5px;right:6px;background:var(--gd-gold);color:#3a2c12;
+  font-size:9px;font-weight:800;padding:1px 5px;border-radius:6px}
+#view-garden .plant .soontag{position:absolute;top:5px;right:6px;background:#e7decb;color:#6b6450;
+  font-size:9px;font-weight:800;padding:1px 5px;border-radius:6px}
+#view-garden .plant.sel .nowtag,#view-garden .plant.sel .soontag{display:none}
 #view-garden .plant .rectag{position:absolute;top:5px;left:6px;background:var(--gd-green);color:#fff;
   font-size:9px;font-weight:800;padding:1px 5px;border-radius:6px}
 #view-garden .gd-basket{position:sticky;bottom:calc(80px + env(safe-area-inset-bottom));margin-top:14px;
@@ -506,6 +521,19 @@ nav.tabs button:focus-visible{outline:2px solid var(--sun);outline-offset:-2px}
 #view-garden .pal-em{font-size:12px;line-height:1}
 #view-garden .pal-nm{font-weight:700}
 
+#view-garden .round-tabs{margin-bottom:12px}
+#view-garden .round-lead{font-size:12px;color:var(--muted);margin-bottom:7px}
+#view-garden .round-lead b{color:var(--soil)}
+#view-garden .round-row{display:flex;gap:8px}
+#view-garden .round-tab{flex:1;background:var(--gd-card);border:2px solid var(--gd-bd);
+  border-radius:12px;padding:9px 8px;font:inherit;cursor:pointer;text-align:center;
+  min-height:52px;touch-action:manipulation;transition:.15s}
+#view-garden .round-tab.sel{border-color:var(--gd-green);background:var(--leaf-soft)}
+#view-garden .round-tab .rt-name{display:block;font-size:13.5px;font-weight:800;color:var(--bark)}
+#view-garden .round-tab.sel .rt-name{color:var(--gd-green)}
+#view-garden .round-tab .rt-sub{display:block;font-size:10.5px;font-weight:600;color:var(--muted);margin-top:1px}
+#view-garden .round-both{font-size:11.5px;color:var(--muted);margin-top:7px}
+#view-garden .round-both b{color:var(--gd-green)}
 #view-garden .plan-wrap{margin-bottom:16px;background:var(--gd-card);
   border:2px solid var(--gd-bd);border-radius:var(--radius);overflow:hidden;
   box-shadow:0 6px 16px -8px rgba(58,51,39,.25)}
@@ -928,6 +956,7 @@ main .view.active{animation:vw-in .22s ease both}
       <div class="gd-step-label">STEP 3 · 작물</div>
       <h3 class="gd-h2">무엇을 키우고 싶나요?</h3>
       <p class="gd-hint" id="gdPlantHint">2~6가지가 가장 잘 어울려요. 탭으로 종류를 넘겨보세요.</p>
+      <div class="season-row" id="gdSeasonRow"></div>
       <div class="cat-tabs" id="gdCatTabs"></div>
       <div class="plant-grid" id="gdPlantGrid"></div>
       <div class="gd-basket" id="gdBasket">아직 고른 작물이 없어요</div>
@@ -945,6 +974,7 @@ main .view.active{animation:vw-in .22s ease both}
         <button id="gdPrintBtn">🖨 인쇄</button>
         <button id="gdShopBtn">🧺 장보기</button>
       </div>
+      <div class="round-tabs" id="gdRoundTabs" style="display:none"></div>
       <div class="plan-wrap" id="gdPlanWrap">
         <div class="plan-stage"><svg class="plan-cv" id="gdPlanCv"></svg></div>
         <div class="plan-bar">
@@ -2125,6 +2155,8 @@ const state = {
   material: null,      // 스파이럴 벽 재료 id
   selected: [],        // 선택한 작물 id
   cat: "all",
+  season: "now",       // 지금 / 봄 / 여름 / 가을 / 시기 무관
+  round: "all",        // 보고 있는 그루: all / spring / fall
 };
 
 /* ---------- 화면 전환 ---------- */
@@ -2315,6 +2347,74 @@ function readBed(){
   if(fixed && window.Mock) Mock.toast(`밭 크기를 ${state.bed.w}×${state.bed.h}m로 맞췄어요 (0.8~30m)`);
 }
 
+/* ════════════════════════════════════════════════════════════
+   심는 시기 — 작물의 sow 값을 실제 파종 창으로 읽습니다.
+
+   sow:[4,5]  → 4월부터 5월까지 이어지는 한 번의 파종기
+   sow:[3,9]  → 3월과 9월, 봄·가을 두 번  (간격이 4달 이상이면 두 번으로 봅니다)
+
+   ※ 중부지방 노지 기준입니다. 남부는 2~3주 이르고, 북부는 그만큼 늦습니다.
+   ════════════════════════════════════════════════════════════ */
+function sowWindows(p){
+  const [a, b] = p.sow;
+  if(b - a >= 4) return [[a,a], [b,b]];   // 봄·가을 두 번
+  return [[a, b]];                        // 이어지는 한 번
+}
+function sowsInMonth(p, m){
+  return sowWindows(p).some(([a,b]) => m >= a && m <= b);
+}
+function sowLabel(p){
+  return sowWindows(p)
+    .map(([a,b]) => a === b ? `${a}월` : `${a}~${b}월`)
+    .join(" · ");
+}
+
+/* ── 앞그루 / 뒷그루 ──────────────────────────────────────
+   한 밭을 시간으로 나눠 두 번 씁니다. 두둑(구조)은 그대로 두고
+   심는 작물만 바뀝니다 — 실제 텃밭이 돌아가는 방식입니다.        */
+const ROUNDS = [
+  { id:"spring", name:"앞그루", sub:"봄·여름 심기", emoji:"🌱", months:[3,4,5,6]  },
+  { id:"fall",   name:"뒷그루", sub:"가을 심기",   emoji:"🍂", months:[7,8,9,10] },
+];
+const ROUND_BY_ID = Object.fromEntries(ROUNDS.map(r => [r.id, r]));
+/* 이 작물을 심을 수 있는 그루들 */
+function cropRounds(p){
+  const rs = ROUNDS.filter(r => r.months.some(m => sowsInMonth(p, m))).map(r => r.id);
+  return rs.length ? rs : ["spring"];
+}
+
+const SEASONS = [
+  { id:"now",    name:"지금",   months:null },              // 오늘 기준(아래에서 채움)
+  { id:"spring", name:"봄",     months:[3,4,5]  },
+  { id:"summer", name:"여름",   months:[6,7,8]  },
+  { id:"fall",   name:"가을",   months:[9,10,11]},
+  { id:"all",    name:"모두",   months:null },
+];
+const SEASON_BY_ID = Object.fromEntries(SEASONS.map(x => [x.id, x]));
+function thisMonth(){ return new Date().getMonth() + 1; }
+function nextMonth(){ return thisMonth() % 12 + 1; }
+
+/* 작물이 지금 고른 계절에 얼마나 맞는지
+   2 = 지금(또는 고른 계절)에 심는 때 · 1 = 다음 달에 심음 · 0 = 시기 아님 */
+function seasonFit(p, seasonId){
+  if(seasonId === "all") return 2;
+  if(seasonId === "now"){
+    if(sowsInMonth(p, thisMonth())) return 2;
+    if(sowsInMonth(p, nextMonth())) return 1;
+    return 0;
+  }
+  const ms = SEASON_BY_ID[seasonId] ? SEASON_BY_ID[seasonId].months : null;
+  if(!ms) return 2;
+  return ms.some(m => sowsInMonth(p, m)) ? 2 : 0;
+}
+function seasonTag(p, seasonId){
+  const f = seasonFit(p, seasonId);
+  if(seasonId === "all") return null;
+  if(f === 2) return { cls:"nowtag", text: seasonId === "now" ? "지금" : "제철" };
+  if(f === 1) return { cls:"soontag", text: `${nextMonth()}월` };
+  return null;
+}
+
 /* ---------- STEP2: 작물 선택 ---------- */
 const CATS = [
   {id:"all",   name:"전체"},
@@ -2337,30 +2437,70 @@ CATS.forEach(c=>{
   catTabs.appendChild(el);
 });
 
+/* ── 계절 칩 ── */
+const seasonRow = document.getElementById("gdSeasonRow");
+function renderSeasonRow(){
+  if(!seasonRow) return;
+  seasonRow.innerHTML = '<span class="lbl">심는 시기</span>';
+  SEASONS.forEach(sn => {
+    const b = document.createElement("button");
+    b.className = "season-chip" + (state.season === sn.id ? " sel" : "");
+    b.textContent = sn.id === "now" ? `지금 (${thisMonth()}월)` : sn.name;
+    b.onclick = () => { state.season = sn.id; renderSeasonRow(); renderPlants(); };
+    seasonRow.appendChild(b);
+  });
+  const note = document.createElement("div");
+  note.className = "season-note";
+  note.textContent = state.season === "all"
+    ? "시기를 따지지 않고 모두 보여줍니다."
+    : "중부지방 노지 기준 · 남부는 2~3주 이르고 북부는 그만큼 늦습니다.";
+  seasonRow.appendChild(note);
+}
+
+/* ── 작물 카드 한 장 ── */
+function plantCard(p, isRec){
+  const b = document.createElement("button");
+  const on  = state.selected.includes(p.id);
+  const fit = seasonFit(p, state.season);
+  const tag = seasonTag(p, state.season);
+  b.className = "plant" + (on ? " sel" : "") + (isRec ? " rec" : "")
+              + (fit === 0 && !on ? " off" : "");
+  b.innerHTML =
+      `<div class="e">${p.emoji}</div><div class="n">${p.name}</div>`
+    + `<div class="sowtag">${sowLabel(p)}</div>`
+    + (isRec ? `<div class="rectag">추천</div>` : "")
+    + (tag ? `<div class="${tag.cls}">${tag.text}</div>` : "");
+  b.onclick = () => {
+    const i = state.selected.indexOf(p.id);
+    if(i >= 0) state.selected.splice(i, 1);
+    else {
+      state.selected.push(p.id);
+      if(fit === 0 && state.season !== "all" && window.Mock)
+        Mock.toast(`${p.name}는 ${sowLabel(p)}에 심어요 — 미리 설계해두는 건 괜찮아요`);
+    }
+    renderPlants(); renderBasket(); updateNextEnabled();
+  };
+  return b;
+}
+
+/* ── 목록 정렬: 제철 → 곧 → 나머지, 같은 등급 안에서는 기법 추천 먼저 ── */
+function sortPlants(list, rec){
+  return [...list].sort((a, b) => {
+    const fa = seasonFit(a, state.season), fb = seasonFit(b, state.season);
+    if(fa !== fb) return fb - fa;
+    const ra = rec.includes(a.id) ? 1 : 0, rb = rec.includes(b.id) ? 1 : 0;
+    if(ra !== rb) return rb - ra;
+    return 0;
+  });
+}
+
 const plantGrid = document.getElementById("gdPlantGrid");
 function renderPlants(){
   plantGrid.innerHTML = "";
+  renderSeasonRow();
   const rec = state.tech ? (TECH_BY_ID[state.tech].recommend||[]) : [];
-  let list = PLANTS.filter(p=> state.cat==="all" || p.cat===state.cat);
-  // 전체 탭에서는 기법 추천 작물을 앞으로 정렬
-  if(state.cat==="all" && rec.length){
-    list = [...list].sort((a,b)=> (rec.includes(b.id)?1:0)-(rec.includes(a.id)?1:0));
-  }
-  list.forEach(p=>{
-    const el = document.createElement("button");
-    const on = state.selected.includes(p.id);
-    const isRec = rec.includes(p.id);
-    el.className = "plant" + (on ? " sel":"") + (isRec ? " rec":"");
-    el.innerHTML = `<div class="e">${p.emoji}</div><div class="n">${p.name}</div>`
-      + (isRec ? `<div class="rectag">추천</div>` : "");
-    el.onclick = ()=>{
-      const i = state.selected.indexOf(p.id);
-      if(i>=0) state.selected.splice(i,1);
-      else state.selected.push(p.id);
-      renderPlants(); renderBasket(); updateNextEnabled();
-    };
-    plantGrid.appendChild(el);
-  });
+  const list = sortPlants(PLANTS.filter(p=> state.cat==="all" || p.cat===state.cat), rec);
+  list.forEach(p => plantGrid.appendChild(plantCard(p, rec.includes(p.id))));
   // 힌트: 기법 추천 안내
   const hint = document.getElementById("gdPlantHint");
   if(hint && state.tech){
@@ -2669,7 +2809,9 @@ nextB.addEventListener("click", ()=>{
 backB.addEventListener("click", ()=> goto(Math.max(0, state.step-1)));
 
 resetAll = function(){
-  state.selected = []; state.cat = "all"; state.material = null; state.elements = [];
+  state.selected = []; state.cat = "all"; state.season = "now"; state.round = "all";
+  gdPlans = {}; gdSplit = false;
+  state.material = null; state.elements = [];
   matBlock.classList.remove("show"); matDetail.classList.remove("show");
   document.getElementById("gdTechDetail").classList.remove("show");
   catTabs.querySelectorAll(".cat-tab").forEach((t,i)=>t.classList.toggle("sel", i===0));
@@ -2879,26 +3021,19 @@ setupMaterials = refreshMat;   // 옛 호출 경로 무해화
 /* ── 작물 추천(담은 두둑 합집합) ── */
 renderPlants = function(){
   plantGrid.innerHTML = "";
+  renderSeasonRow();
   const rec = [...new Set(state.elements.flatMap(e=>(TECH_BY_ID[e.tech].recommend||[])))];
-  let list = PLANTS.filter(p=> state.cat==="all" || p.cat===state.cat);
-  if(state.cat==="all" && rec.length)
-    list = [...list].sort((a,b)=>(rec.includes(b.id)?1:0)-(rec.includes(a.id)?1:0));
-  list.forEach(p=>{
-    const b = document.createElement("button");
-    const on = state.selected.includes(p.id), isRec = rec.includes(p.id);
-    b.className = "plant"+(on?" sel":"")+(isRec?" rec":"");
-    b.innerHTML = `<div class="e">${p.emoji}</div><div class="n">${p.name}</div>`+(isRec?`<div class="rectag">추천</div>`:"");
-    b.onclick = ()=>{
-      const i = state.selected.indexOf(p.id);
-      if(i>=0) state.selected.splice(i,1); else state.selected.push(p.id);
-      renderPlants(); renderBasket(); updateNextEnabled();
-    };
-    plantGrid.appendChild(b);
-  });
+  const list = sortPlants(PLANTS.filter(p=> state.cat==="all" || p.cat===state.cat), rec);
+  list.forEach(p => plantGrid.appendChild(plantCard(p, rec.includes(p.id))));
   const hint = document.getElementById("gdPlantHint");
-  if(hint) hint.innerHTML = state.elements.length
-    ? `담은 두둑(${state.elements.map(e=>TECH_BY_ID[e.tech].name).join("·")})에 맞는 작물을 <b style="color:var(--gd-green)">추천</b>으로 표시했어요.`
-    : "2~6가지가 가장 잘 어울려요.";
+  if(hint){
+    const nowN = PLANTS.filter(p => seasonFit(p, state.season) === 2).length;
+    const base = state.elements.length
+      ? `담은 두둑(${state.elements.map(e=>TECH_BY_ID[e.tech].name).join("·")})에 맞는 작물을 <b style="color:var(--gd-green)">추천</b>으로 표시했어요.`
+      : "2~6가지가 가장 잘 어울려요.";
+    hint.innerHTML = base + (state.season === "all" ? ""
+      : ` 지금 심을 수 있는 작물 <b style="color:var(--gd-gold)">${nowN}가지</b>를 위로 올렸어요.`);
+  }
 };
 
 /* ── 작물 → 두둑 배정 ── */
@@ -2950,9 +3085,8 @@ function assignCrops(plants){
 }
 
 /* ── 메인 빌드 ── */
-buildLayout = function(){
-  readBed(); repackAll(true);
-  const plants = state.selected.map(id=>PLANT_BY_ID[id]);
+/* 작물 한 묶음을 지금 두둑 위에 배치해 결과 한 장을 만듭니다 */
+function computePlan(plants){
   const buckets = assignCrops(plants);
   const {S,ox,oy} = plotTransform();
   const RT=[], place=[]; let gi=0;
@@ -2969,14 +3103,98 @@ buildLayout = function(){
     });
     RT.push({ el, meta, exPx, eyPx, sx, sy });
   });
-  lastResult = { plants, bed:{...state.bed}, sun:state.sun, S, ox, oy, elements:RT, place };
+  return { plants, bed:{...state.bed}, sun:state.sun, S, ox, oy, elements:RT, place };
+}
+
+/* 그루별 배치도 보관 — gdPlans.all 이면 한 장, spring/fall 이면 두 장 */
+let gdPlans = {}, gdSplit = false;
+
+/* 어느 그루를 먼저 보여줄지 — 고른 작물이 더 많은 쪽,
+   수가 같으면 오늘 달에 맞는 쪽 */
+function defaultRound(byRound){
+  const m = thisMonth();
+  const byMonth = (m >= 7 && m <= 11) ? "fall" : "spring";
+  if(!byRound) return byMonth;
+  const ns = byRound.spring.length, nf = byRound.fall.length;
+  if(ns !== nf) return ns > nf ? "spring" : "fall";
+  return byMonth;
+}
+
+buildLayout = function(){
+  readBed(); repackAll(true);
+  const all = state.selected.map(id=>PLANT_BY_ID[id]);
+
+  /* 그루마다 심을 수 있는 작물을 모읍니다.
+     상추·대파처럼 봄가을 다 되는 작물은 두 그루 모두에 들어갑니다. */
+  const byRound = {};
+  ROUNDS.forEach(r => { byRound[r.id] = all.filter(p => cropRounds(p).includes(r.id)); });
+  const key = ps => ps.map(p=>p.id).sort().join(",");
+
+  /* 진짜 이어짓기일 때만 나눕니다 —
+     한쪽이 다른 쪽에 완전히 포함되면(예: 봄 작물만 골랐는데 부추가 가을에도 되는 경우)
+     나눌 이유가 없습니다. 양쪽 모두 상대에게 없는 작물을 가져야 두 번 심는 것입니다. */
+  const onlyIn = (a, b) => a.filter(p => !b.some(q => q.id === p.id));
+  gdSplit = onlyIn(byRound.spring, byRound.fall).length > 0
+         && onlyIn(byRound.fall, byRound.spring).length > 0;
+
+  gdPlans = {};
+  if(gdSplit){
+    ROUNDS.forEach(r => { gdPlans[r.id] = computePlan(byRound[r.id]); });
+    if(!gdPlans[state.round]) state.round = defaultRound(byRound);
+  } else {
+    gdPlans.all = computePlan(all);
+    state.round = "all";
+  }
+  showRound(state.round);
+};
+
+/* 그루를 골라 화면 전체(배치도·평면도·리포트)를 그 그루로 맞춥니다 */
+function showRound(id){
+  if(!gdPlans[id]) id = Object.keys(gdPlans)[0];
+  state.round = id;
+  lastResult = gdPlans[id];
+  renderRoundTabs();
   renderPlotAll();
   renderReport(lastResult);
+  const r = ROUND_BY_ID[id];
+  const base = state.elements.length===1
+    ? `${TECH_BY_ID[state.elements[0].tech].emoji} ${TECH_BY_ID[state.elements[0].tech].name}, 이렇게 심어보세요`
+    : `두둑 ${state.elements.length}개, 이렇게 배치했어요 🌿`;
   document.getElementById("gdResultTitle").textContent =
-    state.elements.length===1
-      ? `${TECH_BY_ID[state.elements[0].tech].emoji} ${TECH_BY_ID[state.elements[0].tech].name}, 이렇게 심어보세요`
-      : `두둑 ${state.elements.length}개, 이렇게 배치했어요 🌿`;
-};
+    r ? `${r.emoji} ${r.name} — ${r.sub}` : base;
+}
+
+/* 그루 전환 탭 — 나뉘지 않으면 아예 나오지 않습니다 */
+function renderRoundTabs(){
+  const host = document.getElementById("gdRoundTabs");
+  if(!host) return;
+  if(!gdSplit){ host.innerHTML = ""; host.style.display = "none"; return; }
+  host.style.display = "";
+  host.innerHTML = `<div class="round-lead">시기가 갈려서 <b>두 번에 나눠</b> 심습니다 — 같은 두둑을 그대로 씁니다</div>`;
+  const row = document.createElement("div");
+  row.className = "round-row";
+  ROUNDS.forEach(r => {
+    const pl = gdPlans[r.id];
+    if(!pl) return;
+    const b = document.createElement("button");
+    b.className = "round-tab" + (state.round === r.id ? " sel" : "");
+    b.innerHTML = `<span class="rt-name">${r.emoji} ${r.name}</span>`
+                + `<span class="rt-sub">${r.sub} · ${pl.plants.length}종</span>`;
+    b.onclick = () => showRound(r.id);
+    row.appendChild(b);
+  });
+  host.appendChild(row);
+
+  /* 두 그루에 다 들어가는 작물은 따로 알려줍니다 */
+  const both = (gdPlans.spring ? gdPlans.spring.plants : [])
+    .filter(p => (gdPlans.fall ? gdPlans.fall.plants : []).some(q => q.id === p.id));
+  if(both.length){
+    const n = document.createElement("div");
+    n.className = "round-both";
+    n.innerHTML = `<b>${both.map(p=>p.name).join(" · ")}</b>는 봄·가을 두 번 다 심을 수 있어 양쪽에 넣었어요.`;
+    host.appendChild(n);
+  }
+}
 
 /* ── 렌더 (레이아웃 재계산 없이 place 기반) ── */
 function renderPlotAll(){
@@ -3068,12 +3286,29 @@ renderReport = function(R){
   if(goods.length || bads.length)
     html += `<p class="csrc">궁합 근거 — 농촌진흥청 동반식물 연구(텃밭 채소 18종) 정리</p>`;
   html += `<h3>📅 심는 시기</h3>`;
-  plants.forEach(p=>{ const[a,b]=p.sow;
-    html += note("info","·",`<b>${p.name}</b> — ${a===b?MONTHS[a-1]:MONTHS[a-1]+"~"+MONTHS[b-1]}에 심기`); });
-  const ms = plants.map(p=>p.sow[0]);
-  if(ms.length && Math.max(...ms)-Math.min(...ms)>=3)
-    html += note("warn","🕒","심는 시기가 갈립니다 — 봄 작물 먼저 심고, 가을 작물 자리는 비워 이어짓기 하세요.");
-  else if(ms.length) html += note("good","✅","비슷한 시기에 함께 심을 수 있어요.");
+  if(gdSplit){
+    const r = ROUND_BY_ID[state.round];
+    const other = ROUNDS.find(x => x.id !== state.round);
+    if(r) html += note("info", r.emoji,
+      `지금 보는 건 <b>${r.name}(${r.sub})</b> 배치도예요. ` +
+      (other && gdPlans[other.id]
+        ? `${other.name}는 위 탭에서 볼 수 있어요 — 같은 두둑에 ${gdPlans[other.id].plants.length}종을 이어 심습니다.`
+        : ""));
+  }
+  const M = thisMonth();
+  const nowList  = plants.filter(p => sowsInMonth(p, M));
+  const soonList = plants.filter(p => !sowsInMonth(p, M) && sowsInMonth(p, nextMonth()));
+  const laterList= plants.filter(p => !sowsInMonth(p, M) && !sowsInMonth(p, nextMonth()));
+  if(nowList.length)
+    html += note("good","🌱",`<b>지금(${M}월) 심으세요</b> — ${nowList.map(p=>p.name).join(" · ")}`);
+  if(soonList.length)
+    html += note("info","🕒",`<b>${nextMonth()}월에 심으세요</b> — ${soonList.map(p=>p.name).join(" · ")}`);
+  laterList.forEach(p =>
+    html += note("warn","📅",`<b>${p.name}</b> — ${sowLabel(p)}이 제철이에요. 자리만 잡아두고 때를 기다리세요.`));
+  if(laterList.length)
+    html += note("info","↔","시기가 다른 작물은 한 자리에서 이어짓기(앞그루·뒷그루)로 돌리면 밭을 놀리지 않습니다.");
+  else if(plants.length)
+    html += note("good","✅","고른 작물이 비슷한 때에 들어가 한 번에 심을 수 있어요.");
   if(state.material && state.elements.some(e=>e.tech==="spiral")){
     const m = MAT_BY_ID[state.material];
     html += `<h3>${m.emoji} 나선 벽 재료 — ${m.name}</h3>`
@@ -3241,6 +3476,7 @@ function gdDoSave(){
     placement: lastResult.place.map(p=>({pid:p.plant.id, cx:p.cx, cy:p.cy, elUid:p.elUid})),
     /* 편집기에서 고친 설계 — 통로·파츠까지 그대로 보관합니다 */
     design: gdDesign || null,
+    round: state.round,
     schemaVersion: 1
   };
 
@@ -3373,7 +3609,8 @@ function gdOpenGarden(id){
         plantIds: r.plant_ids || [],
         elements: r.elements || [],
         placeSlim: r.placement || [],
-        design: r.design || null
+        design: r.design || null,
+        round: r.round || "all"
       });
     })
     .catch(function(e){ MK.toast(e.message || "불러오지 못했어요"); });
@@ -3383,6 +3620,7 @@ function gdLoadGarden(g){
   /* 직접 고친 설계가 있으면 자동 배치보다 이쪽을 씁니다 */
   gdPendingDesign = g.design || null;
   gdEdited = false;
+  if(g.round) state.round = g.round;
   state.bed = {...g.bed};
   state.sun = g.sun;
   state.material = g.material;
