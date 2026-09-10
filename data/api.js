@@ -408,7 +408,9 @@ function localDriver() {
         id: p.id || (i + 1), author_id: "seed-" + i, category: p.cat || p.category,
         body: p.text || p.body, image_path: p.img || null,
         author_name: p.user, author_avatar: p.avatar,
-        author_premium: !!p.premium, created_at: new Date(Date.now() - i * 3600e3).toISOString(),
+        author_premium: !!p.premium,
+        /* 방금 쓴 글만 잔뜩 있으면 어색하니 2시간 간격을 벌려 둡니다 */
+        created_at: new Date(Date.now() - (2 + i * 7) * 3600e3).toISOString(),
         like_count: p.likes || 0, comment_count: (p.comments || []).length, status: "visible"
       };
     });
@@ -417,7 +419,7 @@ function localDriver() {
         comments.push({ id: ++seq.comment, post_id: p.id || (i + 1),
           author_id: "seed-c", body: c.text, author_name: c.user,
           author_avatar: c.avatar || "🙂", author_premium: !!c.premium,
-          created_at: new Date().toISOString(), status: "visible" });
+          created_at: new Date(Date.now() - (1 + i * 7) * 3600e3).toISOString(), status: "visible" });
       });
     });
   }
