@@ -678,6 +678,20 @@ nav.tabs button:focus-visible{outline:2px solid var(--sun);outline-offset:-2px}
 #view-board textarea{width:100%;min-height:120px;border:2px solid #E2DCC4;border-radius:12px;padding:12px;font-size:14.5px;font-family:inherit;background:#fff;resize:vertical;box-sizing:border-box}
 #view-board .bd-photo{margin-top:10px;border:1.5px dashed #cdc3aa;background:#faf6ea;color:#7a8378;border-radius:11px;padding:12px;width:100%;font-weight:800;font-size:13.5px;cursor:pointer;font-family:inherit}
 #view-board #bdWpreview .bd-img{margin-top:10px}
+/* ── 서버 연결 후 추가 ── */
+#view-board .bd-img img{display:block;width:100%;height:auto;border-radius:12px}
+#view-board .bd-ava img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
+#view-board .bd-empty{text-align:center;color:#a9a390;padding:44px 16px;font-size:14px;font-weight:700;line-height:1.9}
+#view-board .bd-empty span{display:block;font-size:13px;font-weight:600;color:#bdb7a4}
+#view-board .bd-retry{margin-top:12px;border:1.5px solid #cdc3aa;background:#fff;color:#6b7468;
+  border-radius:999px;padding:8px 18px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit}
+#view-board .bd-cload{color:#a9a390;font-size:13px;padding:8px 0}
+#view-board .bd-skel{pointer-events:none}
+#view-board .bd-skel .bd-ava{background:#e6e0cc}
+#view-board .sk-line{height:11px;border-radius:6px;background:#e6e0cc;margin:7px 0}
+#view-board .bd-skel .bd-ava,#view-board .sk-line{animation:bdPulse 1.2s ease-in-out infinite}
+@keyframes bdPulse{0%,100%{opacity:.55}50%{opacity:.95}}
+@media (prefers-reduced-motion:reduce){#view-board .bd-skel .bd-ava,#view-board .sk-line{animation:none}}
 #view-board .bd-submit{margin-top:14px;width:100%;border:none;background:var(--moss);color:#fff;border-radius:12px;padding:15px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 0 #1f3a27}
 
 /* ===== 목업 공용 UI ===== */
@@ -1000,7 +1014,6 @@ main .view.active{animation:vw-in .22s ease both}
   <section id="view-board" class="view">
     <div class="bd-head">
       <h2 class="sec">커뮤니티</h2>
-      <span class="bd-mock">MOCK · 예시 데이터</span>
     </div>
     <p class="sec-desc">고흥에서, 베란다에서 — 서로의 텃밭을 나눠요</p>
 
@@ -1025,7 +1038,8 @@ main .view.active{animation:vw-in .22s ease both}
       <div class="bd-wbody">
         <div class="bd-wcats" id="bdWcats"></div>
         <textarea id="bdWtext" placeholder="텃밭 이야기를 들려주세요 🌱" maxlength="500"></textarea>
-        <button class="bd-photo" id="bdWphoto">📷 사진 추가 (목업)</button>
+        <button class="bd-photo" id="bdWphoto" type="button">📷 사진 추가</button>
+        <input type="file" id="bdWfile" accept="image/*" hidden>
         <div id="bdWpreview"></div>
         <button class="bd-submit" id="bdWsubmit">올리기</button>
       </div>
@@ -1065,6 +1079,48 @@ main .view.active{animation:vw-in .22s ease both}
 
 </div>
 <!-- 백엔드 연결 — plantdata보다 먼저 로드되어야 합니다 -->
+<script>
+/* 설정 전(로컬 모드)에서만 보이는 예시 글입니다.
+   data/api.js 가 로컬 드라이버를 만들 때 이걸 읽어 갑니다.
+   config.js 에 Supabase 값이 채워지면 서버 글로 완전히 대체됩니다.
+   ※ data/api.js 보다 먼저 실행되어야 합니다. */
+window.PCON_SEED = { posts: [
+  { id:1, cat:"brag", user:"초록엄지", avatar:"👩‍🌾", premium:true, time:"2시간 전",
+    text:"올해 첫 방울토마토 수확! 바질 옆에 심었더니 진짜 벌레가 덜 꼬이는 것 같아요 🍅 앱 궁합표 보고 심은 건데 효과 있네요.",
+    img:"tomato", likes:24, liked:false,
+    comments:[ {user:"텃밭삼촌",avatar:"👨‍🌾",text:"색이 예술이네요! 저희 집 토마토는 아직 파래요 😂"},
+               {user:"고흥댁",avatar:"👩",text:"저도 내년엔 바질이랑 같이 심어볼게요"} ] },
+  { id:2, cat:"qna", user:"텃밭초보", avatar:"🌱", time:"5시간 전",
+    text:"상추 잎끝이 갈색으로 타들어가요. 물은 이틀에 한 번 주는데 뭐가 문제일까요? 베란다 남향입니다.",
+    img:"lettuce", likes:7, liked:false,
+    comments:[ {user:"초록엄지",avatar:"👩‍🌾",premium:true,text:"한여름 남향 직사광이면 잎끝이 탈 수 있어요. 한낮엔 발이나 망으로 살짝 그늘 만들어 주세요!"} ] },
+  { id:3, cat:"share", user:"씨앗할머니", avatar:"👵", time:"어제",
+    text:"메리골드 씨앗을 넉넉히 받았어요. 고흥 읍내에서 나눔합니다. 필요하신 분 댓글 주세요 🌼 텃밭 테두리에 심으면 벌레가 덜 와요.",
+    img:"marigold", likes:31, liked:false,
+    comments:[ {user:"텃밭초보",avatar:"🌱",text:"저요저요! 쪽지 드렸어요"},
+               {user:"염포지기",avatar:"🧑‍🌾",text:"할머니 씨앗은 발아율이 다르죠 👍"} ] },
+  { id:4, cat:"local", user:"염포지기", avatar:"🧑‍🌾", premium:true, time:"어제",
+    text:"염포마을 화합의 정원 상촌 구역, 이번 주말 오전에 두둑 만들기 함께해요. 새참으로 유자차 준비합니다 🍵",
+    img:"plot", likes:18, liked:false,
+    comments:[ {user:"고흥댁",avatar:"👩",text:"토요일이죠? 장갑 들고 갈게요!"} ] },
+  { id:5, cat:"brag", user:"허브부자", avatar:"🌿", time:"2일 전",
+    text:"베란다 바질이 이렇게 컸습니다. 파스타 해먹을 때마다 한 줌씩 뜯는 재미 🤤",
+    img:"basil", likes:15, liked:false, comments:[] },
+  { id:6, cat:"qna", user:"매운맛", avatar:"🌶️", time:"2일 전",
+    text:"고추 옆에 들깨 심어도 괜찮을까요? 자리가 애매하게 남아서요.",
+    img:null, likes:4, liked:false,
+    comments:[ {user:"허브부자",avatar:"🌿",text:"들깨 향이 진해서 오히려 해충 쫓는 데 도움돼요. 간격만 40cm 이상 주세요"} ] },
+  { id:7, cat:"share", user:"도양댁", avatar:"👩‍🦳", time:"3일 전",
+    text:"상추 모종 20포기 남아요. 도양읍 근처 직접 가져가실 분! 다음 주까지요.",
+    img:"sprout", likes:12, liked:false, comments:[] },
+  { id:8, cat:"brag", user:"통나무장인", avatar:"🪵", time:"4일 전",
+    text:"후겔컬처 두둑 드디어 완성! 통나무 묻는 데만 하루 종일 걸렸네요. 앱 3D 보고 따라 만들었는데 뿌듯합니다 💪",
+    img:"hugel", likes:42, liked:false,
+    comments:[ {user:"초록엄지",avatar:"👩‍🌾",premium:true,text:"우와 규모가 상당한데요? 2년 뒤가 기대되네요"},
+               {user:"텃밭삼촌",avatar:"👨‍🌾",text:"저도 도전해보고 싶어요. 통나무는 어디서 구하셨어요?"},
+               {user:"통나무장인",avatar:"🪵",text:"뒷산 간벌목 얻어왔어요! 산림조합에 문의해보세요"} ] },
+] };
+</script>
 <script src="config.js"></script>
 <script src="vendor/supabase.js"></script>
 <script src="data/api.js"></script>
@@ -4282,7 +4338,7 @@ function photo(type){
   return `<svg viewBox="0 0 400 220" xmlns="http://www.w3.org/2000/svg">${P[type]||P.plot}</svg>`;
 }
 
-/* ---------- 예시 데이터 ---------- */
+/* ---------- 분류 ---------- */
 const CATS = [
   { id:"all",   name:"전체" },
   { id:"brag",  name:"🌱 텃밭 자랑" },
@@ -4291,53 +4347,55 @@ const CATS = [
   { id:"local", name:"📍 우리 동네" },
 ];
 const CAT_NAME = Object.fromEntries(CATS.map(c=>[c.id,c.name]));
+function catShort(id){ return (CAT_NAME[id]||"").replace(/^[^ ]+ /,""); }
 
-let seq = 100;
-const posts = [
-  { id:1, cat:"brag", user:"초록엄지", avatar:"👩‍🌾", premium:true, time:"2시간 전",
-    text:"올해 첫 방울토마토 수확! 바질 옆에 심었더니 진짜 벌레가 덜 꼬이는 것 같아요 🍅 앱 궁합표 보고 심은 건데 효과 있네요.",
-    img:"tomato", likes:24, liked:false,
-    comments:[ {user:"텃밭삼촌",avatar:"👨‍🌾",text:"색이 예술이네요! 저희 집 토마토는 아직 파래요 😂"},
-               {user:"고흥댁",avatar:"👩",text:"저도 내년엔 바질이랑 같이 심어볼게요"} ] },
-  { id:2, cat:"qna", user:"텃밭초보", avatar:"🌱", time:"5시간 전",
-    text:"상추 잎끝이 갈색으로 타들어가요. 물은 이틀에 한 번 주는데 뭐가 문제일까요? 베란다 남향입니다.",
-    img:"lettuce", likes:7, liked:false,
-    comments:[ {user:"초록엄지",avatar:"👩‍🌾",premium:true,text:"한여름 남향 직사광이면 잎끝이 탈 수 있어요. 한낮엔 발이나 망으로 살짝 그늘 만들어 주세요!"} ] },
-  { id:3, cat:"share", user:"씨앗할머니", avatar:"👵", time:"어제",
-    text:"메리골드 씨앗을 넉넉히 받았어요. 고흥 읍내에서 나눔합니다. 필요하신 분 댓글 주세요 🌼 텃밭 테두리에 심으면 벌레가 덜 와요.",
-    img:"marigold", likes:31, liked:false,
-    comments:[ {user:"텃밭초보",avatar:"🌱",text:"저요저요! 쪽지 드렸어요"},
-               {user:"염포지기",avatar:"🧑‍🌾",text:"할머니 씨앗은 발아율이 다르죠 👍"} ] },
-  { id:4, cat:"local", user:"염포지기", avatar:"🧑‍🌾", premium:true, time:"어제",
-    text:"염포마을 화합의 정원 상촌 구역, 이번 주말 오전에 두둑 만들기 함께해요. 새참으로 유자차 준비합니다 🍵",
-    img:"plot", likes:18, liked:false,
-    comments:[ {user:"고흥댁",avatar:"👩",text:"토요일이죠? 장갑 들고 갈게요!"} ] },
-  { id:5, cat:"brag", user:"허브부자", avatar:"🌿", time:"2일 전",
-    text:"베란다 바질이 이렇게 컸습니다. 파스타 해먹을 때마다 한 줌씩 뜯는 재미 🤤",
-    img:"basil", likes:15, liked:false, comments:[] },
-  { id:6, cat:"qna", user:"매운맛", avatar:"🌶️", time:"2일 전",
-    text:"고추 옆에 들깨 심어도 괜찮을까요? 자리가 애매하게 남아서요.",
-    img:null, likes:4, liked:false,
-    comments:[ {user:"허브부자",avatar:"🌿",text:"들깨 향이 진해서 오히려 해충 쫓는 데 도움돼요. 간격만 40cm 이상 주세요"} ] },
-  { id:7, cat:"share", user:"도양댁", avatar:"👩‍🦳", time:"3일 전",
-    text:"상추 모종 20포기 남아요. 도양읍 근처 직접 가져가실 분! 다음 주까지요.",
-    img:"sprout", likes:12, liked:false, comments:[] },
-  { id:8, cat:"brag", user:"통나무장인", avatar:"🪵", time:"4일 전",
-    text:"후겔컬처 두둑 드디어 완성! 통나무 묻는 데만 하루 종일 걸렸네요. 앱 3D 보고 따라 만들었는데 뿌듯합니다 💪",
-    img:"hugel", likes:42, liked:false,
-    comments:[ {user:"초록엄지",avatar:"👩‍🌾",premium:true,text:"우와 규모가 상당한데요? 2년 뒤가 기대되네요"},
-               {user:"텃밭삼촌",avatar:"👨‍🌾",text:"저도 도전해보고 싶어요. 통나무는 어디서 구하셨어요?"},
-               {user:"통나무장인",avatar:"🪵",text:"뒷산 간벌목 얻어왔어요! 산림조합에 문의해보세요"} ] },
-];
+/* ---------- 데이터 계층 ---------- */
+const api = window.PCON && window.PCON.api;
+if(!api){ console.warn("[PCON] data/api.js 를 찾지 못해 게시판을 켜지 못했습니다."); return; }
+
+/* 사용자가 쓴 글이 그대로 HTML이 되지 않도록 — 서버에 붙은 이상 필수입니다 */
+const ESCMAP = { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" };
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c=>ESCMAP[c]); }
+
+/* 예시 글의 그림은 종류 이름("tomato")이고, 진짜 사진은 스토리지 경로입니다 */
+const SEED_ART = ["tomato","lettuce","marigold","basil","plot","hugel","sprout"];
+function imgHtml(path){
+  if(!path) return "";
+  if(SEED_ART.indexOf(path) >= 0) return `<div class="bd-img">${photo(path)}</div>`;
+  const url = api.media.publicUrl(path);
+  return url ? `<div class="bd-img"><img src="${esc(url)}" alt="" loading="lazy"></div>` : "";
+}
+
+/* 카카오 프로필은 사진 URL, 예시 글은 이모지 */
+function ava(a, cls){
+  const k = cls || "bd-ava";
+  if(a && /^(https?:|blob:)/.test(a)) return `<div class="${k}"><img src="${esc(a)}" alt=""></div>`;
+  return `<div class="${k}">${esc(a || "🧑‍🌾")}</div>`;
+}
+
+function ago(iso){
+  const t = Date.parse(iso);
+  if(!t) return "";
+  const s = Math.max(0, (Date.now() - t) / 1000);
+  if(s < 60)      return "방금";
+  if(s < 3600)    return Math.floor(s/60) + "분 전";
+  if(s < 86400)   return Math.floor(s/3600) + "시간 전";
+  if(s < 172800)  return "어제";
+  if(s < 604800)  return Math.floor(s/86400) + "일 전";
+  const d = new Date(t);
+  return (d.getMonth()+1) + "월 " + d.getDate() + "일";
+}
 
 /* ---------- 상태 ---------- */
 let curCat = "all";
-let curPost = null;
+let posts = [];           // 목록 캐시 (feed_posts 행)
+let curPost = null;       // 상세로 열어둔 글 — 목록과 같은 객체를 씁니다
+let curComments = null;   // null = 불러오는 중, [] = 없음
 let writeCat = "brag";
-let writePhoto = null;
+let writeFile = null, writeUrl = null;
 
 /* ---------- 목록 ---------- */
-const catBox = document.getElementById("bdCats");
+const catBox  = document.getElementById("bdCats");
 const listBox = document.getElementById("bdList");
 
 CATS.forEach(c=>{
@@ -4346,18 +4404,79 @@ CATS.forEach(c=>{
   b.textContent = c.name;
   b.onclick = ()=>{ curCat=c.id;
     catBox.querySelectorAll(".bd-cat").forEach(x=>x.classList.remove("sel"));
-    b.classList.add("sel"); renderList(); };
+    b.classList.add("sel"); loadList(); };
   catBox.appendChild(b);
 });
 
-function badge(p){ return p.premium ? ' <span class="bd-badge">🌿</span>' : ''; }
+function badge(premium){ return premium ? ' <span class="bd-badge">🌿</span>' : ''; }
+
+function skeleton(){
+  listBox.innerHTML = Array.from({length:3}, ()=>`
+    <div class="bd-card bd-skel">
+      <div class="bd-top"><div class="bd-ava"></div><div class="sk-line" style="width:96px"></div></div>
+      <div class="sk-line" style="width:100%"></div>
+      <div class="sk-line" style="width:72%"></div>
+    </div>`).join("");
+}
+
+function loadList(){
+  skeleton();
+  return api.feed.list({ category: curCat, limit: 30 })
+    .then(rows=>{
+      posts = rows || [];
+      if(curPost){
+        const fresh = posts.find(p=>p.id===curPost.id);
+        if(fresh){ curPost = fresh; renderDetail(); }
+      }
+      renderList();
+    })
+    .catch(e=>{
+      listBox.innerHTML = `<div class="bd-empty">글을 불러오지 못했어요
+        <span>${esc(e && e.message || "잠시 후 다시 시도해 주세요")}</span>
+        <button class="bd-retry" type="button">다시 시도</button></div>`;
+      const r = listBox.querySelector(".bd-retry");
+      if(r) r.onclick = loadList;
+    });
+}
+
+function renderList(){
+  if(!posts.length){
+    listBox.innerHTML = `<div class="bd-empty">아직 글이 없어요
+      <span>${curCat==="all" ? "첫 글을 남겨보세요 🌱" : "이 분류에는 아직 글이 없어요"}</span></div>`;
+    return;
+  }
+  listBox.innerHTML = posts.map(p=>`
+    <article class="bd-card" data-id="${p.id}">
+      <div class="bd-top">
+        ${ava(p.author_avatar)}
+        <div><div class="bd-name">${esc(p.author_name)}${badge(p.author_premium)}</div></div>
+        <span class="bd-cattag">${esc(catShort(p.category))}</span>
+        <span class="bd-time">${ago(p.created_at)}</span>
+        ${moreBtn("post", p.id)}
+      </div>
+      <div class="bd-text">${esc(p.body)}</div>
+      ${imgHtml(p.image_path)}
+      <div class="bd-meta">
+        <span class="lk ${p.liked_by_me?'on':''}" data-like="${p.id}">${p.liked_by_me?'❤️':'🤍'} ${p.like_count}</span>
+        <span>💬 ${p.comment_count}</span>
+      </div>
+    </article>`).join("");
+}
+
+listBox.addEventListener("click", e=>{
+  const mo = e.target.closest("[data-more]");
+  if(mo){ e.stopPropagation(); openMore(mo.dataset.more, +mo.dataset.mid); return; }
+  const lk = e.target.closest("[data-like]");
+  if(lk){ e.stopPropagation(); toggleLike(+lk.dataset.like); return; }
+  const card = e.target.closest(".bd-card");
+  if(card && !card.classList.contains("bd-skel")) openDetail(+card.dataset.id);
+});
 
 /* ══════════════ PCON_REPORT_START ══════════════
    신고 · 차단 (App Store 1.2 / Google Play UGC 정책 대응)
+   신고하면 reports 테이블에 남고, feed_posts 뷰가 신고자 화면에서
+   즉시 감춥니다. 3건 이상 쌓이면 글이 자동으로 검토 대기로 넘어갑니다.
    ══════════════════════════════════════════════ */
-M.session.blocked = M.session.blocked || [];
-M.session.reports = M.session.reports || [];
-
 const REPORT_REASONS = [
   { id:"abuse",   label:"비방 · 모욕 · 협박" },
   { id:"sexual",  label:"음란물 · 청소년 유해" },
@@ -4368,69 +4487,76 @@ const REPORT_REASONS = [
   { id:"etc",     label:"기타" }
 ];
 
-/* 금지어 사전 필터 — 약관 제9조 ④ */
+/* 금지어 사전 필터 — 약관 제9조 ④ (서버에도 같은 트리거가 있습니다) */
 const BANNED = ["씨발","시발","씹할","좆","병신","지랄","개새끼","니미","엠창","fuck","shit","asshole"];
 function hasBanned(t){
   const s = String(t).toLowerCase().replace(/\s+/g, "");
   return BANNED.find(w => s.includes(w));
 }
 
-function isBlocked(name){ return M.session.blocked.some(b => b.name === name); }
-
-function moreBtn(kind, id, ci){
-  return `<button class="bd-more" data-more="${kind}" data-mid="${id}"` +
-         (ci != null ? ` data-ci="${ci}"` : "") + ` aria-label="더보기">⋯</button>`;
+/* 차단 목록은 설정 화면의 개수 표시에도 쓰입니다 */
+M.session.blocked = M.session.blocked || [];
+function refreshBlocked(){
+  if(!api.auth.current()){ M.session.blocked = []; return Promise.resolve([]); }
+  return api.moderation.blockedList()
+    .then(rows=>{ M.session.blocked = rows || []; return M.session.blocked; })
+    .catch(()=> M.session.blocked);
 }
 
-function targetOf(kind, id, ci){
-  const p = posts.find(x => x.id === id);
-  if(!p) return null;
-  if(kind === "post") return { name:p.user, avatar:p.avatar, text:p.text, post:p, ci:null };
-  const c = p.comments[ci];
+function moreBtn(kind, id){
+  return `<button class="bd-more" data-more="${kind}" data-mid="${id}" aria-label="더보기">⋯</button>`;
+}
+
+function targetOf(kind, id){
+  if(kind === "post"){
+    const p = (curPost && curPost.id === id) ? curPost : posts.find(x=>x.id===id);
+    if(!p) return null;
+    return { kind:"post", id:p.id, name:p.author_name, avatar:p.author_avatar,
+             text:p.body, authorId:p.author_id, mine:!!p.is_mine, deleted:!!p.author_deleted };
+  }
+  const c = (curComments||[]).find(x=>x.id===id);
   if(!c) return null;
-  return { name:c.user, avatar:c.avatar || "🙂", text:c.text, post:p, ci:ci };
+  return { kind:"comment", id:c.id, name:c.author_name, avatar:c.author_avatar,
+           text:c.body, authorId:c.author_id, mine:!!c.is_mine, deleted:false };
 }
 
 /* ⋯ 액션 시트 */
-function openMore(kind, id, ci){
-  const t = targetOf(kind, id, ci);
+function openMore(kind, id){
+  const t = targetOf(kind, id);
   if(!t) return;
-  const mine = M.session.user && M.session.user.name === t.name;
   const what = kind === "post" ? "글" : "댓글";
   const wrap = document.createElement("div");
   wrap.className = "mk-dim bottom";
   wrap.innerHTML = `<div class="mk-sheet">
     <div class="mk-shandle"></div>
-    <div class="bd-mtarget">${t.avatar} <b>${t.name}</b>님의 ${what}</div>
-    ${mine
+    <div class="bd-mtarget">${esc(t.name)}님의 ${what}</div>
+    ${t.mine
       ? `<button class="bd-msheet danger" data-do="delete">🗑 삭제하기</button>`
-      : `<button class="bd-msheet" data-do="report">🚩 신고하기</button>
-         <button class="bd-msheet danger" data-do="block">🚫 ${t.name}님 차단하기</button>`}
+      : `<button class="bd-msheet" data-do="report">🚩 신고하기</button>` +
+        (t.deleted ? "" : `<button class="bd-msheet danger" data-do="block">🚫 ${esc(t.name)}님 차단하기</button>`)}
     <button class="mk-later" data-do="cancel">닫기</button>
   </div>`;
   wrap.addEventListener("click", e => { if(e.target === wrap) wrap.remove(); });
   wrap.querySelectorAll("[data-do]").forEach(b => {
     b.onclick = () => {
       const a = b.dataset.do; wrap.remove();
-      if(a === "report")      openReport(kind, id, ci);
-      else if(a === "block")  confirmBlock(t.name, t.avatar);
-      else if(a === "delete") removeOwn(kind, id, ci);
+      if(a === "report")      openReport(t);
+      else if(a === "block")  confirmBlock(t);
+      else if(a === "delete") removeOwn(t);
     };
   });
   document.body.appendChild(wrap);
 }
 
 /* 신고 사유 선택 */
-function openReport(kind, id, ci){
+function openReport(t){
   M.kakao(() => {
-    const t = targetOf(kind, id, ci);
-    if(!t) return;
     let picked = null;
     const quote = t.text.length > 44 ? t.text.slice(0, 44) + "…" : t.text;
     M.modal({
       title:"신고하기",
       body:`<div class="bd-rp">
-        <div class="bd-rq">${quote}</div>
+        <div class="bd-rq">${esc(quote)}</div>
         <div class="bd-rl">신고 사유를 선택해 주세요</div>
         <div class="bd-rr">${REPORT_REASONS.map(r =>
           `<button class="bd-rbtn" data-r="${r.id}">${r.label}</button>`).join("")}</div>
@@ -4439,7 +4565,7 @@ function openReport(kind, id, ci){
       </div>`,
       buttons:[
         { label:"취소" },
-        { label:"신고 접수", primary:true, onClick:() => { if(picked) submitReport(kind, id, ci, picked); } }
+        { label:"신고 접수", primary:true, onClick:() => { if(picked) submitReport(t, picked); } }
       ]
     });
     const send = document.querySelector(".mk-modal .mk-btn.primary");
@@ -4455,49 +4581,51 @@ function openReport(kind, id, ci){
   });
 }
 
-/* 신고 접수 */
-function submitReport(kind, id, ci, reason){
-  const t = targetOf(kind, id, ci);
-  if(!t) return;
-  M.session.reports.push({
-    at: Date.now(), kind: kind, reason: reason,
-    target: t.name, text: t.text,
-    reporter: M.session.user ? M.session.user.name : "익명",
-    status: "접수"
-  });
-  /* TODO(Phase 1) — Supabase reports 테이블 insert + 운영자 알림.
-     운영자가 24시간 내에 처리하지 않으면 자동 에스컬레이션되도록 구성할 것. */
-  if(kind === "post"){
-    t.post.hidden = true;
-    if(curPost && curPost.id === id){ detail.classList.remove("show"); curPost = null; }
-  } else {
-    t.post.comments[ci].hidden = true;
-  }
-  renderList();
-  if(curPost) renderDetail();
-  M.modal({
-    title:"신고가 접수되었습니다",
-    body:"24시간 이내에 검토하여 조치하고 결과를 알려드립니다.<br>" +
-         "검토가 끝날 때까지 이 게시물은 회원님께 보이지 않습니다.",
-    buttons:[{ label:"확인", primary:true }]
-  });
+/* 신고 접수 — 서버 reports 테이블에 남습니다 */
+function submitReport(t, reason){
+  M.toast("신고를 접수하는 중이에요…", 6000);
+  api.moderation.report(t.kind, t.id, reason)
+    .then(()=>{
+      if(t.kind === "post"){ closeDetail(); return loadList(); }
+      return curPost ? loadComments(curPost.id).then(loadList) : loadList();
+    })
+    .then(()=>{
+      M.modal({
+        title:"신고가 접수되었습니다",
+        body:"24시간 이내에 검토하여 조치하고 결과를 알려드립니다.<br>" +
+             "검토가 끝날 때까지 이 게시물은 회원님께 보이지 않습니다.",
+        buttons:[{ label:"확인", primary:true }]
+      });
+    })
+    .catch(e=>{
+      if(e && e.code === "AUTH"){ M.kakao(()=>{}); return; }
+      M.toast(e && e.message || "신고하지 못했어요");
+    });
 }
 
 /* 차단 */
-function confirmBlock(name, avatar){
+function confirmBlock(t){
   M.kakao(() => {
     M.modal({
-      title:`${name}님을 차단할까요?`,
+      title:`${t.name}님을 차단할까요?`,
       body:"차단하면 이 사용자의 글과 댓글이 보이지 않고, 회원님의 글에 댓글을 남길 수 없습니다.<br><br>" +
            "차단은 <b>설정 → 차단한 사용자</b>에서 언제든 해제할 수 있습니다.",
       buttons:[
         { label:"취소" },
         { label:"차단하기", primary:true, onClick:() => {
-            if(!isBlocked(name)) M.session.blocked.push({ name: name, avatar: avatar });
-            if(curPost && curPost.user === name){ detail.classList.remove("show"); curPost = null; }
-            renderList();
-            if(curPost) renderDetail();
-            M.toast(`${name}님을 차단했어요`);
+            api.moderation.block(t.authorId)
+              .then(()=>{
+                if(curPost && curPost.author_id === t.authorId) closeDetail();
+                return Promise.all([loadList(), refreshBlocked()]);
+              })
+              .then(()=>{
+                if(typeof window.pconRenderSettings === "function") window.pconRenderSettings();
+                M.toast(`${t.name}님을 차단했어요`);
+              })
+              .catch(e=>{
+                if(e && e.code === "AUTH"){ M.kakao(()=>{}); return; }
+                M.toast(e && e.message || "차단하지 못했어요");
+              });
         }}
       ]
     });
@@ -4505,125 +4633,151 @@ function confirmBlock(name, avatar){
 }
 
 /* 내 글·댓글 삭제 */
-function removeOwn(kind, id, ci){
+function removeOwn(t){
   M.modal({
     title:"삭제할까요?",
     body:"삭제한 내용은 복구할 수 없습니다.",
     buttons:[
       { label:"취소" },
       { label:"삭제", primary:true, onClick:() => {
-          const p = posts.find(x => x.id === id);
-          if(!p) return;
-          if(kind === "post"){
-            posts.splice(posts.indexOf(p), 1);
-            if(curPost && curPost.id === id){ detail.classList.remove("show"); curPost = null; }
-          } else {
-            p.comments.splice(ci, 1);
-          }
-          renderList();
-          if(curPost) renderDetail();
-          M.toast("삭제했어요");
+          const job = t.kind === "post" ? api.feed.remove(t.id) : api.feed.removeComment(t.id);
+          job.then(()=>{
+              if(t.kind === "post"){ closeDetail(); return loadList(); }
+              return curPost ? loadComments(curPost.id).then(loadList) : loadList();
+            })
+            .then(()=> M.toast("삭제했어요"))
+            .catch(e=> M.toast(e && e.message || "삭제하지 못했어요"));
       }}
     ]
   });
 }
 /* ══════════════ PCON_REPORT_END ══════════════ */
 
-function renderList(){
-  const list = posts.filter(p=> (curCat==="all" || p.cat===curCat) && !p.hidden && !isBlocked(p.user));
-  listBox.innerHTML = list.map(p=>`
-    <div class="bd-card" data-id="${p.id}">
-      <div class="bd-top">
-        <div class="bd-ava">${p.avatar}</div>
-        <div><div class="bd-name">${p.user}${badge(p)}</div></div>
-        <span class="bd-cattag">${CAT_NAME[p.cat].replace(/^[^ ]+ /,'')}</span>
-        <span class="bd-time">${p.time}</span>
-        ${moreBtn("post", p.id)}
-      </div>
-      <div class="bd-text">${p.text}</div>
-      ${p.img?`<div class="bd-img">${photo(p.img)}</div>`:""}
-      <div class="bd-meta">
-        <span class="lk ${p.liked?'on':''}" data-like="${p.id}">${p.liked?'❤️':'🤍'} ${p.likes}</span>
-        <span>💬 ${p.comments.length}</span>
-      </div>
-    </div>`).join("") || `<div style="text-align:center;color:#a9a390;padding:40px 0">아직 글이 없어요</div>`;
-}
-renderList();
-
-listBox.addEventListener("click", e=>{
-  const mo = e.target.closest("[data-more]");
-  if(mo){ e.stopPropagation();
-    openMore(mo.dataset.more, +mo.dataset.mid, mo.dataset.ci != null ? +mo.dataset.ci : null);
-    return; }
-  const lk = e.target.closest("[data-like]");
-  if(lk){ e.stopPropagation(); toggleLike(+lk.dataset.like); return; }
-  const card = e.target.closest(".bd-card");
-  if(card) openDetail(+card.dataset.id);
-});
-
+/* ---------- 좋아요 ---------- */
 function toggleLike(id){
   M.kakao(()=>{
-    const p = posts.find(x=>x.id===id);
-    p.liked = !p.liked; p.likes += p.liked?1:-1;
-    renderList(); if(curPost && curPost.id===id) renderDetail();
+    const row = posts.find(x=>x.id===id);
+    const targets = [];
+    if(row) targets.push(row);
+    if(curPost && curPost.id === id && curPost !== row) targets.push(curPost);
+    if(!targets.length) return;
+
+    const on = !targets[0].liked_by_me;
+    const apply = v => targets.forEach(t=>{
+      t.liked_by_me = v;
+      t.like_count = Math.max(0, t.like_count + (v ? 1 : -1));
+    });
+    apply(on);
+    renderList(); if(curPost) renderDetail();
+
+    api.feed.toggleLike(id).catch(e=>{
+      apply(!on);
+      renderList(); if(curPost) renderDetail();
+      if(e && e.code === "AUTH"){ M.kakao(()=>{}); return; }
+      M.toast(e && e.message || "좋아요를 반영하지 못했어요");
+    });
   });
 }
 
 /* ---------- 상세 ---------- */
 const detail = document.getElementById("bdDetail");
-const dbody = document.getElementById("bdDbody");
-document.getElementById("bdBack").onclick = ()=>{ detail.classList.remove("show"); curPost=null; };
+const dbody  = document.getElementById("bdDbody");
+document.getElementById("bdBack").onclick = closeDetail;
+
+function closeDetail(){
+  detail.classList.remove("show");
+  curPost = null; curComments = null;
+}
 
 function openDetail(id){
-  curPost = posts.find(p=>p.id===id);
+  curPost = posts.find(p=>p.id===id) || null;
+  curComments = null;
+  if(!curPost){
+    api.feed.get(id)
+      .then(p=>{ curPost = p; renderDetail(); })
+      .catch(()=> closeDetail());
+  }
   renderDetail();
   detail.classList.add("show");
   detail.scrollTop = 0;
+  loadComments(id);
 }
+
+function loadComments(postId){
+  return api.feed.comments(postId)
+    .then(rows=>{ if(curPost && curPost.id === postId){ curComments = rows || []; renderDetail(); } })
+    .catch(()=>{ if(curPost && curPost.id === postId){ curComments = []; renderDetail(); } });
+}
+
 function renderDetail(){
   const p = curPost;
+  if(!p) return;
+  let cmts;
+  if(curComments === null){
+    cmts = `<div class="bd-cload">댓글을 불러오는 중…</div>`;
+  } else if(!curComments.length){
+    cmts = `<div class="bd-cload">첫 댓글을 남겨보세요</div>`;
+  } else {
+    cmts = curComments.map(c=>`
+      <div class="bd-cmt">
+        ${ava(c.author_avatar)}
+        <div style="flex:1">
+          <div class="c-name">${esc(c.author_name)}${badge(c.author_premium)}</div>
+          <div class="c-text">${esc(c.body)}</div>
+        </div>
+        ${moreBtn("comment", c.id)}
+      </div>`).join("");
+  }
+
   dbody.innerHTML = `
     <div class="bd-top">
-      <div class="bd-ava">${p.avatar}</div>
-      <div><div class="bd-name">${p.user}${badge(p)}</div></div>
-      <span class="bd-cattag">${CAT_NAME[p.cat].replace(/^[^ ]+ /,'')}</span>
-      <span class="bd-time">${p.time}</span>
+      ${ava(p.author_avatar)}
+      <div><div class="bd-name">${esc(p.author_name)}${badge(p.author_premium)}</div></div>
+      <span class="bd-cattag">${esc(catShort(p.category))}</span>
+      <span class="bd-time">${ago(p.created_at)}</span>
       ${moreBtn("post", p.id)}
     </div>
-    <div class="bd-text" style="font-size:15px">${p.text}</div>
-    ${p.img?`<div class="bd-img">${photo(p.img)}</div>`:""}
+    <div class="bd-text" style="font-size:15px">${esc(p.body)}</div>
+    ${imgHtml(p.image_path)}
     <div class="bd-meta">
-      <span class="lk ${p.liked?'on':''}" id="bdDlike">${p.liked?'❤️':'🤍'} ${p.likes}</span>
-      <span>💬 ${p.comments.length}</span>
+      <span class="lk ${p.liked_by_me?'on':''}" id="bdDlike">${p.liked_by_me?'❤️':'🤍'} ${p.like_count}</span>
+      <span>💬 ${p.comment_count}</span>
     </div>
-    <div class="bd-cbox">
-      ${p.comments.map((c,ci)=> (c.hidden || isBlocked(c.user)) ? "" : `
-        <div class="bd-cmt">
-          <div class="bd-ava">${c.avatar||"🙂"}</div>
-          <div style="flex:1"><div class="c-name">${c.user}${c.premium?' <span class="bd-badge">🌿</span>':''}</div>
-          <div class="c-text">${c.text}</div></div>
-          ${moreBtn("comment", p.id, ci)}
-        </div>`).join("") || `<div style="color:#a9a390;font-size:13px;padding:6px 0">첫 댓글을 남겨보세요</div>`}
-    </div>`;
+    <div class="bd-cbox">${cmts}</div>`;
+
   document.getElementById("bdDlike").onclick = ()=> toggleLike(p.id);
   dbody.querySelectorAll("[data-more]").forEach(b=>{
-    b.onclick = ()=> openMore(b.dataset.more, +b.dataset.mid, b.dataset.ci != null ? +b.dataset.ci : null);
+    b.onclick = ()=> openMore(b.dataset.more, +b.dataset.mid);
   });
 }
 
 /* 댓글 입력 */
-document.getElementById("bdCsend").onclick = ()=>{
-  const f = document.getElementById("bdCfield");
-  const txt = f.value.trim();
+const csend  = document.getElementById("bdCsend");
+const cfield = document.getElementById("bdCfield");
+csend.onclick = ()=>{
+  const txt = cfield.value.trim();
   if(!txt || !curPost) return;
   if(hasBanned(txt)){ M.toast("부적절한 표현이 포함되어 있어 등록할 수 없습니다"); return; }
   M.kakao(()=>{
-    curPost.comments.push({ user:M.session.user.name, avatar:M.session.user.avatar,
-      premium:M.session.premium, text:txt });
-    f.value=""; renderDetail(); renderList();
-    M.toast("댓글을 남겼어요 (목업)");
+    const pid = curPost.id;
+    csend.disabled = true;
+    api.feed.addComment(pid, txt)
+      .then(()=>{
+        cfield.value = "";
+        const row = posts.find(x=>x.id===pid);
+        if(row) row.comment_count++;
+        if(curPost && curPost.id === pid && curPost !== row) curPost.comment_count++;
+        renderList();
+        return loadComments(pid);
+      })
+      .catch(e=>{
+        if(e && e.code === "AUTH"){ M.kakao(()=>{}); return; }
+        M.toast(e && e.message || "댓글을 남기지 못했어요");
+      })
+      .then(()=>{ csend.disabled = false; });
   });
 };
+cfield.addEventListener("keydown", e=>{ if(e.key === "Enter") csend.onclick(); });
 
 /* ---------- 글쓰기 ---------- */
 const write = document.getElementById("bdWrite");
@@ -4641,29 +4795,72 @@ CATS.filter(c=>c.id!=="all").forEach(c=>{
 document.getElementById("bdFab").onclick = ()=> M.kakao(()=> write.classList.add("show"));
 document.getElementById("bdWback").onclick = ()=> write.classList.remove("show");
 
-const photoTypes = ["tomato","lettuce","marigold","basil","plot","hugel","sprout"];
-let photoIdx = 0;
-document.getElementById("bdWphoto").onclick = ()=>{
-  writePhoto = photoTypes[photoIdx++ % photoTypes.length];
-  document.getElementById("bdWpreview").innerHTML = `<div class="bd-img">${photo(writePhoto)}</div>`;
+const wfile    = document.getElementById("bdWfile");
+const wpreview = document.getElementById("bdWpreview");
+document.getElementById("bdWphoto").onclick = ()=> wfile.click();
+
+wfile.onchange = ()=>{
+  const f = wfile.files && wfile.files[0];
+  if(!f) return;
+  if(!/^image\//.test(f.type)){ M.toast("이미지 파일만 올릴 수 있어요"); wfile.value=""; return; }
+  if(f.size > 20*1024*1024){ M.toast("사진이 너무 커요 (20MB 이하로 올려주세요)"); wfile.value=""; return; }
+  if(writeUrl) URL.revokeObjectURL(writeUrl);
+  writeFile = f;
+  writeUrl = URL.createObjectURL(f);
+  wpreview.innerHTML = `<div class="bd-img"><img src="${writeUrl}" alt=""></div>
+    <button class="bd-photo" id="bdWclear" type="button">사진 빼기</button>`;
+  document.getElementById("bdWclear").onclick = clearPhoto;
 };
 
-document.getElementById("bdWsubmit").onclick = ()=>{
-  const txt = document.getElementById("bdWtext").value.trim();
+function clearPhoto(){
+  if(writeUrl) URL.revokeObjectURL(writeUrl);
+  writeFile = null; writeUrl = null; wfile.value = "";
+  wpreview.innerHTML = "";
+}
+
+const wsubmit = document.getElementById("bdWsubmit");
+wsubmit.onclick = ()=>{
+  const ta = document.getElementById("bdWtext");
+  const txt = ta.value.trim();
   if(!txt){ M.toast("내용을 입력해주세요"); return; }
   if(hasBanned(txt)){ M.toast("부적절한 표현이 포함되어 있어 등록할 수 없습니다"); return; }
-  posts.unshift({ id:++seq, cat:writeCat, user:M.session.user.name, avatar:M.session.user.avatar,
-    premium:M.session.premium, time:"방금", text:txt, img:writePhoto,
-    likes:0, liked:false, comments:[] });
-  document.getElementById("bdWtext").value="";
-  document.getElementById("bdWpreview").innerHTML=""; writePhoto=null;
-  write.classList.remove("show");
-  curCat="all";
-  catBox.querySelectorAll(".bd-cat").forEach((x,i)=>x.classList.toggle("sel",i===0));
-  renderList();
-  window.scrollTo({top:0,behavior:"smooth"});
-  M.toast("글이 올라갔어요! (목업)");
+
+  wsubmit.disabled = true;
+  wsubmit.textContent = writeFile ? "사진 올리는 중…" : "올리는 중…";
+
+  api.feed.create({ category: writeCat, body: txt,
+                    imageFile: writeFile, imagePlaceholder: writeUrl })
+    .then(()=>{
+      ta.value = "";
+      wpreview.innerHTML = "";
+      writeFile = null; writeUrl = null; wfile.value = "";   /* 로컬 모드는 URL을 계속 씁니다 */
+      write.classList.remove("show");
+      curCat = "all";
+      catBox.querySelectorAll(".bd-cat").forEach((x,i)=>x.classList.toggle("sel", i===0));
+      window.scrollTo({top:0, behavior:"smooth"});
+      M.toast("글이 올라갔어요 🌱");
+      return loadList();
+    })
+    .catch(e=>{
+      if(e && e.code === "AUTH"){ M.kakao(()=>{}); return; }
+      M.toast(e && e.message || "글을 올리지 못했어요");
+    })
+    .then(()=>{ wsubmit.disabled = false; wsubmit.textContent = "올리기"; });
 };
+
+/* ---------- 로그인 상태가 바뀌면 다시 그립니다 ----------
+   내 글 여부(is_mine)·좋아요 여부(liked_by_me)·차단 필터가 모두
+   로그인한 사람 기준으로 계산되기 때문입니다.
+   onChange 는 등록 즉시 현재 상태로 한 번 불리므로 첫 로딩도 겸합니다. */
+api.auth.onChange(()=>{
+  closeDetail();
+  loadList();
+  refreshBlocked();
+});
+
+/* 설정 화면에서 차단을 해제했을 때 목록을 되살리기 위해 열어둡니다 */
+window.pconReloadBoard   = loadList;
+window.pconRefreshBlocked = refreshBlocked;
 
 })();
 
@@ -5248,13 +5445,10 @@ function act(a){
 /* ---------- 차단 목록 ---------- */
 function blockedList(){
   var api = window.PCON && window.PCON.api;
-  if(api && api.mode === "supabase"){
-    api.moderation.blockedList()
-      .then(function(rows){ showBlockedList(rows); })
-      .catch(function(e){ MK.toast(e.message || "차단 목록을 불러오지 못했어요"); });
-    return;
-  }
-  showBlockedList(MK.session.blocked);
+  if(!api){ showBlockedList(MK.session.blocked || []); return; }
+  api.moderation.blockedList()
+    .then(function(rows){ MK.session.blocked = rows || []; showBlockedList(MK.session.blocked); })
+    .catch(function(e){ MK.toast(e.message || "차단 목록을 불러오지 못했어요"); });
 }
 
 function showBlockedList(list){
@@ -5274,15 +5468,15 @@ function showBlockedList(list){
       var i = +btn.dataset.unblock;
       var target = list[i];
       closeModal();
-      if(api && api.mode === "supabase"){
-        api.moderation.unblock(target.id)
-          .then(function(){ MK.toast("차단을 해제했어요"); render(); })
-          .catch(function(e){ MK.toast(e.message || "해제하지 못했어요"); });
-        return;
-      }
-      MK.session.blocked.splice(i, 1);
-      MK.toast("차단을 해제했어요");
-      render();
+      if(!api){ MK.session.blocked.splice(i, 1); MK.toast("차단을 해제했어요"); render(); return; }
+      api.moderation.unblock(target.id)
+        .then(function(){
+          MK.toast("차단을 해제했어요");
+          if(typeof window.pconRefreshBlocked === "function") window.pconRefreshBlocked();
+          if(typeof window.pconReloadBoard === "function") window.pconReloadBoard();
+          render();
+        })
+        .catch(function(e){ MK.toast(e.message || "해제하지 못했어요"); });
     };
   });
 }
@@ -5458,7 +5652,8 @@ window.pconRenderSettings = render;
      쓰고 있습니다. 그 둘을 진짜 인증에 이어두면, 5,200줄을
      통째로 고치지 않고도 로그인·로그아웃·계정 삭제가 실제로 돕니다.
 
-     아직 목업인 것: 게시판 글·댓글, 텃밭 저장 (다음 단계에서 교체)
+     게시판·텃밭 모두 서버에 연결돼 있습니다. config.js 가 비어 있으면
+     로컬(메모리) 모드로 돌아 예시 글이 보입니다.
 ═══════════════════════════════════════════════════════════════ -->
 <script>
 (function () {
@@ -5468,11 +5663,10 @@ var api = window.PCON && window.PCON.api;
 var MK  = window.Mock;
 if (!api || !MK) return;
 
-/* 설정이 비어 있으면 예전처럼 목업으로 둡니다 */
-if (api.mode !== "supabase") {
-  console.info("[PCON] 목업 모드 — config.js 를 채우면 서버 모드로 전환됩니다.");
-  return;
-}
+/* 두 드라이버 모두 여기를 지납니다.
+   게시판·텃밭이 PCON.api 를 쓰기 때문에, 로컬(시연) 모드에서도
+   화면의 로그인 시트가 데이터 계층의 로그인과 같아야 합니다. */
+var LIVE = api.mode === "supabase";
 
 /* ---------- 로그인 상태를 앱 전체에 반영 ---------- */
 function syncSession(user) {
@@ -5490,8 +5684,8 @@ function syncSession(user) {
 
 api.auth.onChange(syncSession);
 
-/* 새로고침·카카오에서 돌아왔을 때 세션 복원 */
-api.init()
+/* 새로고침·카카오에서 돌아왔을 때 세션 복원 (로컬 모드는 복원할 게 없습니다) */
+if (LIVE) api.init()
   .then(function (user) {
     if (user && sessionStorage.getItem("pcon_just_logged_in") === "1") {
       sessionStorage.removeItem("pcon_just_logged_in");
@@ -5545,14 +5739,34 @@ MK.kakao = function (onDone) {
       '<div class="mk-ssub">텃밭 자랑, 질문, 나눔 — 로그인하고 함께해요</div>' +
       '<button class="mk-kakao">💬 카카오로 3초 만에 시작하기</button>' +
       '<button class="mk-later">나중에 할게요</button>' +
-      '<div class="mk-fine">로그인하면 <a href="terms.html" target="_blank" rel="noopener">이용약관</a>과 ' +
-      '<a href="privacy.html" target="_blank" rel="noopener">개인정보처리방침</a>에 동의하게 됩니다</div>' +
+      '<div class="mk-fine">' +
+        (LIVE ? '' : '시연 모드입니다 · 새로고침하면 사라집니다<br>') +
+        '로그인하면 <a href="terms.html" target="_blank" rel="noopener">이용약관</a>과 ' +
+        '<a href="privacy.html" target="_blank" rel="noopener">개인정보처리방침</a>에 동의하게 됩니다</div>' +
     '</div>';
 
   var btn = wrap.querySelector(".mk-kakao");
   btn.onclick = function () {
     btn.disabled = true;
-    btn.textContent = "카카오로 이동 중…";
+    btn.textContent = LIVE ? "카카오로 이동 중…" : "들어가는 중…";
+
+    /* 로컬(시연) 모드 — 페이지를 떠나지 않으므로 콜백을 바로 잇습니다 */
+    if (!LIVE) {
+      api.auth.signInWithKakao()
+        .then(function (u) {
+          wrap.remove();
+          MK.toast((u && u.name ? u.name : "손님") + "님, 환영합니다 🌱 (시연 모드)");
+          onDone && onDone();
+        })
+        .catch(function (e) {
+          btn.disabled = false;
+          btn.textContent = "💬 카카오로 3초 만에 시작하기";
+          MK.toast(e.message || "로그인하지 못했어요");
+        });
+      return;
+    }
+
+    /* 서버 모드 — 카카오로 넘어갔다 돌아옵니다. 콜백은 이어지지 않습니다. */
     try { sessionStorage.setItem("pcon_just_logged_in", "1"); } catch (e) {}
     api.auth.signInWithKakao().catch(function (e) {
       btn.disabled = false;
@@ -5565,7 +5779,9 @@ MK.kakao = function (onDone) {
   document.body.appendChild(wrap);
 };
 
-console.info("[PCON] 서버 모드 — 카카오 로그인이 실제로 동작합니다.");
+console.info(LIVE
+  ? "[PCON] 서버 모드 — 카카오 로그인이 실제로 동작합니다."
+  : "[PCON] 시연 모드 — config.js 를 채우면 서버 모드로 전환됩니다. 글은 새로고침하면 사라집니다.");
 })();
 </script>
 <!-- ══════════════════ PCON_AUTH_BRIDGE_END ══════════════════ -->
