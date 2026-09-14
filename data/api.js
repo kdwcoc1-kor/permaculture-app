@@ -47,6 +47,24 @@ function httpsUrl(u) {
   return String(u).replace(/^http:\/\//i, "https://");
 }
 
+/* ────────────────────────────────────────────────────────────
+   앱(Capacitor) 안에서 도는 중인가?
+   웹 브라우저에서는 항상 false 라, 아래 분기는 앱에서만 걸립니다.
+   ──────────────────────────────────────────────────────────── */
+function isNative() {
+  var C = global.Capacitor;
+  return !!(C && typeof C.isNativePlatform === "function" && C.isNativePlatform());
+}
+function nativePlugin(name) {
+  var C = global.Capacitor;
+  return (C && C.Plugins && C.Plugins[name]) || null;
+}
+
+/* 카카오가 로그인 뒤 앱으로 돌아올 주소.
+   AndroidManifest 의 intent-filter, Supabase 의 Redirect URLs,
+   이 값 셋이 반드시 같아야 합니다. */
+var NATIVE_REDIRECT = CFG.NATIVE_REDIRECT_URL || "kr.permacultureon.app://login-callback";
+
 function normalize(error) {
   if (!error) return null;
   var msg = error.message || "";
@@ -144,6 +162,42 @@ function supabaseDriver(sb) {
     return me;
   }
 
+  /* ── 앱 ── 카카오가 돌려보낸 주소를 받아 세션으로 바꿉니다 ──
+     kr.permacultureon.app://login-callback?code=... 형태로 들어옵니다.
+     custom scheme 은 new URL() 이 제대로 못 읽는 기기가 있어
+     쿼리 문자열을 직접 잘라 씁니다. */
+  if (isNative()) {
+    var AppPlugin = nativePlugin("App");
+    if (AppPlugin) {
+      AppPlugin.addListener("appUrlOpen", async function (ev) {
+        var url = (ev && ev.url) || "";
+        if (url.indexOf(NATIVE_REDIRECT) !== 0) return;
+
+        var Browser = nativePlugin("Browser");
+        if (Browser) { try { await Browser.close(); } catch (e) {} }
+
+        var qs = url.split("?")[1] || "";
+        var params = new URLSearchParams(qs.split("#")[0]);
+        var code = params.get("code");
+        var errDesc = params.get("error_description") || params.get("error");
+
+        if (!code) {
+          emit();
+          if (errDesc) console.warn("[PCON] 로그인 실패:", errDesc);
+          return;
+        }
+        try {
+          var x = await sb.auth.exchangeCodeForSession(code);
+          if (x.error) throw x.error;
+          await refresh();
+        } catch (e) {
+          console.warn("[PCON] 세션 교환 실패:", e && e.message);
+          me = null; emit();
+        }
+      });
+    }
+  }
+
   sb.auth.onAuthStateChange(function (_evt, session) {
     if (!session) { me = null; emit(); return; }
     loadProfile(session.user.id).then(function (p) { me = p; emit(); })
@@ -188,6 +242,24 @@ function supabaseDriver(sb) {
            CFG.KAKAO_SCOPES 는 항목을 더 추가할 때만 씁니다. 보통은 비워두세요. */
         var opts = { redirectTo: CFG.REDIRECT_URL || global.location.href };
         if (CFG.KAKAO_SCOPES) opts.scopes = CFG.KAKAO_SCOPES;
+
+        /* ── 앱 안 ── 시스템 브라우저로 열고 딥링크로 돌아옵니다.
+           앱 내부 WebView 로 카카오를 열면 안 됩니다:
+           구글·카카오 모두 보안상 막고 있고, 돌아올 길도 없습니다. */
+        if (isNative()) {
+          var Browser = nativePlugin("Browser");
+          if (!Browser) throw ApiError("UNKNOWN", "브라우저를 열 수 없어요");
+
+          opts.redirectTo = NATIVE_REDIRECT;
+          opts.skipBrowserRedirect = true;
+
+          var nres = await sb.auth.signInWithOAuth({ provider: "kakao", options: opts });
+          if (nres.error) throw normalize(nres.error);
+          if (!nres.data || !nres.data.url) throw ApiError("UNKNOWN", "로그인 주소를 받지 못했어요");
+
+          await Browser.open({ url: nres.data.url, presentationStyle: "popover" });
+          return;   // 나머지는 appUrlOpen 이 이어받습니다
+        }
 
         var res = await sb.auth.signInWithOAuth({ provider: "kakao", options: opts });
         if (res.error) throw normalize(res.error);
@@ -800,8 +872,17 @@ var api;
 var configured = !!(CFG.SUPABASE_URL && CFG.SUPABASE_ANON_KEY);
 
 if (configured && global.supabase && global.supabase.createClient) {
+  /* 앱에서는 주소창이 없으니 detectSessionInUrl 이 소용없고,
+     딥링크로 받은 코드를 직접 교환해야 하므로 PKCE 를 씁니다.
+     웹은 지금까지 쓰던 방식 그대로 둡니다 — 이미 잘 돌고 있습니다. */
+  var native = isNative();
   var client = global.supabase.createClient(CFG.SUPABASE_URL, CFG.SUPABASE_ANON_KEY, {
-    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: !native,
+      flowType: native ? "pkce" : "implicit"
+    }
   });
   api = supabaseDriver(client);
 } else {
