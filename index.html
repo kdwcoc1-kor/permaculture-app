@@ -1113,7 +1113,7 @@ window.PCON_SEED = { posts: [
     text:"상추 모종 20포기 남아요. 도양읍 근처 직접 가져가실 분! 다음 주까지요.",
     img:"sprout", likes:12, liked:false, comments:[] },
   { id:8, cat:"brag", user:"통나무장인", avatar:"🪵", time:"4일 전",
-    text:"후겔컬처 두둑 드디어 완성! 통나무 묻는 데만 하루 종일 걸렸네요. 앱 3D 보고 따라 만들었는데 뿌듯합니다 💪",
+    text:"후겔컬처 두둑 드디어 완성! 통나무 묻는 데만 하루 종일 걸렸네요. 앱 배치도 보고 따라 만들었는데 뿌듯합니다 💪",
     img:"hugel", likes:42, liked:false,
     comments:[ {user:"초록엄지",avatar:"👩‍🌾",premium:true,text:"우와 규모가 상당한데요? 2년 뒤가 기대되네요"},
                {user:"텃밭삼촌",avatar:"👨‍🌾",text:"저도 도전해보고 싶어요. 통나무는 어디서 구하셨어요?"},
@@ -1130,7 +1130,7 @@ window.PCON_SEED = { posts: [
 <script>
 /* ============================================================
    퍼머컬처ON 목업 공용 — 세션 / 카카오 시트 / 토스트 / 모달
-   (실제 로그인·결제 없음. 화면 결정용 목업)
+   (토스트 · 모달 · 로그인 시트 — 화면 공용 도구)
    ============================================================ */
 window.Mock = (function(){
   const session = { user:null, premium:false, gardens:[] };
@@ -3390,7 +3390,7 @@ renderPalette(); renderPlaced(); renderPrev();
 
 
 /* ============================================================
-   프리미엄 "내 텃밭" 목업 — 저장/결제벽/드래그편집/내보내기
+   "내 텃밭" — 저장 / 드래그 편집 / 내보내기 (v1.0 전부 무료)
    (garden IIFE 내부: state, lastResult, goto, buildLayout,
     renderTechBed, gdShowPlan, *_BY_ID 접근 가능)
    ============================================================ */
@@ -3435,36 +3435,21 @@ function gdSyncGardens(){
 }
 window.pconSyncGardens = gdSyncGardens;
 
-/* ---------- 결제벽 ---------- */
-function gdPaywall(afterSubscribe){
+/* v1.0 무료 — 서버(config.js)의 FREE_GARDEN_LIMIT 와 같아야 합니다 */
+const GD_SAVE_LIMIT = (window.PCON_CONFIG && window.PCON_CONFIG.FREE_GARDEN_LIMIT) || 20;
+
+/* ---------- 저장 개수 안내 ----------
+   v1.0 은 완전 무료입니다. 예전에는 여기서 월·연 구독 가격을 보여주고
+   "구독 시작하기" 를 누르면 결제 없이 프리미엄이 켜졌는데,
+   Google Play 정책상 앱에서 디지털 상품을 팔려면 Play 결제를 써야 합니다.
+   결제를 붙이기 전까지는 가격도 구매 버튼도 두지 않습니다.        */
+function gdPaywall(){
   MK.modal({
-    title:"내 텃밭 프리미엄 🌿",
-    body:`
-      <ul class="mk-bene">
-        <li>💾 텃밭 디자인 <b>무제한 저장</b></li>
-        <li>✏️ 작물 <b>드래그로 직접 편집</b></li>
-        <li>🖼 인쇄용 <b>배치도 이미지 내보내기</b></li>
-        <li>🔔 내 작물 기준 <b>월별 할 일 알림</b></li>
-        <li>📔 텃밭 일지 · 게시판 🌿 배지</li>
-      </ul>
-      <div class="mk-plans">
-        <div class="mk-plan" data-pl="m"><div class="pl-name">월간</div><div class="pl-price">3,900원</div><div class="pl-sub">부담 없이</div></div>
-        <div class="mk-plan sel" data-pl="y"><div class="pl-name">연간</div><div class="pl-price">29,000원</div><div class="pl-sub">2.6개월 무료</div></div>
-      </div>
-      <div class="mk-fine" style="text-align:left;margin-top:8px">목업 화면 · 실제 결제되지 않습니다</div>`,
-    buttons:[
-      { label:"다음에" },
-      { label:"구독 시작하기", primary:true, onClick:()=>{
-          MK.session.premium = true;
-          MK.toast("프리미엄이 활성화됐어요 🌿 (목업)");
-          gdRefreshMyCnt();
-          afterSubscribe && afterSubscribe();
-      }}
-    ]
-  });
-  document.querySelectorAll(".mk-plan").forEach(p=> p.onclick=()=>{
-    document.querySelectorAll(".mk-plan").forEach(x=>x.classList.remove("sel"));
-    p.classList.add("sel");
+    title:"텃밭을 " + GD_SAVE_LIMIT + "개까지 저장할 수 있어요",
+    body:"지금은 모든 기능을 무료로 쓰실 수 있습니다.<br><br>" +
+         "저장 칸이 다 찼다면 <b>내 텃밭</b>에서 안 쓰는 설계를 지우고 " +
+         "다시 저장해 주세요.",
+    buttons:[{ label:"확인", primary:true }]
   });
 }
 
@@ -3544,7 +3529,7 @@ function gdDoSave(){
       .catch(function(e){
         /* 개수 제한은 서버가 판단합니다. 앱에서 세지 않습니다 —
            앱에서 세면 개발자도구로 우회되고, 유료화의 근거가 무너집니다. */
-        if(e.code === "QUOTA"){ gdPaywall(null); return; }
+        if(e.code === "QUOTA"){ gdPaywall(); return; }
         if(e.code === "AUTH"){ MK.kakao(gdDoSave); return; }
         MK.toast(e.message || "저장하지 못했어요");
       });
@@ -3552,14 +3537,13 @@ function gdDoSave(){
   }
 
   /* 목업 모드 — 서버와 같은 규칙(무료 3개) */
-  if(!MK.session.premium && MK.session.gardens.length >= 3){ gdPaywall(gdDoSave); return; }
+  if(MK.session.gardens.length >= GD_SAVE_LIMIT){ gdPaywall(); return; }
   MK.session.gardens.unshift(Object.assign({ id: Date.now(), placeSlim: g.placement }, g));
   gdRefreshMyCnt();
   MK.toast("내 텃밭에 저장했어요 💾");
 }
 
 if(gdEditBtn) gdEditBtn.onclick = ()=>{
-  if(!MK.session.premium){ gdPaywall(()=> gdEditBtn.onclick()); return; }
   gdEditing = !gdEditing;
   gdEditBtn.textContent = gdEditing ? "✓ 완료" : "✏️ 편집";
   gdEditBtn.classList.toggle("on", gdEditing);
@@ -3568,7 +3552,6 @@ if(gdEditBtn) gdEditBtn.onclick = ()=>{
 };
 
 if(gdExportBtn) gdExportBtn.onclick = ()=>{
-  if(!MK.session.premium){ gdPaywall(()=> gdExportBtn.onclick()); return; }
   const svg = gdBedSvg();
   if(!svg){ MK.toast("배치도가 없어요"); return; }
   try{
@@ -3608,7 +3591,7 @@ function gdRenderMy(){
   wrap.innerHTML = `<div class="mk-sheet" style="max-height:76vh;overflow-y:auto">
     <div class="mk-shandle"></div>
     <div class="mk-stitle">🌾 내 텃밭</div>
-    <div class="mk-ssub">${MK.session.premium ? "프리미엄 🌿 무제한 저장" : "무료 · 3개까지 저장"}</div>
+    <div class="mk-ssub">최대 ${GD_SAVE_LIMIT}개까지 저장할 수 있어요</div>
     ${gs.length ? gs.map(g=>`
       <div class="gd-mycard">
         <div>
@@ -5305,7 +5288,7 @@ function render(){
           '<div class="st-av">' + avatarHTML(u.avatar) + '</div>' +
           '<div class="st-ainfo">' +
             '<div class="st-aname">' + esc(u.name) +
-              (pr ? '<span class="st-badge">🌿 프리미엄</span>' : '') + '</div>' +
+              '</div>' +
             '<div class="st-asub">카카오 계정으로 로그인됨</div>' +
           '</div>' +
         '</div>' +
@@ -5318,22 +5301,9 @@ function render(){
         '<button class="st-login" id="stLogin">💬 카카오로 3초 만에 시작하기</button>' +
       '</div></div>';
 
-  var subCard =
-    '<div class="st-sec">구독</div>' +
-    '<div class="st-card">' +
-      '<div class="st-row static">' +
-        '<span class="ic">🌿</span>' +
-        '<span class="lb">현재 플랜</span>' +
-        '<span class="vl">' + (pr ? "프리미엄" : "무료") + '</span>' +
-      '</div>' +
-      (pr
-        ? '<button class="st-row" data-act="manage"><span class="ic">🧾</span>' +
-          '<span class="lb">구독 관리 · 해지<small>' + storeName() + '에서 관리합니다</small></span><span class="ar">›</span></button>'
-        : '<button class="st-row" data-act="upsell"><span class="ic">✨</span>' +
-          '<span class="lb">프리미엄 알아보기<small>무제한 저장 · 편집 · 내보내기 · 할 일 알림</small></span><span class="ar">›</span></button>') +
-      '<button class="st-row" data-act="restore"><span class="ic">🔄</span>' +
-        '<span class="lb">구매 복원<small>기기를 바꿨거나 앱을 다시 설치했다면</small></span><span class="ar">›</span></button>' +
-    '</div>';
+  /* v1.0 은 완전 무료라 구독 칸을 두지 않습니다.
+     진짜 Play 결제를 붙이면 그때 되살립니다. */
+  var subCard = "";
 
   var notiCard =
     '<div class="st-sec">알림</div>' +
@@ -5454,25 +5424,9 @@ function bind(){
 }
 
 function act(a){
-  if(a === "manage"){
-    var p = platform();
-    if(p === "ios")          openExternal("https://apps.apple.com/account/subscriptions");
-    else if(p === "android") openExternal("https://play.google.com/store/account/subscriptions");
-    else MK.modal({
-      title:"구독 관리",
-      body:"구독은 결제하신 앱스토어 또는 구글플레이의 <b>구독 관리</b> 화면에서 해지할 수 있습니다.<br><br>" +
-           "<b>iOS</b> — 설정 → [내 이름] → 구독<br><b>Android</b> — Play 스토어 → 프로필 → 결제 및 구독"
-    });
-  }
-  else if(a === "upsell"){
-    close();
-    MK.toast("텃밭 탭에서 배치도를 만들고 저장해보세요 🌿");
-  }
-  else if(a === "restore"){
-    MK.toast("구매 내역을 확인하고 있어요…");
-    setTimeout(function(){ MK.toast("복원할 구독이 없습니다"); }, 1200);
-  }
-  else if(a === "moderation"){ close(); if(window.pconOpenModeration) window.pconOpenModeration(); }
+  /* v1.0 은 완전 무료 — 구독 관리 / 프리미엄 안내 / 구매 복원은 없앴습니다.
+     진짜 Play 결제를 붙일 때 되살리세요. */
+  if(a === "moderation"){ close(); if(window.pconOpenModeration) window.pconOpenModeration(); }
   else if(a === "blocked")    blockedList();
   else if(a === "guide")      communityGuide();
   else if(a === "onboarding"){ close(); if(window.pconShowOnboarding) window.pconShowOnboarding(); }
@@ -5588,17 +5542,12 @@ function deleteStep1(){
           '<li>텃밭 일지와 업로드한 사진</li>' +
           '<li>작성한 게시글 · 댓글 · 좋아요</li>' +
         '</ul>' +
-        (pr
-          ? '<div class="st-warn"><b>구독은 자동으로 해지되지 않습니다.</b><br>' +
-            '계정을 삭제해도 ' + storeName() + '의 구독은 계속 결제됩니다. ' +
-            '삭제하기 전에 먼저 구독을 해지해 주세요.</div>'
-          : '') +
       '</div>',
-    buttons: pr
-      ? [ { label:"먼저 구독 해지하기", primary:true, onClick:function(){ act("manage"); } },
-          { label:"그래도 삭제", onClick:deleteStep2 } ]
-      : [ { label:"취소" },
-          { label:"계속", primary:true, onClick:deleteStep2 } ]
+    /* v1.0 은 구독이 없어 "먼저 구독을 해지하세요" 안내를 두지 않습니다.
+       진짜 Play 결제를 붙이면 그때 되살려야 합니다 — 계정만 지우고
+       구독이 남으면 계속 결제됩니다. */
+    buttons: [ { label:"취소" },
+               { label:"계속", primary:true, onClick:deleteStep2 } ]
   });
 }
 
