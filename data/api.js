@@ -298,6 +298,37 @@ function supabaseDriver(sb) {
       }
     },
 
+    /* ── 운영자 ──────────────────────────────────────────────
+       약관 제9조: 신고 접수 후 24시간 이내에 검토·조치.
+       admin_report_queue 뷰는 운영자가 아니면 0건을 돌려주므로
+       화면에서 권한 오류를 따로 다룰 필요가 없습니다.        */
+    admin: {
+      is: function () { return !!(me && me.role === "admin"); },
+
+      queue: async function (opts) {
+        opts = opts || {};
+        var q = sb.from("admin_report_queue").select("*");
+        if (opts.pending === true)  q = q.eq("pending", true);
+        if (opts.pending === false) q = q.eq("pending", false);
+        q = q.order("pending",            { ascending: false })
+             .order("first_reported_at",  { ascending: true })
+             .limit(opts.limit || 50);
+        var res = await q;
+        if (res.error) throw normalize(res.error);
+        return res.data;
+      },
+
+      resolve: function (targetType, targetId, action, days) {
+        requireAuth();
+        return call("resolve_target", {
+          p_target_type:  targetType,
+          p_target_id:    targetId,
+          p_action:       action,
+          p_suspend_days: days || 7
+        });
+      }
+    },
+
     gardens: {
       list: async function () {
         requireAuth();
@@ -395,10 +426,11 @@ async function uploadPostImage(sb, userId, file) {
 function localDriver() {
   var listeners = [];
   var me = null;
-  var seq = { post: 100, comment: 100 };
+  var seq = { post: 100, comment: 100, report: 0 };
 
   var BANNED = ["씨발","시발","씹할","좆","병신","지랄","개새끼","니미","엠창","fuck","shit"];
   var posts = [], comments = [], likes = [], blocks = [], reports = [], gardens = [];
+  var suspended = {};        // { user_id: 해제시각 ISO }
   var prefs = { todo: true, comment: true };
 
   // 화면에 보여줄 예시 글. index.html의 기존 목업 데이터를 넣어두면 그걸 씁니다.
@@ -427,6 +459,10 @@ function localDriver() {
   function emit() { listeners.forEach(function (cb) { try { cb(me); } catch (e) {} }); }
   function requireAuth() {
     if (!me) throw ApiError("AUTH", "로그인이 필요합니다");
+    var until = suspended[me.id];
+    if (until && Date.parse(until) > Date.now())
+      throw ApiError("BLOCKED", "이용이 제한된 상태입니다 (해제: "
+        + new Date(until).toLocaleDateString("ko-KR") + ")");
     return me;
   }
   function checkBanned(text) {
@@ -573,7 +609,9 @@ function localDriver() {
         if (!target) return Promise.reject(ApiError("NOT_FOUND", "대상을 찾을 수 없습니다"));
         if (target.author_id === me.id)
           return Promise.reject(ApiError("UNKNOWN", "본인의 게시물은 신고할 수 없습니다"));
-        reports.push({ reporter: me.id, type: type, target: id, reason: reason });
+        reports.push({ id: ++seq.report, reporter: me.id, type: type, target: id,
+                       reason: reason, status: "pending", at: new Date().toISOString(),
+                       handled_at: null, action_taken: null });
         return Promise.resolve();
       },
       block: function (userId) {
@@ -594,6 +632,97 @@ function localDriver() {
             var src = p || c || {};
             return { id: b.blocked, name: src.author_name || "이용자", avatar: src.author_avatar || "🙍" };
           }));
+      }
+    },
+
+    /* 서버와 같은 규칙을 흉내냅니다 — 화면 코드를 두 번 쓰지 않으려고 */
+    admin: {
+      is: function () { return !!(me && me.role === "admin"); },
+
+      queue: function (opts) {
+        opts = opts || {};
+        if (!me || me.role !== "admin") return Promise.resolve([]);
+
+        var byTarget = {};
+        reports.forEach(function (r) {
+          var k = r.type + ":" + r.target;
+          var g = byTarget[k];
+          if (!g) {
+            g = byTarget[k] = {
+              target_type: r.type, target_id: r.target,
+              first_report_id: r.id, report_count: 0,
+              first_reported_at: r.at, last_reported_at: r.at,
+              pending: false, reasons: [], memos: [],
+              handled_at: null, action_taken: null
+            };
+          }
+          g.report_count++;
+          if (g.reasons.indexOf(r.reason) < 0) g.reasons.push(r.reason);
+          if (r.at < g.first_reported_at) g.first_reported_at = r.at;
+          if (r.at > g.last_reported_at)  g.last_reported_at  = r.at;
+          if (r.status !== "resolved" && r.status !== "rejected") g.pending = true;
+          if (r.handled_at) { g.handled_at = r.handled_at; g.action_taken = r.action_taken; }
+        });
+
+        var out = Object.keys(byTarget).map(function (k) {
+          var g = byTarget[k];
+          var t = g.target_type === "post"
+            ? posts.find(function (p) { return p.id === g.target_id; })
+            : comments.find(function (c) { return c.id === g.target_id; });
+          t = t || {};
+          var age = Date.now() - Date.parse(g.first_reported_at);
+          g.overdue    = g.pending && age > 24 * 3600e3;
+          g.hours_open = Math.round(age / 3600e3);
+          g.body           = t.body || "(삭제된 내용)";
+          g.content_status = t.status || "removed";
+          g.image_path     = t.image_path || null;
+          g.category       = t.category || null;
+          g.parent_post_id = t.post_id || null;
+          g.content_created_at = t.created_at || g.first_reported_at;
+          g.author_id      = t.author_id || null;
+          g.author_name    = t.author_name || "탈퇴한 이용자";
+          g.author_avatar  = t.author_avatar || null;
+          g.author_suspended_until = (suspended[t.author_id] || null);
+          return g;
+        });
+
+        if (opts.pending === true)  out = out.filter(function (g) { return g.pending; });
+        if (opts.pending === false) out = out.filter(function (g) { return !g.pending; });
+        out.sort(function (a, b) {
+          if (a.pending !== b.pending) return a.pending ? -1 : 1;
+          return Date.parse(a.first_reported_at) - Date.parse(b.first_reported_at);
+        });
+        return Promise.resolve(out.slice(0, opts.limit || 50));
+      },
+
+      resolve: function (type, id, action, days) {
+        if (!me || me.role !== "admin")
+          return Promise.reject(ApiError("UNKNOWN", "권한이 없습니다"));
+        if (["none", "removed", "suspended"].indexOf(action) < 0)
+          return Promise.reject(ApiError("UNKNOWN", "알 수 없는 조치입니다"));
+
+        var t = type === "post"
+          ? posts.find(function (p) { return p.id === id; })
+          : comments.find(function (c) { return c.id === id; });
+        if (!t) return Promise.reject(ApiError("NOT_FOUND", "대상을 찾을 수 없습니다"));
+
+        if (action === "removed" || action === "suspended") t.status = "removed";
+        else if (t.status === "under_review") t.status = "visible";
+
+        if (action === "suspended" && t.author_id)
+          suspended[t.author_id] =
+            new Date(Date.now() + (days || 7) * 86400e3).toISOString();
+
+        var n = 0;
+        reports.forEach(function (r) {
+          if (r.type === type && r.target === id && r.status !== "resolved" && r.status !== "rejected") {
+            r.status = action === "none" ? "rejected" : "resolved";
+            r.action_taken = action;
+            r.handled_at = new Date().toISOString();
+            n++;
+          }
+        });
+        return Promise.resolve(n);
       }
     },
 
@@ -640,8 +769,9 @@ function localDriver() {
       publicUrl: function (path) { return path; }
     },
 
-    /* 시연용 — 프리미엄 켜기 (로컬 모드에서만) */
-    _setPremium: function (v) { if (me) { me.premium = !!v; emit(); } }
+    /* 시연용 — 로컬 모드에서만 */
+    _setPremium: function (v) { if (me) { me.premium = !!v; emit(); } },
+    _setAdmin:   function (v) { if (me) { me.role = v ? "admin" : "user"; emit(); } }
   };
 }
 

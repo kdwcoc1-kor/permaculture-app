@@ -5231,6 +5231,25 @@ var prefs = {
   comment: LS.get("pcon_push_comment", true)
 };
 
+/* 운영자 배지 — 숫자는 서버에서 오므로, 먼저 그리고 나중에 채웁니다 */
+var modCount = null;      // { total, overdue } | null
+function modBadge(){
+  if(!modCount) return "";
+  if(modCount.overdue) return modCount.total + "건 · 지연 " + modCount.overdue;
+  return modCount.total ? modCount.total + "건" : "없음";
+}
+function refreshModBadge(){
+  if(typeof window.pconModCount !== "function") return;
+  window.pconModCount().then(function(c){
+    if(!c) return;
+    var same = modCount && modCount.total === c.total && modCount.overdue === c.overdue;
+    modCount = c;
+    var el = document.getElementById("stModCount");
+    if(el){ el.textContent = modBadge(); el.style.color = c.overdue ? "#B4513E" : ""; }
+    else if(!same) render();
+  });
+}
+
 function platform(){
   var ua = navigator.userAgent || "";
   if(/iPad|iPhone|iPod/.test(ua)) return "ios";
@@ -5242,6 +5261,7 @@ function openExternal(url){ window.open(url, "_blank", "noopener"); }
 /* ---------- 열기 / 닫기 ---------- */
 function open(){
   render();
+  refreshModBadge();
   view.classList.add("open");
   view.setAttribute("aria-hidden","false");
   document.body.style.overflow = "hidden";
@@ -5310,6 +5330,17 @@ function render(){
         '<button class="st-sw' + (prefs.comment ? " on" : "") + '" data-sw="comment" role="switch" aria-checked="' + prefs.comment + '" aria-label="댓글 알림"></button></div>' +
     '</div>';
 
+  /* 운영자에게만 보이는 칸 — 신고를 24시간 안에 처리해야 합니다 (약관 제9조) */
+  var A = window.PCON && window.PCON.api;
+  var adminCard = (A && A.admin && A.admin.is())
+    ? '<div class="st-sec">운영자</div>' +
+      '<div class="st-card">' +
+        '<button class="st-row" data-act="moderation"><span class="ic">🚩</span>' +
+          '<span class="lb">신고 처리<small>접수 후 24시간 이내 조치</small></span>' +
+          '<span class="vl" id="stModCount">' + modBadge() + '</span><span class="ar">›</span></button>' +
+      '</div>'
+    : '';
+
   var communityCard =
     '<div class="st-sec">커뮤니티</div>' +
     '<div class="st-card">' +
@@ -5358,7 +5389,7 @@ function render(){
     : '';
 
   body.innerHTML =
-    accountCard + subCard + notiCard + communityCard + appCard + infoCard + accountActions +
+    accountCard + adminCard + subCard + notiCard + communityCard + appCard + infoCard + accountActions +
     '<div class="st-foot">퍼머컬처ON v' + esc(APP_VERSION) + '<br>자연과 함께 설계하는 텃밭</div>';
 
   bind();
@@ -5425,6 +5456,7 @@ function act(a){
     MK.toast("구매 내역을 확인하고 있어요…");
     setTimeout(function(){ MK.toast("복원할 구독이 없습니다"); }, 1200);
   }
+  else if(a === "moderation"){ close(); if(window.pconOpenModeration) window.pconOpenModeration(); }
   else if(a === "blocked")    blockedList();
   else if(a === "guide")      communityGuide();
   else if(a === "onboarding"){ close(); if(window.pconShowOnboarding) window.pconShowOnboarding(); }
@@ -5643,6 +5675,309 @@ window.pconRenderSettings = render;
 </script>
 <!-- ══════════════════ PCON_SETTINGS_END ══════════════════ -->
 
+
+<!-- ══════════════════ PCON_MOD_START ══════════════════
+     운영자 신고 처리 화면 (App Store 1.2 / 약관 제9조)
+
+     신고는 서버에 잘 쌓이지만, 그걸 볼 화면이 없으면
+     "24시간 이내에 조치한다"는 약속을 지킬 방법이 없습니다.
+     운영자(profiles.role = 'admin')에게만 보입니다.
+═══════════════════════════════════════════════════════ -->
+<style>
+#modView{
+  position:fixed;inset:0;z-index:140;background:#F1EEDF;
+  display:flex;flex-direction:column;
+  transform:translateY(100%);visibility:hidden;
+  transition:transform .28s cubic-bezier(.32,.72,0,1),visibility .28s;
+}
+#modView.open{transform:none;visibility:visible}
+@media (prefers-reduced-motion:reduce){#modView{transition:none}}
+
+#modView .st-bar{flex:none}
+#modView .md-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:12px 16px calc(34px + env(safe-area-inset-bottom));max-width:600px;margin:0 auto;width:100%;box-sizing:border-box}
+
+.md-tabs{display:flex;gap:6px;margin-bottom:12px}
+.md-tab{flex:1;border:1.5px solid #ddd6bd;background:#fff;color:#6b6450;font-family:inherit;
+  font-size:13.5px;font-weight:700;padding:9px;border-radius:10px;cursor:pointer}
+.md-tab.on{background:#2E5339;border-color:#2E5339;color:#fff}
+
+.md-sum{background:#FCFAF1;border:1px solid #E2DBC4;border-radius:12px;padding:12px 14px;
+  margin-bottom:12px;font-size:13px;color:#5f5c48;line-height:1.7}
+.md-sum b{color:#2f4030}
+.md-sum .warn{color:#B4513E;font-weight:800}
+
+.md-card{background:#FCFAF1;border:1px solid #E2DBC4;border-radius:14px;padding:14px;margin-bottom:12px}
+.md-card.over{border-color:#e0a99c;box-shadow:0 0 0 2px #f6e4df inset}
+.md-top{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:9px}
+.md-why{background:#F1EEDF;border-radius:7px;padding:3px 8px;font-size:11.5px;font-weight:800;color:#6b6852}
+.md-flag{background:#B4513E;color:#fff;border-radius:7px;padding:3px 8px;font-size:11.5px;font-weight:800}
+.md-when{margin-left:auto;font-size:11.5px;color:#a9a390;flex:none}
+
+.md-who{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:13px}
+.md-who .av{width:26px;height:26px;border-radius:50%;background:#E3EDDC;display:grid;place-items:center;
+  font-size:13px;flex:none;overflow:hidden}
+.md-who .av img{width:100%;height:100%;object-fit:cover;display:block}
+.md-who b{color:#2f4030;font-weight:800}
+.md-who .sus{color:#B4513E;font-size:11.5px;font-weight:700}
+
+.md-body-text{background:#fff;border:1px solid #EFEADA;border-radius:10px;padding:11px 12px;
+  font-size:13.5px;line-height:1.65;color:#3a3327;white-space:pre-wrap;word-break:break-word;
+  max-height:190px;overflow-y:auto}
+.md-img{margin-top:8px;border-radius:10px;overflow:hidden;border:1px solid #EFEADA}
+.md-img img{display:block;width:100%;height:auto}
+.md-gone{color:#a9a390;font-style:italic}
+
+.md-acts{display:flex;gap:7px;margin-top:11px}
+.md-acts button{flex:1;border:1.5px solid #ddd6bd;background:#fff;color:#5f5c48;font-family:inherit;
+  font-size:12.5px;font-weight:800;padding:10px 4px;border-radius:10px;cursor:pointer;line-height:1.35}
+.md-acts button.keep{border-color:#bcd3b6;color:#2E5339}
+.md-acts button.del{border-color:#e5c6bd;color:#B4513E}
+.md-acts button.ban{background:#B4513E;border-color:#B4513E;color:#fff}
+.md-acts button:disabled{opacity:.5}
+
+.md-done{margin-top:10px;font-size:12.5px;color:#7a8378;border-top:1px dashed #d8cdb3;padding-top:9px}
+.md-done b{color:#2f4030}
+.md-empty{text-align:center;color:#a9a390;padding:44px 16px;font-size:14px;font-weight:700;line-height:1.9}
+.md-empty span{display:block;font-size:13px;font-weight:600;color:#bdb7a4}
+</style>
+
+<div id="modView" role="dialog" aria-modal="true" aria-label="신고 처리" aria-hidden="true">
+  <div class="st-bar">
+    <button id="modClose" aria-label="닫기">←</button>
+    <b>신고 처리</b>
+    <button id="modReload" style="margin-left:auto" aria-label="새로고침">↻</button>
+  </div>
+  <div class="md-body" id="modBody"></div>
+</div>
+
+<script>
+(function () {
+"use strict";
+
+var view = document.getElementById("modView");
+var body = document.getElementById("modBody");
+var MK   = window.Mock;
+if (!view || !MK) return;
+
+function api(){ return window.PCON && window.PCON.api; }
+
+var tab  = "pending";      // pending | done
+var rows = [];
+var busy = false;
+
+var REASON = {
+  abuse:"비방·모욕·협박", sexual:"음란물·청소년유해", hate:"차별·혐오",
+  privacy:"개인정보 노출", spam:"스팸·광고", fake:"사칭·허위", etc:"기타"
+};
+var ACTION = { removed:"삭제함", suspended:"삭제 + 이용제한", none:"위반 아님" };
+
+var ESCMAP = { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" };
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){ return ESCMAP[c]; }); }
+
+function ago(iso){
+  var t = Date.parse(iso);
+  if (!t) return "";
+  var s = Math.max(0, (Date.now() - t) / 1000);
+  if (s < 3600)  return Math.floor(s/60) + "분 전";
+  if (s < 86400) return Math.floor(s/3600) + "시간 전";
+  return Math.floor(s/86400) + "일 전";
+}
+function ymd(iso){
+  var d = new Date(iso);
+  return isNaN(d) ? "" : (d.getMonth()+1) + "/" + d.getDate();
+}
+
+function avatarHTML(a){
+  if (a && /^https?:\/\//.test(a))
+    return '<img src="' + esc(a) + '" alt="" referrerpolicy="no-referrer">';
+  return esc(a || "🧑‍🌾");
+}
+
+function imgHTML(path){
+  var A = api();
+  if (!path || !A) return "";
+  var SEED = ["tomato","lettuce","marigold","basil","plot","hugel","sprout"];
+  if (SEED.indexOf(path) >= 0) return '<div class="md-img" style="padding:10px;text-align:center;color:#a9a390;font-size:12px">(예시 그림)</div>';
+  var url = A.media.publicUrl(path);
+  return url ? '<div class="md-img"><img src="' + esc(url) + '" alt=""></div>' : "";
+}
+
+/* ---------- 열기 / 닫기 ---------- */
+function open(){
+  view.classList.add("open");
+  view.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+  load();
+}
+function close(){
+  view.classList.remove("open");
+  view.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+}
+document.getElementById("modClose").onclick = close;
+document.getElementById("modReload").onclick = function(){ load(); };
+document.addEventListener("keydown", function(e){
+  if (e.key === "Escape" && view.classList.contains("open")) close();
+});
+
+/* ---------- 불러오기 ---------- */
+function load(){
+  var A = api();
+  if (!A || !A.admin) { body.innerHTML = '<div class="md-empty">신고 창구를 열 수 없어요</div>'; return; }
+  body.innerHTML = '<div class="md-empty">불러오는 중…</div>';
+  return A.admin.queue({ pending: tab === "pending" })
+    .then(function (r) { rows = r || []; render(); })
+    .catch(function (e) {
+      body.innerHTML = '<div class="md-empty">불러오지 못했어요<span>' +
+        esc(e && e.message || "") + '</span></div>';
+    });
+}
+
+/* ---------- 그리기 ---------- */
+function render(){
+  var over = rows.filter(function (r) { return r.overdue; }).length;
+
+  var head =
+    '<div class="md-tabs">' +
+      '<button class="md-tab' + (tab === "pending" ? " on" : "") + '" data-tab="pending">대기 중</button>' +
+      '<button class="md-tab' + (tab === "done"    ? " on" : "") + '" data-tab="done">처리 완료</button>' +
+    '</div>';
+
+  if (tab === "pending") {
+    head += '<div class="md-sum">' +
+      '대기 중 <b>' + rows.length + '건</b>' +
+      (over ? ' · <span class="warn">24시간 초과 ' + over + '건</span>' : '') +
+      '<br>이용약관 제9조 — 접수 후 24시간 이내에 검토하고 결과를 알려야 합니다.' +
+      '</div>';
+  }
+
+  if (!rows.length) {
+    body.innerHTML = head + '<div class="md-empty">' +
+      (tab === "pending" ? '처리할 신고가 없어요 <span>깨끗합니다 🌿</span>'
+                         : '처리한 신고가 아직 없어요') + '</div>';
+    bind();
+    return;
+  }
+
+  body.innerHTML = head + rows.map(card).join("");
+  bind();
+}
+
+function card(r){
+  var what = r.target_type === "post" ? "글" : "댓글";
+  var gone = r.content_status === "removed";
+  var sus  = r.author_suspended_until && Date.parse(r.author_suspended_until) > Date.now();
+
+  var why = (r.reasons || []).map(function (x) {
+    return '<span class="md-why">' + esc(REASON[x] || x) + '</span>';
+  }).join("");
+
+  var memo = (r.memos || []).length
+    ? '<div class="md-done">신고자 메모: ' + esc(r.memos.join(" / ")) + '</div>' : "";
+
+  var acts = r.pending
+    ? '<div class="md-acts" data-t="' + esc(r.target_type) + '" data-i="' + esc(r.target_id) + '">' +
+        '<button class="keep" data-do="none">위반 아님<br>되살리기</button>' +
+        '<button class="del"  data-do="removed">' + what + ' 삭제</button>' +
+        '<button class="ban"  data-do="suspended">삭제 +<br>7일 정지</button>' +
+      '</div>'
+    : '<div class="md-done">' + ymd(r.handled_at) + ' 처리 — <b>' +
+        esc(ACTION[r.action_taken] || r.action_taken || "처리함") + '</b></div>';
+
+  return '<div class="md-card' + (r.overdue ? " over" : "") + '">' +
+    '<div class="md-top">' +
+      why +
+      (r.report_count > 1 ? '<span class="md-why">신고 ' + r.report_count + '건</span>' : '') +
+      (r.overdue ? '<span class="md-flag">24시간 초과</span>' : '') +
+      (gone && r.pending ? '<span class="md-why">검토 대기</span>' : '') +
+      '<span class="md-when">' + ago(r.first_reported_at) + '</span>' +
+    '</div>' +
+    '<div class="md-who">' +
+      '<span class="av">' + avatarHTML(r.author_avatar) + '</span>' +
+      '<b>' + esc(r.author_name) + '</b>' +
+      '<span style="color:#a9a390">의 ' + what + '</span>' +
+      (sus ? '<span class="sus">· 이용제한 ~' + ymd(r.author_suspended_until) + '</span>' : '') +
+    '</div>' +
+    '<div class="md-body-text' + (gone ? ' md-gone' : '') + '">' + esc(r.body) + '</div>' +
+    imgHTML(r.image_path) +
+    memo +
+    acts +
+    '</div>';
+}
+
+function bind(){
+  Array.prototype.forEach.call(body.querySelectorAll("[data-tab]"), function (b) {
+    b.onclick = function () { tab = b.dataset.tab; load(); };
+  });
+  Array.prototype.forEach.call(body.querySelectorAll(".md-acts"), function (box) {
+    Array.prototype.forEach.call(box.querySelectorAll("[data-do]"), function (b) {
+      b.onclick = function () { confirmAct(box.dataset.t, +box.dataset.i, b.dataset.do, box); };
+    });
+  });
+}
+
+/* ---------- 조치 ---------- */
+function confirmAct(type, id, action, box){
+  var what = type === "post" ? "글" : "댓글";
+  var ask = {
+    none:      { t: "위반이 아닌 것으로 처리할까요?",
+                 b: "이 " + what + "이 다시 보이게 되고, 걸려 있던 신고가 모두 닫힙니다." },
+    removed:   { t: what + "을 삭제할까요?",
+                 b: "이 " + what + "은 아무에게도 보이지 않게 됩니다.<br>작성자의 이용은 계속됩니다." },
+    suspended: { t: what + " 삭제 + 7일 이용제한",
+                 b: "이 " + what + "을 삭제하고, 작성자는 <b>7일 동안 글·댓글을 쓸 수 없습니다.</b><br><br>" +
+                    "되돌리려면 Supabase 에서 직접 풀어야 합니다." }
+  }[action];
+  if (!ask) return;
+
+  MK.modal({
+    title: ask.t,
+    body: ask.b + '<br><br><span style="font-size:12.5px;color:#8a8a72">' +
+          '처리 결과는 신고자에게 알려야 합니다 (약관 제9조).</span>',
+    buttons: [
+      { label: "취소" },
+      { label: "처리하기", primary: true, onClick: function () { run(type, id, action, box); } }
+    ]
+  });
+}
+
+function run(type, id, action, box){
+  if (busy) return;
+  busy = true;
+  Array.prototype.forEach.call(box.querySelectorAll("button"), function (b) { b.disabled = true; });
+  MK.toast("처리하는 중이에요…", 6000);
+
+  api().admin.resolve(type, id, action, 7)
+    .then(function (n) {
+      MK.toast("신고 " + (n || 1) + "건을 처리했어요");
+      if (typeof window.pconReloadBoard === "function") window.pconReloadBoard();
+      if (typeof window.pconRenderSettings === "function") window.pconRenderSettings();
+      return load();
+    })
+    .catch(function (e) {
+      MK.toast(e && e.message || "처리하지 못했어요");
+      Array.prototype.forEach.call(box.querySelectorAll("button"), function (b) { b.disabled = false; });
+    })
+    .then(function () { busy = false; });
+}
+
+/* ---------- 설정 화면이 부르는 창구 ---------- */
+window.pconOpenModeration = open;
+
+/* 설정 화면의 배지에 쓸 대기 건수 */
+window.pconModCount = function () {
+  var A = api();
+  if (!A || !A.admin || !A.admin.is()) return Promise.resolve(null);
+  return A.admin.queue({ pending: true })
+    .then(function (r) {
+      return { total: r.length, overdue: r.filter(function (x) { return x.overdue; }).length };
+    })
+    .catch(function () { return null; });
+};
+})();
+</script>
+<!-- ══════════════════ PCON_MOD_END ══════════════════ -->
 
 <!-- ══════════════════ PCON_AUTH_BRIDGE_START ══════════════════
      실제 카카오 로그인을 앱 전체에 연결합니다.
