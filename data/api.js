@@ -94,9 +94,18 @@ function processImage(file, maxEdge) {
       var g = c.getContext("2d");
       g.drawImage(img, 0, 0, cw, ch);
 
-      c.toBlob(function (blob) {
-        if (!blob) { reject(ApiError("UNKNOWN", "사진을 처리하지 못했어요")); return; }
-        resolve(blob);
+      /* webp 를 먼저 시도합니다.
+         ⚠️ toBlob 은 지원하지 않는 형식을 주면 오류를 내지 않고
+            조용히 png 를 돌려줍니다 (iOS 사파리 구버전).
+            png 는 사진에 비효율적이라 같은 사진이 5~10배가 되므로,
+            돌려받은 type 을 확인해서 아니면 jpeg 로 다시 만듭니다. */
+      c.toBlob(function (webp) {
+        if (webp && webp.type === "image/webp") { resolve(webp); return; }
+        c.toBlob(function (jpeg) {
+          if (jpeg) { resolve(jpeg); return; }
+          if (webp) { resolve(webp); return; }          // 그래도 안 되면 있는 걸 씁니다
+          reject(ApiError("UNKNOWN", "사진을 처리하지 못했어요"));
+        }, "image/jpeg", 0.85);
       }, "image/webp", 0.85);
     };
     img.onerror = function () {
@@ -402,16 +411,24 @@ function supabaseDriver(sb) {
 async function uploadPostImage(sb, userId, file) {
   var blob = await processImage(file);
   if (blob.size > 5 * 1024 * 1024)
-    throw ApiError("UNKNOWN", "사진이 너무 큽니다. 다른 사진을 골라주세요");
+    throw ApiError("UNKNOWN", "사진 용량이 너무 큽니다 ("
+      + Math.round(blob.size / 1024 / 1024 * 10) / 10 + "MB). 다른 사진을 골라주세요");
 
-  // 경로 규칙 {user_id}/{uuid}.webp — 스토리지 정책이 첫 폴더로 본인 여부를 판단합니다
+  // 경로 규칙 {user_id}/{uuid}.{확장자}
+  //  — 스토리지 정책이 첫 폴더로 본인 여부를 판단합니다
+  //  — 확장자는 실제로 만들어진 형식에 맞춥니다. 이름과 내용이 어긋나면
+  //    나중에 내려받거나 다른 도구로 다룰 때 헷갈립니다.
+  var type = blob.type || "image/jpeg";
+  var ext  = type === "image/webp" ? "webp"
+           : type === "image/png"  ? "png"
+           : "jpg";
   var name = (global.crypto && crypto.randomUUID)
     ? crypto.randomUUID()
     : String(Date.now()) + Math.random().toString(16).slice(2);
-  var path = userId + "/" + name + ".webp";
+  var path = userId + "/" + name + "." + ext;
 
   var res = await sb.storage.from("post-images")
-              .upload(path, blob, { contentType: "image/webp" });
+              .upload(path, blob, { contentType: type });
   if (res.error) throw normalize(res.error);
   return path;
 }
