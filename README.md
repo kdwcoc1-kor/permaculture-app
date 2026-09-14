@@ -2,7 +2,7 @@
 
 자연과 함께 설계하는 텃밭 — 퍼머컬처 방식 텃밭 설계 · 커뮤니티 앱
 
-배포: GitHub → Netlify 자동 배포
+배포: GitHub → GitHub Pages 자동 배포
 
 ---
 
@@ -10,7 +10,13 @@
 ## 이 폴더가 유일한 원본입니다
 
 `~/Downloads/permaculture-app/` — GitHub 저장소와 직접 연결된 폴더입니다.
-여기서 고친 것이 바로 GitHub → Netlify 로 이어집니다.
+여기서 고친 것이 바로 GitHub → GitHub Pages 로 이어집니다.
+
+**실제 앱 주소**
+```
+https://kdwcoc1-kor.github.io/permaculture-app/
+```
+Netlify 는 이 앱과 아무 상관이 없습니다. 거기에 올려도 반영되지 않습니다.
 
 > 예전 `permaculture-on 3` 폴더는 이제 쓰지 않습니다.
 > 그쪽을 고쳐도 배포되지 않습니다.
@@ -20,7 +26,7 @@
 1. **GitHub Desktop** 을 엽니다
 2. 왼쪽 위에서 `permaculture-app` 저장소를 고릅니다
 3. 오른쪽 위 **Push origin** 을 누릅니다
-4. Netlify 가 30초 안에 자동 배포합니다
+4. **GitHub Pages** 가 1~2분 안에 자동 배포합니다
 5. 폰에서 앱을 완전히 껐다 켜면 새 버전이 반영됩니다
 
 파일을 끌어다 올리는 일은 더 이상 하지 않습니다.
@@ -45,7 +51,11 @@ permaculture-app/
 ├── manifest.json     앱 아이콘·이름
 ├── sw.js             오프라인 동작   ⚠️ 고칠 때마다 VERSION 숫자 올리기
 ├── icons/  textures/  vendor/
+└── .nojekyll         ⚠️ 지우지 마세요
 ```
+
+`.nojekyll` 은 GitHub Pages 가 Jekyll 로 파일을 걸러내지 않게 막는 빈 파일입니다.
+이게 없으면 `_` 로 시작하는 파일·폴더가 배포에서 통째로 빠집니다.
 
 ## 콘텐츠만 고칠 때 (가장 자주 할 일)
 `data/content.js` 만 열어서 고치고 → GitHub Desktop 에서 Push. 끝.
@@ -57,7 +67,8 @@ permaculture-app/
 
 ## 배포가 반영되지 않을 때
 1. GitHub 저장소 웹페이지에서 방금 커밋이 보이는지 확인
-2. Netlify 대시보드에서 배포가 성공(초록)인지 확인
+2. GitHub 저장소 → Actions 탭에서 `pages build and deployment` 가 초록인지 확인
+   (또는 Settings → Pages 에서 마지막 배포 시각 확인)
 3. 폰에서 앱을 완전히 종료 후 재실행 — `sw.js` 의 `pcon-vNN` 숫자가
    올라가 있어야 새 버전이 받아집니다
 
@@ -69,8 +80,9 @@ permaculture-app/
 
 ## 약관·개인정보처리방침 주소
 ```
-https://<넷리파이-주소>/privacy.html
-https://<넷리파이-주소>/terms.html
+https://kdwcoc1-kor.github.io/permaculture-app/privacy.html
+https://kdwcoc1-kor.github.io/permaculture-app/terms.html
 ```
+**이 두 주소를 스토어 제출 폼에 넣습니다.**
 두 문서와 앱 설정 화면의 연락처(`kdw1350@naver.com`)는 항상 같아야 합니다 —
 스토어 심사에서 대조합니다. 시행일은 2026년 9월 30일로 적혀 있습니다.
