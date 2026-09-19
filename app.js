@@ -203,6 +203,13 @@ function bindDogam(){
 /* ════════════════════════════════════════
    🎬 영상
 ════════════════════════════════════════ */
+/* 가로로 스크롤되는 칩 줄에서, 켜져 있는 칩을 보이게 끌어옵니다.
+   inline 만 움직이고 block:"nearest" 라 페이지가 위아래로 튀지 않습니다. */
+function showActiveChip(sel){
+  const c = document.querySelector(sel + " .chip.on");
+  if(c && c.scrollIntoView) c.scrollIntoView({ block:"nearest", inline:"center" });
+}
+
 let videoFilter = 0;
 let videoLang = "all";                       // all | ko | en
 const langOf = v => (v.lang === "en" ? "en" : "ko");
@@ -228,6 +235,7 @@ function renderVideoChips(){
     `<button class="chip ${videoFilter===0?"on":""}" data-pr="0">전체</button>` +
     used.map(n=>`<button class="chip ${videoFilter===n?"on":""}" data-pr="${n}">${esc(PRINCIPLES[n].split(".")[0])}원리</button>`).join("");
   $$("#video-chips .chip").forEach(c=>c.addEventListener("click",()=>{videoFilter=+c.dataset.pr;renderVideos();}));
+  showActiveChip("#video-chips");
 }
 function renderVideos(){
   renderVideoChips();
@@ -271,9 +279,19 @@ function renderVideos(){
 ════════════════════════════════════════ */
 let farmRegion = "전체";
 function renderFarms(){
-  const regions = ["전체", ...new Set(FARMS.map(f=>f.region))];
-  $("#farm-chips").innerHTML = regions.map(r=>`<button class="chip ${r===farmRegion?"on":""}" data-fr="${esc(r)}">${esc(r)}</button>`).join("");
+  /* 칩 순서는 content.js 의 FARM_REGIONS 를 따릅니다.
+     거기 없는 지역이 들어오더라도 빠지지 않게 뒤에 붙여 줍니다. */
+  const order = (typeof FARM_REGIONS !== "undefined") ? FARM_REGIONS : [];
+  const have  = [...new Set(FARMS.map(f=>f.region))];
+  const regions = ["전체",
+    ...order.filter(r=>have.includes(r)),
+    ...have.filter(r=>!order.includes(r))];
+  $("#farm-chips").innerHTML = regions.map(r=>{
+    const n = r==="전체" ? FARMS.length : FARMS.filter(f=>f.region===r).length;
+    return `<button class="chip ${r===farmRegion?"on":""}" data-fr="${esc(r)}">${esc(r)} ${n}</button>`;
+  }).join("");
   $$("#farm-chips .chip").forEach(c=>c.addEventListener("click",()=>{farmRegion=c.dataset.fr;renderFarms();}));
+  showActiveChip("#farm-chips");
   const list = FARMS.filter(f=>farmRegion==="전체"||f.region===farmRegion);
   $("#farm-list").innerHTML = list.length ? list.map(f=>`
     <div class="card">
@@ -282,10 +300,10 @@ function renderFarms(){
         ${f.experience?`<span class="exp-badge">체험 가능</span>`:""}
       </div>
       <p style="font-size:.86rem;margin-top:9px">${esc(f.desc)}</p>
-      <div class="tags">${(f.crops||[]).map(c=>`<span class="tag-pill">${esc(c)}</span>`).join("")}</div>
-      <div class="meta" style="margin-top:8px">연락: ${esc(f.contact||"-")}</div>
+      <div class="tags">${(f.tags||f.crops||[]).map(c=>`<span class="tag-pill">${esc(c)}</span>`).join("")}</div>
+      ${f.contact?`<div class="meta" style="margin-top:8px">연락: ${esc(f.contact)}</div>`:""}
       <div class="farm-links">
-        <a class="map" href="https://map.kakao.com/?q=${encodeURIComponent(f.address)}" target="_blank" rel="noopener">🗺️ 지도 보기</a>
+        <a class="map" href="https://map.kakao.com/?q=${encodeURIComponent(f.name + " " + f.address)}" target="_blank" rel="noopener">🗺️ 지도 보기</a>
         ${f.link?`<a href="${esc(f.link)}" target="_blank" rel="noopener">🔗 홈페이지</a>`:""}
       </div>
     </div>`).join("") : `<div class="empty">이 지역에는 아직 등록된 농가가 없어요</div>`;

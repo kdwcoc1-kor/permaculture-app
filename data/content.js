@@ -455,32 +455,376 @@ const PRINCIPLES = [
 ];
 
 // ------------------------------------------------------------
-// 🗺️ 농가 — 퍼머컬처로 농사짓는 전국 농가·농원
-// region은 아래 중 하나: 전남, 전북, 경남, 경북, 충남, 충북,
-//                       경기, 강원, 제주, 서울/인천, 대전/세종, 광주, 부산/울산, 대구
-// experience: 체험 프로그램 운영 여부 (true / false)
-// link: 홈페이지·인스타·블로그 등 (없으면 "")
+// 🗺️ 농가 — 퍼머컬처를 실제로 하고 있는 전국의 농장·학교·공동체
+//
+// 출처: 한국퍼머컬처네트워크 https://koreapermaculture.or.kr/ 가 공개한
+//       전국 거점 목록 + 각 기관 홈페이지 확인
+//
+// region: 아래 FARM_REGIONS 에 적힌 값만 씁니다. 칩도 그 순서대로 나옵니다.
+// tags: 카드에 붙는 꼬리표 (숲밭·학교·공동체·교육 등). 예전 crops 도 그대로 동작합니다.
+// experience: 방문·체험·교육 프로그램이 확인된 곳만 true
+// contact: 확인된 것만. 비워 두면 카드에 연락 줄이 나오지 않습니다.
+//          ⚠️ 확인하지 않은 전화번호는 절대 넣지 마세요.
+// link: 홈페이지·블로그 (없으면 네트워크 주소)
 // ------------------------------------------------------------
+/* 지역 칩이 나오는 순서 — 여기 적은 순서대로, 등록된 곳이 있는 지역만 나옵니다 */
+const FARM_REGIONS = ["서울", "인천·강화", "경기", "강원", "충청", "전라", "경상", "제주"];
+
 const FARMS = [
+  /* ── 서울 ───────────────────────────────────────────────── */
+  {
+    name: "퍼머컬처학교",
+    region: "서울",
+    address: "서울",
+    desc: "퍼머컬처를 배우고 나누는 배움터. 한국퍼머컬처네트워크와 함께합니다.",
+    tags: ["교육"],
+    experience: false,
+    contact: "",
+    link: "https://koreapermaculture.or.kr/"
+  },
+  {
+    name: "잡초라도충분한풀학교",
+    region: "서울",
+    address: "서울",
+    desc: "풀을 뽑아내야 할 것이 아니라 함께 지낼 것으로 보는 도시 속 풀학교.",
+    tags: ["교육", "도시"],
+    experience: false,
+    contact: "",
+    link: "https://koreapermaculture.or.kr/"
+  },
+  {
+    name: "산다미아노 카페",
+    region: "서울",
+    address: "서울",
+    desc: "퍼머컬처 활동가들이 모이는 서울의 거점 공간.",
+    tags: ["거점"],
+    experience: false,
+    contact: "",
+    link: "https://koreapermaculture.or.kr/"
+  },
+  {
+    name: "전환마을 은평",
+    region: "서울",
+    address: "서울 은평구",
+    desc: "2014년부터 도심에서 기르고 나누고 되돌리는 삶을 실험해 온 마을 공동체. 공동체텃밭과 풀학교를 운영합니다.",
+    tags: ["공동체", "도시텃밭"],
+    experience: false,
+    contact: "",
+    link: "https://koreapermaculture.or.kr/"
+  },
+
+  /* ── 인천·강화 ──────────────────────────────────────────── */
+  {
+    name: "소란한숲밭",
+    region: "인천·강화",
+    address: "인천 강화군",
+    desc: "강화의 숲밭. 한국퍼머컬처네트워크 활동의 중심 가운데 하나입니다.",
+    tags: ["숲밭"],
+    experience: false,
+    contact: "",
+    link: "https://koreapermaculture.or.kr/"
+  },
+  {
+    name: "큰나무캠프힐",
+    region: "인천·강화",
+    address: "인천 강화군",
+    desc: "발달장애인과 비장애인이 함께 농사지으며 살아가는 생활공동체. 숲밭을 함께 가꿉니다.",
+    tags: ["공동체", "숲밭"],
+    experience: false,
+    contact: "",
+    link: "https://www.bigtreecamphill.com/"
+  },
+  {
+    name: "산마을고등학교",
+    region: "인천·강화",
+    address: "인천 강화군",
+    desc: "인천 유일의 탄소중립 중점학교인 대안 고등학교. 학교 숲밭을 학생들이 직접 가꿉니다.",
+    tags: ["학교", "숲밭"],
+    experience: false,
+    contact: "",
+    link: "https://sanmaeul.icehs.kr/"
+  },
+  {
+    name: "풀정원",
+    region: "인천·강화",
+    address: "인천 강화군",
+    desc: "강화에서 퍼머컬처를 실천하는 정원.",
+    tags: ["생태정원"],
+    experience: false,
+    contact: "",
+    link: "https://koreapermaculture.or.kr/"
+  },
+
+  /* ── 경기 ───────────────────────────────────────────────── */
+  {
+    name: "수락 퍼머컬처공동체",
+    region: "경기",
+    address: "경기 의정부시",
+    desc: "수락산 자락의 공동체텃밭(바람길숲밭). 퍼머컬처 디자인 학교가 열리는 곳입니다.",
+    tags: ["공동체", "숲밭", "교육"],
+    experience: false,
+    contact: "",
+    link: "https://koreapermaculture.or.kr/"
+  },
+  {
+    name: "숲밭디자인학교",
+    region: "경기",
+    address: "경기 의정부시",
+    desc: "숲밭을 설계하는 법을 가르치는 배움터.",
+    tags: ["교육"],
+    experience: false,
+    contact: "",
+    link: "https://koreapermaculture.or.kr/"
+  },
+  {
+    name: "인과의숲",
+    region: "경기",
+    address: "경기 의정부시",
+    desc: "의정부의 퍼머컬처 거점.",
+    tags: ["숲밭"],
+    experience: false,
+    contact: "",
+    link: "https://koreapermaculture.or.kr/"
+  },
+  {
+    name: "나름대로생태정원",
+    region: "경기",
+    address: "경기 고양시",
+    desc: "고양의 생태정원. 공동체텃밭을 함께 가꿉니다.",
+    tags: ["생태정원"],
+    experience: false,
+    contact: "",
+    link: "https://koreapermaculture.or.kr/"
+  },
+  {
+    name: "놀노리 어깨동무밭",
+    region: "경기",
+    address: "경기 파주시",
+    desc: "파주에서 여럿이 어깨를 맞대고 가꾸는 밭.",
+    tags: ["공동체"],
+    experience: false,
+    contact: "",
+    link: "https://koreapermaculture.or.kr/"
+  },
+  {
+    name: "평화마을 짓자밭",
+    region: "경기",
+    address: "경기 파주시",
+    desc: "평화마을에서 함께 짓는 퍼머컬처 밭.",
+    tags: ["공동체"],
+    experience: false,
+    contact: "",
+    link: "https://koreapermaculture.or.kr/"
+  },
+  {
+    name: "활짝@해봄 생태정원",
+    region: "경기",
+    address: "경기 여주시",
+    desc: "여주의 퍼머컬처 생태정원.",
+    tags: ["생태정원"],
+    experience: false,
+    contact: "",
+    link: "https://koreapermaculture.or.kr/"
+  },
+  {
+    name: "랑랑숲밭",
+    region: "경기",
+    address: "경기 이천시",
+    desc: "이천의 숲밭. 네트워크 소식지에 사계절 이야기가 실립니다.",
+    tags: ["숲밭"],
+    experience: false,
+    contact: "",
+    link: "https://koreapermaculture.or.kr/"
+  },
+
+  /* ── 강원 ───────────────────────────────────────────────── */
+  {
+    name: "맛있는정원코리아",
+    region: "강원",
+    address: "강원 정선군 신동읍",
+    desc: "이진호 대표가 운영하는 퍼머컬처 전문 업체. 온라인·대면 교육 과정과 퍼머컬처 틀밭을 다룹니다. 유튜브 「지속가능한 생태농업, 퍼머컬처」 강의를 만든 곳입니다.",
+    tags: ["교육", "키친가든"],
+    experience: true,
+    contact: "홈페이지 참고",
+    link: "https://www.deliciousgardenkorea.com/"
+  },
+  {
+    name: "꼬뮨숲밭",
+    region: "강원",
+    address: "강원 강릉시",
+    desc: "강릉의 숲밭 공동체.",
+    tags: ["숲밭", "공동체"],
+    experience: false,
+    contact: "",
+    link: "https://koreapermaculture.or.kr/"
+  },
+  {
+    name: "홀리데이가든",
+    region: "강원",
+    address: "강원 춘천시",
+    desc: "춘천의 퍼머컬처 정원.",
+    tags: ["생태정원"],
+    experience: false,
+    contact: "",
+    link: "https://koreapermaculture.or.kr/"
+  },
+  {
+    name: "살피텃밭",
+    region: "강원",
+    address: "강원 춘천시",
+    desc: "춘천의 퍼머컬처 텃밭.",
+    tags: ["텃밭"],
+    experience: false,
+    contact: "",
+    link: "https://koreapermaculture.or.kr/"
+  },
+  {
+    name: "빌려쓰는 지구 텃밭",
+    region: "강원",
+    address: "강원 양구군",
+    desc: "땅은 빌려 쓰는 것이라는 생각으로 가꾸는 양구의 텃밭.",
+    tags: ["텃밭"],
+    experience: false,
+    contact: "",
+    link: "https://koreapermaculture.or.kr/"
+  },
+  {
+    name: "숨뜰",
+    region: "강원",
+    address: "강원 양구군",
+    desc: "양구의 퍼머컬처 뜰.",
+    tags: ["생태정원"],
+    experience: false,
+    contact: "",
+    link: "https://koreapermaculture.or.kr/"
+  },
+  {
+    name: "놀동네",
+    region: "강원",
+    address: "강원 화천군",
+    desc: "화천의 퍼머컬처 마을 거점.",
+    tags: ["공동체"],
+    experience: false,
+    contact: "",
+    link: "https://koreapermaculture.or.kr/"
+  },
+
+  /* ── 충청 ───────────────────────────────────────────────── */
+  {
+    name: "고산퍼머컬처대학",
+    region: "충청",
+    address: "충북 제천시",
+    desc: "기후변화 시대에 농사를 기반으로 지역에서 살아가려는 사람들을 위한 대안학교. 퍼머컬처 디자인 코스, 농장디자인 과정, 교육자양성 과정, 생태텃밭 워크숍을 엽니다.",
+    tags: ["교육", "PDC"],
+    experience: true,
+    contact: "홈페이지 참고",
+    link: "https://www.permaculture-college.kr/"
+  },
+  {
+    name: "날마다숲밭",
+    region: "충청",
+    address: "충북 영동군",
+    desc: "영동의 숲밭.",
+    tags: ["숲밭"],
+    experience: false,
+    contact: "",
+    link: "https://koreapermaculture.or.kr/"
+  },
+  {
+    name: "추풍령중학교 지구밭",
+    region: "충청",
+    address: "충북 영동군 추풍령면",
+    desc: "학생들이 직접 가꾸는 학교 텃밭.",
+    tags: ["학교", "텃밭"],
+    experience: false,
+    contact: "",
+    link: "https://koreapermaculture.or.kr/"
+  },
+
+  /* ── 전라 ───────────────────────────────────────────────── */
   {
     name: "퍼머컬처ON (염포마을 화합의 정원)",
-    region: "전남",
+    region: "전라",
     address: "전남 고흥군",
     desc: "동반작물·나선형 허브가든·지렁이 퇴비를 실험하는 퍼머컬처 시범 정원. 교육 프로그램과 가든 투어를 운영합니다.",
-    crops: ["허브", "동반작물", "유자"],
+    tags: ["허브", "동반작물", "유자"],
     experience: true,
     contact: "유튜브 퍼머컬처ON",
     link: ""
   },
   {
-    name: "예시 농원 (수정해주세요)",
-    region: "전남",
-    address: "전남 ○○군",
-    desc: "이 카드는 예시입니다. data/content.js 파일의 FARMS 목록을 수정해 실제 농가 정보를 넣어주세요.",
-    crops: ["블루베리", "허브"],
+    name: "이든농장",
+    region: "전라",
+    address: "전북 진안군",
+    desc: "진안의 퍼머컬처 농장.",
+    tags: ["농장"],
     experience: false,
-    contact: "010-0000-0000",
-    link: ""
+    contact: "",
+    link: "https://koreapermaculture.or.kr/"
+  },
+  {
+    name: "마령초등학교 숲밭",
+    region: "전라",
+    address: "전북 진안군 마령면",
+    desc: "학생들이 가꾸는 학교 숲밭.",
+    tags: ["학교", "숲밭"],
+    experience: false,
+    contact: "",
+    link: "https://koreapermaculture.or.kr/"
+  },
+
+  /* ── 경상 ───────────────────────────────────────────────── */
+  {
+    name: "꿀벌살리텃밭",
+    region: "경상",
+    address: "부산광역시",
+    desc: "꿀벌이 찾아오도록 꽃을 함께 심는 부산의 텃밭.",
+    tags: ["텃밭", "꽃"],
+    experience: false,
+    contact: "",
+    link: "https://koreapermaculture.or.kr/"
+  },
+  {
+    name: "화제초등학교 꽃나루텃밭",
+    region: "경상",
+    address: "경남 양산시",
+    desc: "학생들이 가꾸는 학교 텃밭.",
+    tags: ["학교", "텃밭"],
+    experience: false,
+    contact: "",
+    link: "https://koreapermaculture.or.kr/"
+  },
+  {
+    name: "시시숲밭",
+    region: "경상",
+    address: "경남 합천군",
+    desc: "합천의 숲밭.",
+    tags: ["숲밭"],
+    experience: false,
+    contact: "",
+    link: "https://koreapermaculture.or.kr/"
+  },
+
+  /* ── 제주 ───────────────────────────────────────────────── */
+  {
+    name: "설문대발어름밭",
+    region: "제주",
+    address: "제주특별자치도",
+    desc: "제주의 퍼머컬처 밭.",
+    tags: ["밭"],
+    experience: false,
+    contact: "",
+    link: "https://koreapermaculture.or.kr/"
+  },
+  {
+    name: "작은말케어센터",
+    region: "제주",
+    address: "제주특별자치도",
+    desc: "제주에서 퍼머컬처를 함께하는 돌봄 공간.",
+    tags: ["돌봄", "공동체"],
+    experience: false,
+    contact: "",
+    link: "https://koreapermaculture.or.kr/"
   }
 ];
 
