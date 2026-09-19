@@ -832,6 +832,27 @@ main .view.active{animation:vw-in .22s ease both}
 #view-garden .gd-legend i.em{border-color:#cdbf9a;font-size:11px}
 #view-garden .gd-legend b{color:var(--moss)}
 
+/* 도면 아래 번호 목록 — 도면의 ①②③과 짝을 이룹니다 */
+#view-garden .gd-keys{margin-top:11px;padding-top:10px;border-top:1.5px dashed #d8cdb3}
+#view-garden .gd-keys .k{display:flex;gap:9px;align-items:flex-start;padding:7px 0}
+#view-garden .gd-keys .k + .k{border-top:1px dashed #e6dec8}
+#view-garden .gd-keys .kn{flex:0 0 21px;height:21px;border-radius:50%;background:var(--moss-deep);
+  color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px}
+#view-garden .gd-keys .kb{font-size:13.5px;font-weight:800;color:#2f4030}
+#view-garden .gd-keys .kq{font-size:12px;font-weight:800;color:var(--moss);margin-left:4px}
+#view-garden .gd-keys .kw{font-size:12px;color:#7d8270;line-height:1.5;margin-top:1px}
+#view-garden .gd-parts{display:flex;flex-wrap:wrap;gap:7px 13px;margin-top:10px;
+  padding-top:9px;border-top:1px solid #e6dec8}
+#view-garden .gd-parts span{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:#7d8270}
+#view-garden .gd-elcrops{display:flex;flex-wrap:wrap;gap:7px}
+#view-garden .gd-elcrops span{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;
+  background:#fffdf6;border:1px solid #e2dcc4;border-radius:999px;padding:5px 11px;color:#3f4a40}
+#view-garden .gd-elcrops b{color:var(--moss)}
+#view-garden .gd-parts i{width:14px;height:14px;border-radius:4px;flex:0 0 auto;border:1px solid #cdbf9a}
+#view-garden .round-miss{margin-top:8px;font-size:12.5px;line-height:1.5;color:#7d5a1c;
+  background:var(--sun-soft);border-left:4px solid var(--sun);border-radius:0 10px 10px 0;padding:9px 11px}
+#view-garden .round-miss b{color:#8a5f14}
+
 </style>
 </head>
 <body>
@@ -1728,8 +1749,11 @@ function layoutKeyhole(plants, bed){
     // 양분 많은 건 안쪽 링, 적은 건 바깥 링
     const inner = p.feed==="heavy";
     const ring = inner ? rIn+34 : rOut-24;
-    const seg = slots.filter((_,k)=> k%N===idx%N);
-    const ang = seg.length ? seg[Math.floor(seg.length/2)] : slots[idx%slots.length];
+    /* 통로를 뺀 슬롯을 작물 수로 고르게 나눠 각자 다른 각도를 줍니다.
+       안쪽 링과 바깥 링은 반 칸 어긋나게 두어 서로 가리지 않게 합니다. */
+    const off = inner ? 0.5 : 0;
+    const k = Math.round((idx + off) * slots.length / Math.max(1, N));
+    const ang = slots[Math.min(slots.length - 1, Math.max(0, k))];
     place.push({
       plant:p, zone: inner?"안쪽(퇴비 곁)":"바깥 가장자리",
       cx: cx+Math.cos(ang)*ring, cy: cy+Math.sin(ang)*ring,
@@ -1905,6 +1929,17 @@ function plantMarker(pl, opt){
   const no   = opt.no;                      // tiny일 때 번호
   const rr   = Math.max(r, 11);             // 최소 크기 보장
 
+  /* num — 도면에는 번호만 두고 이름은 아래 목록으로 내립니다.
+     이름표를 도면에 얹으면 작물이 5개만 되어도 서로 겹쳐 못 읽습니다. */
+  if(mode === "num"){
+    const R2 = Math.max(rr, 12);
+    return `<g data-gd-i="${pl._i}">
+      <circle cx="${cx}" cy="${cy}" r="${R2+1.5}" fill="#fffdf6" opacity=".92"/>
+      <circle cx="${cx}" cy="${cy}" r="${R2}" fill="#26492F"/>
+      <text x="${cx}" y="${cy+0.5}" font-size="${(R2*1.02).toFixed(1)}" text-anchor="middle"
+        dominant-baseline="central" font-weight="800" fill="#fff">${no}</text>
+    </g>`;
+  }
   if(mode === "tiny"){
     return `<g data-gd-i="${pl._i}">
       <circle cx="${cx}" cy="${cy}" r="${rr}" fill="#fffdf6" stroke="#5d6b57" stroke-width="1.8"/>
@@ -1973,6 +2008,9 @@ function soilDefs(){
     <linearGradient id="gdSoilL" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#9c7a52"/><stop offset="100%" stop-color="#7c5c3c"/>
     </linearGradient>
+    <pattern id="gdFreeHatch" width="8" height="8" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="0" x2="0" y2="8" stroke="#c4bda0" stroke-width="1.3"/>
+    </pattern>
     <pattern id="gdSoilDots" width="12" height="12" patternUnits="userSpaceOnUse">
       <circle cx="3" cy="4" r="0.8" fill="#5c4326" opacity="0.25"/>
       <circle cx="9" cy="9" r="0.7" fill="#5c4326" opacity="0.2"/>
@@ -1983,8 +2021,9 @@ function soilDefs(){
 /* 햇빛 화살표 */
 function sunArrow(sunId){
   const map = {
-    N:[200,10,"▲ 해"], S:[200,292,"▼ 해"],
-    E:[388,150,"▶ 해"], W:[12,150,"◀ 해"]
+    /* 머리말에 이미 "☀ 남쪽 햇빛" 이 있어서 여기선 화살표만 둡니다 */
+    N:[200,10,"▲"], S:[200,292,"▼"],
+    E:[388,150,"▶"], W:[12,150,"◀"]
   };
   const [x,y,t] = map[sunId] || map.S;
   return `<text x="${x}" y="${y}" font-size="11" text-anchor="middle" fill="#e0a02e" font-weight="900">${t}</text>`;
@@ -2135,7 +2174,9 @@ let gdPendingDesign = null;
 let gdEdited = false;
 
 function gdPlanCaption(d){
-  return `${d.bed.w} × ${d.bed.h} m · 작물 ${d.crops.length}포기`
+  /* 5는 포기가 아니라 종 수입니다 — 이름표엔 ×30 이 찍히는데
+     캡션이 "5포기" 라 계속 어긋나 보였습니다 */
+  return `${d.bed.w} × ${d.bed.h} m · 작물 ${d.crops.length}종`
        + (gdEdited ? " · 직접 고침" : "");
 }
 
@@ -3142,6 +3183,45 @@ function assignCrops(plants){
   return buckets;
 }
 
+/* ── 자리 설명 ──────────────────────────────────────────────
+   예전에는 키홀 바깥에 놓인 작물이 전부 "덜 먹는 작물이라 바깥쪽"
+   한 문장으로 똑같이 나왔습니다. 방위와 작물 성질을 함께 써서
+   자리마다 다른 말이 되게 합니다.                              */
+const GD_ESCMAP = { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" };
+function gdEsc(v){ return String(v==null?"":v).replace(/[&<>"']/g, c=>GD_ESCMAP[c]); }
+const GD_DIRS = ["북","북동","동","남동","남","남서","서","북서"];
+function gdSpot(dx, dy){
+  if(Math.abs(dx) < 6 && Math.abs(dy) < 6) return "한가운데";
+  /* 화면 y는 아래로 커지므로 위쪽이 북쪽입니다 */
+  let a = Math.atan2(dx, -dy) * 180 / Math.PI;   // 북=0, 시계방향
+  if(a < 0) a += 360;
+  return GD_DIRS[Math.round(a / 45) % 8] + "쪽";
+}
+/* 받침이 있으면 "을", 없으면 "를" — "앞그루을" 같은 말이 나오지 않게 */
+function gdEul(w){
+  const c = String(w||"").trim().slice(-1).charCodeAt(0);
+  if(!(c >= 0xAC00 && c <= 0xD7A3)) return "을";
+  return ((c - 0xAC00) % 28) ? "을" : "를";
+}
+function gdNo(n){
+  return n ? ("❶❷❸❹❺❻❼❽❾❿"[n-1] || "(" + n + ")") : "";
+}
+function gdWhy(pl){
+  const p = pl.plant || {}, z = pl.zone || "";
+  if(/안쪽|퇴비/.test(z))        return "양분을 많이 먹어 퇴비통 곁에";
+  if(/꼭대기/.test(z))           return "물이 적어도 되는 작물이라 맨 위";
+  if(/습윤/.test(z))             return "물을 좋아해 맨 아래";
+  if(p.cat === "herb")           return "허브라 가장자리에 둘러 벌레를 덜 오게 합니다";
+  if(p.cat === "flower")         return "꽃이라 가장자리에 두어 벌을 부릅니다";
+  if(p.height >= 120)            return "키가 커서 다른 작물에 그늘을 덜 지우는 자리";
+  if(p.cat === "fruit")          return "열매를 맺는 작물이라 볕이 잘 드는 자리";
+  if(p.water === "wet")          return "물을 자주 줘야 해 손이 닿기 쉬운 자리";
+  if(p.water === "dry")          return "물이 적어도 돼 마른 가장자리";
+  if(p.spacing && p.spacing <= 12) return "좁게 촘촘히 심어도 되는 작물";
+  if(p.height && p.height <= 30) return "키가 낮아 큰 작물 그늘에 묻히지 않는 자리";
+  return pl.reason || "";
+}
+
 /* ── 메인 빌드 ── */
 /* 작물 한 묶음을 지금 두둑 위에 배치해 결과 한 장을 만듭니다 */
 function computePlan(plants){
@@ -3160,6 +3240,14 @@ function computePlan(plants){
         elUid:el.uid, _i:gi++ });
     });
     RT.push({ el, meta, exPx, eyPx, sx, sy });
+  });
+  /* 자리 설명을 여기서 한 번만 만들어 도면·목록·리포트가 같은 말을 쓰게 합니다 */
+  RT.forEach(rt=>{
+    const mcx = rt.exPx + rt.el.w*S/2, mcy = rt.eyPx + rt.el.h*S/2;
+    place.filter(q=>q.elUid===rt.el.uid).forEach(q=>{
+      q.spot = gdSpot(q.cx-mcx, q.cy-mcy);
+      q.why  = gdWhy(q);
+    });
   });
   return { plants, bed:{...state.bed}, sun:state.sun, S, ox, oy, elements:RT, place };
 }
@@ -3243,6 +3331,24 @@ function renderRoundTabs(){
   });
   host.appendChild(row);
 
+  /* 지금 보는 그루에 없는 작물이 어디로 갔는지 — 도면 바로 위에서 답합니다.
+     예전에는 이 설명이 한참 아래 "심는 시기" 에만 있어 못 보고 지나쳤습니다. */
+  const cur = gdPlans[state.round];
+  if(cur){
+    ROUNDS.forEach(r => {
+      if(r.id === state.round) return;
+      const other = gdPlans[r.id];
+      if(!other) return;
+      const only = other.plants.filter(p => !cur.plants.some(q => q.id === p.id));
+      if(!only.length) return;
+      const m = document.createElement("div");
+      m.className = "round-miss";
+      m.innerHTML = `🌱 <b>${only.map(p=>p.name).join(" · ")}</b>는 ${r.sub}에 심는 작물이라 `
+                  + `지금 도면에 없어요 — 위의 <b>${r.emoji} ${r.name}</b>${gdEul(r.name)} 눌러 보세요.`;
+      host.appendChild(m);
+    });
+  }
+
   /* 두 그루에 다 들어가는 작물은 따로 알려줍니다 */
   const both = (gdPlans.spring ? gdPlans.spring.plants : [])
     .filter(p => (gdPlans.fall ? gdPlans.fall.plants : []).some(q => q.id === p.id));
@@ -3260,10 +3366,40 @@ function renderPlotAll(){
   let s = `<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">` + soilDefs();
   s += `<rect x="${R.ox-6}" y="${R.oy-6}" width="${R.bed.w*R.S+12}" height="${R.bed.h*R.S+12}" rx="14" fill="#e3d8bc"/>`;
   s += `<rect x="${R.ox}" y="${R.oy}" width="${R.bed.w*R.S}" height="${R.bed.h*R.S}" rx="10" fill="#efe6d0"/>`;
+  /* 두둑이 덮지 않은 땅 — 빗금으로 칠하고 아래에서 크기를 적습니다.
+     예전에는 그냥 빈 색이라 통로인지 남은 땅인지 버그인지 알 수 없었습니다. */
+  s += `<rect x="${R.ox}" y="${R.oy}" width="${R.bed.w*R.S}" height="${R.bed.h*R.S}" rx="10" fill="url(#gdFreeHatch)" opacity=".75"/>`;
   R.elements.forEach(rt=>{
     const shape = (BED_SHAPE[rt.el.tech]||BED_SHAPE.custom)(rt.meta);
     s += `<g transform="translate(${rt.exPx},${rt.eyPx}) scale(${rt.sx.toFixed(4)},${rt.sy.toFixed(4)})">${shape}</g>`;
   });
+  /* 두둑이 덮지 않은 가장 넓은 띠에 실제 크기를 적습니다.
+     "밭이 4×2.5m 인데 왜 절반이 비었지?" 를 그 자리에서 답해 줍니다. */
+  R.freeNote = null;
+  (function(){
+    if(!R.elements.length) return;
+    const bx=R.ox, by=R.oy, bw=R.bed.w*R.S, bh=R.bed.h*R.S;
+    let x0=Infinity, y0=Infinity, x1=-Infinity, y1=-Infinity;
+    R.elements.forEach(rt=>{
+      x0=Math.min(x0, rt.exPx);                 y0=Math.min(y0, rt.eyPx);
+      x1=Math.max(x1, rt.exPx+rt.el.w*R.S);     y1=Math.max(y1, rt.eyPx+rt.el.h*R.S);
+    });
+    const cands = [
+      { px:bx+bw-x1, cx:(x1+bx+bw)/2, cy:by+bh/2,    wM:(bx+bw-x1)/R.S, hM:R.bed.h },
+      { px:x0-bx,    cx:(bx+x0)/2,    cy:by+bh/2,    wM:(x0-bx)/R.S,    hM:R.bed.h },
+      { px:by+bh-y1, cx:bx+bw/2,      cy:(y1+by+bh)/2, wM:R.bed.w,      hM:(by+bh-y1)/R.S },
+      { px:y0-by,    cx:bx+bw/2,      cy:(by+y0)/2,  wM:R.bed.w,        hM:(y0-by)/R.S }
+    ].sort((a,b)=>b.px-a.px);
+    const best = cands[0];
+    if(!best || best.px < 26) return;           // 글씨가 못 들어갈 만큼 좁으면 생략
+    const wM = Math.round(best.wM*10)/10, hM = Math.round(best.hM*10)/10;
+    if(wM < 0.4 || hM < 0.4) return;
+    R.freeNote = `${wM} × ${hM} m`;
+    s += `<text x="${best.cx.toFixed(0)}" y="${(best.cy-4).toFixed(0)}" font-size="9.5"`
+      +  ` text-anchor="middle" fill="#8a8468" font-weight="700">남는 땅</text>`
+      +  `<text x="${best.cx.toFixed(0)}" y="${(best.cy+8).toFixed(0)}" font-size="9"`
+      +  ` text-anchor="middle" fill="#8a8468">${R.freeNote}</text>`;
+  })();
   /* 밀집도에 따라 표시 방식 자동 선택 */
   const bedArea = (R.bed.w*R.S) * (R.bed.h*R.S);
   const per = bedArea / Math.max(1, R.place.length);
@@ -3273,21 +3409,31 @@ function renderPlotAll(){
 
   /* 겹침 분리 — 표시 좌표를 그대로 저장해 드래그·공유·인쇄와 일치시킴 */
   const shown = R.place;
-  spreadMarkers(shown,
-    { x0:R.ox+4, y0:R.oy+16, x1:R.ox+R.bed.w*R.S-4, y1:R.oy+R.bed.h*R.S-4 },
-    mode==="full" ? 26 : mode==="compact" ? 6 : 4);
+  /* 두둑마다 따로 밀어냅니다. 밭 전체를 경계로 잡으면 번호가
+     자기 두둑을 벗어나 맨땅 위에 얹혀 "여기 심으라"는 그림이 됩니다.
+     번호 마커는 크기가 일정해서 벌릴 간격도 작게 잡습니다. */
+  R.elements.forEach(rt=>{
+    const mine = R.place.filter(p=>p.elUid===rt.el.uid);
+    if(!mine.length) return;
+    const w = rt.el.w*R.S, h = rt.el.h*R.S, pad = Math.min(14, w*0.12, h*0.12);
+    spreadMarkers(mine, {
+      x0: rt.exPx + pad,      y0: rt.eyPx + pad,
+      x1: rt.exPx + w - pad,  y1: rt.eyPx + h - pad
+    }, 4);
+  });
 
-  /* 번호 부여(tiny일 때 범례와 연결) */
+  /* 번호는 항상 매깁니다 — 도면의 ①과 아래 목록의 ①이 짝입니다.
+     북쪽(위)부터 번호를 매겨야 눈이 따라가기 쉽습니다. */
   const legend = [];
   const noOf = new Map();
-  if(mode!=="full"){
-    shown.forEach(p=>{
-      if(!noOf.has(p.plant.id)){ noOf.set(p.plant.id, noOf.size+1); legend.push({no:noOf.size, p}); }
-    });
-  }
+  [...shown].sort((a,b)=> a.cy-b.cy || a.cx-b.cx).forEach(p=>{
+    if(!noOf.has(p.plant.id)){ noOf.set(p.plant.id, noOf.size+1); legend.push({no:noOf.size, p}); }
+  });
+  shown.forEach(p=> p.no = noOf.get(p.plant.id));
   [...shown].sort((a,b)=>a.cy-b.cy).forEach(pl=>
-    s += plantMarker(pl, { mode, no: noOf.get(pl.plant.id) }));
+    s += plantMarker(pl, { mode:"num", no: noOf.get(pl.plant.id) }));
   R.legendMode = mode;
+  R.noOf = noOf;
 
   /* 두둑 이름칩 — 두둑 위쪽 바깥에 (작물과 겹치지 않게) */
   R.elements.forEach(rt=>{
@@ -3298,18 +3444,41 @@ function renderPlotAll(){
   s += `<line x1="${R.ox}" y1="293" x2="${R.ox+R.S}" y2="293" stroke="#7a6a48" stroke-width="2.5"/>
         <text x="${R.ox+R.S/2}" y="288" font-size="8.5" text-anchor="middle" fill="#7a6a48" font-weight="800">1 m</text>`;
   s += sunArrow(R.sun) + `</svg>`;
-  if(mode!=="full" && legend.length){
-    s += `</svg>`;
-    const total = new Map();
-    R.place.forEach(p=> total.set(p.plant.id, (total.get(p.plant.id)||0) + p.count));
-    s = s.replace("</svg></svg>","</svg>");
-    document.getElementById("gdBedHost").innerHTML = s +
-      `<div class="gd-legend">` + legend.map(L=>
-        `<span>${mode==="tiny" ? `<i>${L.no}</i>` : `<i class="em">${L.p.plant.emoji}</i>`}${L.p.plant.name} <b>${total.get(L.p.plant.id)}포기</b></span>`
-      ).join("") + `</div>`;
-  } else {
-    document.getElementById("gdBedHost").innerHTML = s;
+  /* ── 도면 아래 번호 목록 ──
+     작물마다 "어디에 · 몇 포기 · 왜 거기인지" 를 한 줄로. */
+  const total = new Map(), spots = new Map();
+  R.place.forEach(p=>{
+    total.set(p.plant.id, (total.get(p.plant.id)||0) + p.count);
+    if(!spots.has(p.plant.id)) spots.set(p.plant.id, []);
+    spots.get(p.plant.id).push(p);
+  });
+  let keys = `<div class="gd-keys">`;
+  legend.forEach(L=>{
+    const list = spots.get(L.p.plant.id) || [L.p];
+    const head = list[0];
+    const more = list.length > 1 ? ` 외 ${list.length-1}곳` : "";
+    const why  = head.why || head.reason || "";
+    keys += `<div class="k"><span class="kn">${L.no}</span><div>`
+         +  `<span class="kb">${L.p.plant.emoji} ${gdEsc(L.p.plant.name)}</span>`
+         +  `<span class="kq">${total.get(L.p.plant.id)}포기</span>`
+         +  `<div class="kw">${gdEsc((head.spot||"") + more)}${why ? " — " + gdEsc(why) : ""}</div>`
+         +  `</div></div>`;
+  });
+  keys += `</div>`;
+
+  /* ── 파츠 범례 ── 갈색 원·어두운 원이 뭔지 알려줍니다 */
+  const techs = [...new Set(R.elements.map(rt=>rt.el.tech))];
+  const parts = [];
+  parts.push([`background:linear-gradient(#b08a5e,#8a6a44)`, "두둑(흙)"]);
+  if(techs.includes("keyhole")){
+    parts.push([`background:#6b4d2e`, "가운데 퇴비통"]);
+    parts.push([`background:#efe6d0`, "들어가는 길"]);
   }
+  if(R.freeNote) parts.push([`background:repeating-linear-gradient(45deg,#c4bda0 0 1.5px,#efe6d0 1.5px 5px)`, "남는 땅"]);
+  const partsHtml = `<div class="gd-parts">` + parts.map(([st,lb])=>
+      `<span><i style="${st}"></i>${lb}</span>`).join("") + `</div>`;
+
+  document.getElementById("gdBedHost").innerHTML = s + keys + partsHtml;
   document.getElementById("gdBedDim").textContent = `${R.bed.w} × ${R.bed.h} m 밭 · 두둑 ${R.elements.length}개`;
   const sl = SUNS.find(x=>x.id===R.sun);
   document.getElementById("gdBedSun").textContent = "☀ " + (sl?sl.label:"남쪽") + " 햇빛";
@@ -3323,10 +3492,16 @@ renderReport = function(R){
   R.elements.forEach(rt=>{
     const t = TECH_BY_ID[rt.el.tech];
     html += `<h3>${t.emoji} ${t.name} · ${rt.el.w}×${rt.el.h}m</h3>`;
-    const mine = R.place.filter(p=>p.elUid===rt.el.uid);
+    const mine = R.place.filter(p=>p.elUid===rt.el.uid).sort((a,b)=>(a.no||99)-(b.no||99));
     if(!mine.length) html += note("info","·","이 두둑에 배정된 작물이 없어요 — 작물을 더 고르거나 두둑 수를 줄여보세요.");
-    mine.forEach(p=> html += note("info", p.plant.emoji,
-      `<b>${p.plant.name}</b> → <b>${p.zone}</b> · ${p.reason} (약 ${p.count}포기)`));
+    else{
+      /* 자리와 이유는 도면 아래 번호 목록에서 이미 말하고 있습니다.
+         여기서 또 쓰면 같은 문장이 두 번 나와 읽을 게 많아 보입니다.
+         이 칸은 "어느 두둑에 무엇이 몇 포기" 만 맡습니다. */
+      html += `<div class="gd-elcrops">` + mine.map(p=>
+        `<span>${gdNo(p.no)} ${p.plant.emoji} ${gdEsc(p.plant.name)} <b>${p.count}포기</b></span>`
+      ).join("") + `</div>`;
+    }
   });
   html += `<h3>🌿 동반작물 궁합</h3>`;
   const plants=R.plants, goods=[], bads=[];
