@@ -204,9 +204,26 @@ function bindDogam(){
    🎬 영상
 ════════════════════════════════════════ */
 let videoFilter = 0;
+let videoLang = "all";                       // all | ko | en
+const langOf = v => (v.lang === "en" ? "en" : "ko");
 function renderVideoChips(){
-  // 영상이 실제로 있는 원리만 칩으로 노출
-  const used = [...new Set(VIDEOS.map(v=>v.principle))].filter(n=>n>0).sort((a,b)=>a-b);
+  // 언어 칩 — 한국어 영상과 해외 영상을 나눠서 볼 수 있게
+  const langBox = $("#video-lang-chips");
+  if(langBox){
+    const rows = [["all","전체"],["ko","한국어"],["en","해외 🌍"]];
+    langBox.innerHTML = rows.map(([k,label])=>{
+      const n = VIDEOS.filter(v=>k==="all"||langOf(v)===k).length;
+      return `<button class="chip ${videoLang===k?"on":""}" data-lg="${k}">${label} ${n}</button>`;
+    }).join("");
+    $$("#video-lang-chips .chip").forEach(c=>c.addEventListener("click",()=>{
+      videoLang = c.dataset.lg;
+      videoFilter = 0;                       // 언어를 바꾸면 원리 필터는 풀어 줍니다
+      renderVideos();
+    }));
+  }
+  // 영상이 실제로 있는 원리만 칩으로 노출 (지금 고른 언어 기준)
+  const pool = VIDEOS.filter(v=>videoLang==="all"||langOf(v)===videoLang);
+  const used = [...new Set(pool.map(v=>v.principle))].filter(n=>n>0).sort((a,b)=>a-b);
   $("#video-chips").innerHTML =
     `<button class="chip ${videoFilter===0?"on":""}" data-pr="0">전체</button>` +
     used.map(n=>`<button class="chip ${videoFilter===n?"on":""}" data-pr="${n}">${esc(PRINCIPLES[n].split(".")[0])}원리</button>`).join("");
@@ -214,9 +231,11 @@ function renderVideoChips(){
 }
 function renderVideos(){
   renderVideoChips();
+  /* 날짜순으로 정렬하지 않습니다 — 업로드 날짜를 모르는 영상이 많아
+     content.js 에 적어 둔 순서(원리별 묶음)를 그대로 보여줍니다. */
   const list = VIDEOS
-    .filter(v=>videoFilter===0||v.principle===videoFilter)
-    .sort((a,b)=>b.date.localeCompare(a.date));
+    .filter(v=>videoLang==="all"||langOf(v)===videoLang)
+    .filter(v=>videoFilter===0||v.principle===videoFilter);
   $("#video-list").innerHTML = list.length ? list.map((v,i)=>`
     <div class="card video-card">
       <button class="video-thumb" data-vid="${esc(v.videoId)}" aria-label="${esc(v.title)} 재생">
@@ -226,7 +245,11 @@ function renderVideos(){
       <div class="info">
         ${v.principle?`<span class="badge-principle">${esc(PRINCIPLES[v.principle])}</span><br>`:""}
         <h3>${esc(v.title)}</h3>
-        <div class="meta">${esc(v.desc)} · ${esc(v.date)}
+        <div class="meta">${[
+            langOf(v)==="en" ? "🌍 해외 영상" : "",
+            esc(v.desc||""),
+            esc(v.date||"")
+          ].filter(Boolean).join(" · ")}
           · <a href="https://www.youtube.com/watch?v=${esc(v.videoId)}" target="_blank" rel="noopener" style="color:var(--leaf);font-weight:700;text-decoration:none">YouTube에서 보기 ↗</a>
         </div>
       </div>
