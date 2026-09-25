@@ -833,6 +833,7 @@ main .view.active{animation:vw-in .22s ease both}
 #view-garden .gd-legend b{color:var(--moss)}
 
 /* 도면 아래 번호 목록 — 도면의 ①②③과 짝을 이룹니다 */
+#view-garden .bed-title{font-size:15px;font-weight:800;color:var(--moss-deep);margin-bottom:3px}
 #view-garden .gd-keys{margin-top:11px;padding-top:10px;border-top:1.5px dashed #d8cdb3}
 #view-garden .gd-keys .k{display:flex;gap:9px;align-items:flex-start;padding:7px 0}
 #view-garden .gd-keys .k + .k{border-top:1px dashed #e6dec8}
@@ -1021,6 +1022,7 @@ main .view.active{animation:vw-in .22s ease both}
         </div>
       </div>
       <div class="bed-wrap">
+        <h3 class="bed-title">어디에 무엇을 심나</h3>
         <div class="bed-meta"><span id="gdBedDim">—</span><span class="compass" id="gdBedSun">⬆ 햇빛</span></div>
         <div id="gdBedHost"><svg id="gdBed" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg"></svg></div>
       </div>
@@ -1287,6 +1289,24 @@ const PLANTS = [
   { id:"corn",     feed:"heavy", water:"mid", name:"옥수수", emoji:"🌽", cat:"veg", height:200, spacing:30, sow:[4,6],  sun:"full",  note:"키가 매우 큼. 북쪽 끝에 줄지어 심어 그늘을 활용" , },
   { id:"broccoli", feed:"heavy", water:"mid", name:"브로콜리",emoji:"🥦", cat:"veg", height:60,  spacing:45, sow:[3,8],  sun:"full",  note:"넓은 자리가 필요. 배추흰나비 주의" , },
   { id:"parsley",  feed:"mid", water:"wet", name:"파슬리", emoji:"🌿", cat:"herb", height:30,  spacing:20, sow:[3,8],  sun:"part",  note:"익충을 부르고 그늘도 견딤. 감자·아스파라거스와 잘 맞음" , },
+
+  /* ── 2026-09 추가 13종 ──────────────────────────────────
+     파종 시기·심는 거리는 농촌진흥청 농사로(nongsaro.go.kr) 기준.
+     고구마·생강·열무·콜라비는 농사로 페이지를 열지 못해 일반적인
+     텃밭 기준값입니다 — 쓰면서 어긋나면 고쳐 주세요.          */
+  { id:"jjokpa", feed:"light", water:"mid", name:"쪽파", emoji:"🌱", cat:"veg", height:35, spacing:15, sow:[8,9], sun:"full", note:"가을에 종구를 심어 김장철에 거둠. 한 뿌리에서 여러 대가 올라옴" , },
+  { id:"mallow", feed:"light", water:"wet", name:"아욱", emoji:"🌿", cat:"veg", height:40, spacing:15, sow:[3,9], sun:"part", note:"국거리 잎채소. 꽃이 피기 전에 거둡니다" , },
+  { id:"ssukgat", feed:"light", water:"mid", name:"쑥갓", emoji:"🌿", cat:"veg", height:30, spacing:20, sow:[3,9], sun:"part", note:"향이 강해 벌레가 덜 옴. 상추 사이에 끼워 심기 좋음" , },
+  { id:"mustard", feed:"light", water:"mid", name:"갓", emoji:"🥬", cat:"veg", height:45, spacing:12, sow:[4,9], sun:"full", note:"김장 재료. 가을에 심으면 매운맛이 살아납니다" , },
+  { id:"bokchoy", feed:"light", water:"wet", name:"청경채", emoji:"🥬", cat:"veg", height:25, spacing:15, sow:[4,9], sun:"part", note:"한 달이면 거둘 수 있어 빈자리 채우기 좋음" , },
+  { id:"beet", feed:"mid", water:"mid", name:"비트", emoji:"🌿", cat:"veg", height:40, spacing:15, sow:[3,10], sun:"full", note:"뿌리와 잎을 다 먹음. 붉은 잎맥이 곱습니다" , },
+  { id:"watermelon", feed:"heavy", water:"mid", name:"수박", emoji:"🍉", cat:"fruit", height:30, spacing:120, sow:[4,5], sun:"full", note:"덩굴이 크게 뻗음. 밭 가장자리에 심어 밖으로 뻗게 하세요" , },
+  { id:"korean_melon", feed:"heavy", water:"mid", name:"참외", emoji:"🍈", cat:"fruit", height:30, spacing:100, sow:[4,5], sun:"full", note:"덩굴 작물. 볕이 잘 드는 자리에" , },
+  { id:"peanut", feed:"light", water:"dry", name:"땅콩", emoji:"🥜", cat:"veg", height:40, spacing:30, sow:[4,5], sun:"full", note:"콩과라 흙을 기름지게 합니다. 꽃이 진 뒤 땅속에서 여뭅니다" , },
+  { id:"sweet_potato", feed:"light", water:"dry", name:"고구마", emoji:"🍠", cat:"veg", height:30, spacing:30, sow:[5,6], sun:"full", note:"덩굴이 사방으로 퍼짐. 거름이 많으면 잎만 무성해집니다" , },
+  { id:"ginger", feed:"mid", water:"wet", name:"생강", emoji:"🌿", cat:"veg", height:60, spacing:25, sow:[4,5], sun:"part", note:"반그늘에서도 잘 됩니다. 서리 오기 전에 캡니다" , },
+  { id:"young_radish", feed:"light", water:"wet", name:"열무", emoji:"🌿", cat:"veg", height:30, spacing:10, sow:[4,9], sun:"full", note:"한 달이면 거둠. 빈 자리에 아무 때나 뿌리기 좋습니다" , },
+  { id:"kohlrabi", feed:"mid", water:"mid", name:"콜라비", emoji:"🥬", cat:"veg", height:35, spacing:25, sow:[3,9], sun:"full", note:"줄기가 공처럼 부풀면 거둡니다. 배추과라 배추와 자리를 바꿔 심으세요" , },
 ];
 
 /* ════════════════════════════════════════════════════════════
@@ -2176,7 +2196,11 @@ let gdEdited = false;
 function gdPlanCaption(d){
   /* 5는 포기가 아니라 종 수입니다 — 이름표엔 ×30 이 찍히는데
      캡션이 "5포기" 라 계속 어긋나 보였습니다 */
-  return `${d.bed.w} × ${d.bed.h} m · 작물 ${d.crops.length}종`
+  /* d.crops 는 이제 "심은 포기 하나하나" 입니다(도면에 포기 수만큼 깔기 때문).
+     종 수는 무리(groups) 로 세야 합니다. */
+  const kinds = d.groups ? d.groups.length
+              : new Set((d.crops || []).map(c => c.t)).size;
+  return `${d.bed.w} × ${d.bed.h} m · 작물 ${kinds}종`
        + (gdEdited ? " · 직접 고침" : "");
 }
 
@@ -3379,43 +3403,21 @@ function renderRoundTabs(){
 /* ── 렌더 (레이아웃 재계산 없이 place 기반) ── */
 function renderPlotAll(){
   const R = lastResult; if(!R) return;
-  let s = `<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">` + soilDefs();
-  s += `<rect x="${R.ox-6}" y="${R.oy-6}" width="${R.bed.w*R.S+12}" height="${R.bed.h*R.S+12}" rx="14" fill="#e3d8bc"/>`;
-  s += `<rect x="${R.ox}" y="${R.oy}" width="${R.bed.w*R.S}" height="${R.bed.h*R.S}" rx="10" fill="#efe6d0"/>`;
-  /* 두둑이 덮지 않은 땅 — 빗금으로 칠하고 아래에서 크기를 적습니다.
-     예전에는 그냥 빈 색이라 통로인지 남은 땅인지 버그인지 알 수 없었습니다. */
-  s += `<rect x="${R.ox}" y="${R.oy}" width="${R.bed.w*R.S}" height="${R.bed.h*R.S}" rx="10" fill="url(#gdFreeHatch)" opacity=".75"/>`;
-  R.elements.forEach(rt=>{
-    const shape = (BED_SHAPE[rt.el.tech]||BED_SHAPE.custom)(rt.meta);
-    s += `<g transform="translate(${rt.exPx},${rt.eyPx}) scale(${rt.sx.toFixed(4)},${rt.sy.toFixed(4)})">${shape}</g>`;
-  });
-  /* 두둑이 덮지 않은 가장 넓은 띠에 실제 크기를 적습니다.
-     "밭이 4×2.5m 인데 왜 절반이 비었지?" 를 그 자리에서 답해 줍니다. */
+  /* 이 카드는 이제 그림을 그리지 않습니다 — 그림은 위의 상세 도면 하나뿐입니다.
+     여기서는 번호를 매기고, 목록과 범례만 만듭니다. */
+  let s = "";
+  /* 남는 땅이 있는지만 계산해 둡니다 (범례에 쓰려고) */
   R.freeNote = null;
-  (function(){
-    if(!R.elements.length) return;
+  if(R.elements.length){
     const bx=R.ox, by=R.oy, bw=R.bed.w*R.S, bh=R.bed.h*R.S;
     let x0=Infinity, y0=Infinity, x1=-Infinity, y1=-Infinity;
     R.elements.forEach(rt=>{
-      x0=Math.min(x0, rt.exPx);                 y0=Math.min(y0, rt.eyPx);
-      x1=Math.max(x1, rt.exPx+rt.el.w*R.S);     y1=Math.max(y1, rt.eyPx+rt.el.h*R.S);
+      x0=Math.min(x0, rt.exPx);               y0=Math.min(y0, rt.eyPx);
+      x1=Math.max(x1, rt.exPx+rt.el.w*R.S);   y1=Math.max(y1, rt.eyPx+rt.el.h*R.S);
     });
-    const cands = [
-      { px:bx+bw-x1, cx:(x1+bx+bw)/2, cy:by+bh/2,    wM:(bx+bw-x1)/R.S, hM:R.bed.h },
-      { px:x0-bx,    cx:(bx+x0)/2,    cy:by+bh/2,    wM:(x0-bx)/R.S,    hM:R.bed.h },
-      { px:by+bh-y1, cx:bx+bw/2,      cy:(y1+by+bh)/2, wM:R.bed.w,      hM:(by+bh-y1)/R.S },
-      { px:y0-by,    cx:bx+bw/2,      cy:(by+y0)/2,  wM:R.bed.w,        hM:(y0-by)/R.S }
-    ].sort((a,b)=>b.px-a.px);
-    const best = cands[0];
-    if(!best || best.px < 26) return;           // 글씨가 못 들어갈 만큼 좁으면 생략
-    const wM = Math.round(best.wM*10)/10, hM = Math.round(best.hM*10)/10;
-    if(wM < 0.4 || hM < 0.4) return;
-    R.freeNote = `${wM} × ${hM} m`;
-    s += `<text x="${best.cx.toFixed(0)}" y="${(best.cy-4).toFixed(0)}" font-size="9.5"`
-      +  ` text-anchor="middle" fill="#8a8468" font-weight="700">남는 땅</text>`
-      +  `<text x="${best.cx.toFixed(0)}" y="${(best.cy+8).toFixed(0)}" font-size="9"`
-      +  ` text-anchor="middle" fill="#8a8468">${R.freeNote}</text>`;
-  })();
+    const m = Math.max(bx+bw-x1, x0-bx, by+bh-y1, y0-by);
+    if(m >= 0.45*R.S) R.freeNote = true;
+  }
   /* 밀집도에 따라 표시 방식 자동 선택 */
   const bedArea = (R.bed.w*R.S) * (R.bed.h*R.S);
   const per = bedArea / Math.max(1, R.place.length);
@@ -3494,8 +3496,9 @@ function renderPlotAll(){
   const partsHtml = `<div class="gd-parts">` + parts.map(([st,lb])=>
       `<span><i style="${st}"></i>${lb}</span>`).join("") + `</div>`;
 
-  document.getElementById("gdBedHost").innerHTML = s + keys + partsHtml;
-  document.getElementById("gdBedDim").textContent = `${R.bed.w} × ${R.bed.h} m 밭 · 두둑 ${R.elements.length}개`;
+  document.getElementById("gdBedHost").innerHTML = keys + partsHtml;
+  document.getElementById("gdBedDim").textContent =
+    `${legend.length}종 · ${R.bed.w} × ${R.bed.h} m 밭 · 두둑 ${R.elements.length}개`;
   const sl = SUNS.find(x=>x.id===R.sun);
   document.getElementById("gdBedSun").textContent = "☀ " + (sl?sl.label:"남쪽") + " 햇빛";
   gdShowPlan(R);
